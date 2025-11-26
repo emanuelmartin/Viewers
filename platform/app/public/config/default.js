@@ -14,7 +14,7 @@ window.config = {
           href: '/',
         },
         React.createElement('img', {
-          src: './logo.png',
+          src: './assets/logo.png',
           alt: 'Logo',
           className: 'h-8',
         })
@@ -23,19 +23,7 @@ window.config = {
   },
   extensions: [],
   modes: [],
-  customizationService: {
-    'ui.loadingIndicatorProgress': function(React, props) {
-      return React.createElement('div', {
-        className: (props.className || '') + ' flex items-center justify-center',
-      }, 
-        React.createElement('img', {
-          src: './icon.png',
-          alt: 'Cargando...',
-          className: 'w-32 h-32 animate-pulse',
-        })
-      );
-    }
-  },
+  customizationService: {},
   showStudyList: true,
   // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,
