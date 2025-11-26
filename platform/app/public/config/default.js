@@ -3,10 +3,39 @@
 window.config = {
   name: 'config/default.js',
   routerBasename: null,
-  // whiteLabeling: {},
+  whiteLabeling: {
+    createLogoComponentFn: function(React) {
+      return React.createElement(
+        'a',
+        {
+          target: '_self',
+          rel: 'noopener noreferrer',
+          className: 'flex items-center',
+          href: '/',
+        },
+        React.createElement('img', {
+          src: './logo.png',
+          alt: 'Logo',
+          className: 'h-8',
+        })
+      );
+    },
+  },
   extensions: [],
   modes: [],
-  customizationService: {},
+  customizationService: {
+    'ui.loadingIndicatorProgress': function(React, props) {
+      return React.createElement('div', {
+        className: (props.className || '') + ' flex items-center justify-center',
+      }, 
+        React.createElement('img', {
+          src: './icon.png',
+          alt: 'Cargando...',
+          className: 'w-32 h-32 animate-pulse',
+        })
+      );
+    }
+  },
   showStudyList: true,
   // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,

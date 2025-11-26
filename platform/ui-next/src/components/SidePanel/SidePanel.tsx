@@ -465,10 +465,11 @@ const SidePanel = ({
     >
       {panelOpen ? (
         <>
-          {getOpenStateComponent()}
+          {!isVerticalLayout && getOpenStateComponent()}
           {tabs.map((tab, tabIndex) => {
             if (tabIndex === activeTabIndex) {
-              return <tab.content key={tabIndex} isVerticalLayout={isVerticalLayout} />;
+              const TabContent = tab.content;
+              return <TabContent key={tabIndex} isVerticalLayout={isVerticalLayout} />;
             }
             return null;
           })}

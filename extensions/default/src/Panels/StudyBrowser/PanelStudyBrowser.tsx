@@ -26,7 +26,7 @@ function PanelStudyBrowser({
   onDoubleClickThumbnailHandlerCallBack,
   isVerticalLayout = false,
 }) {
-  const { servicesManager, commandsManager, extensionManager } = useSystem();
+  const { servicesManager, commandsManager, extensionManager} = useSystem();
   const { displaySetService, customizationService } = servicesManager.services;
   const navigate = useNavigate();
   const studyMode =
@@ -38,6 +38,23 @@ function PanelStudyBrowser({
 
   const [{ activeViewportId, viewports, isHangingProtocolLayout }] = useViewportGrid();
   const [activeTabName, setActiveTabName] = useState(studyMode);
+  
+  // Detect vertical layout directly based on window size
+  const [isVertical, setIsVertical] = useState(() => {
+    return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const shouldBeVertical = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+      setIsVertical(shouldBeVertical);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [expandedStudyInstanceUIDs, setExpandedStudyInstanceUIDs] = useState(
     studyMode === 'primary' && StudyInstanceUIDs.length > 0
       ? [StudyInstanceUIDs[0]]
@@ -407,7 +424,7 @@ function PanelStudyBrowser({
 
   return (
     <>
-      {!isVerticalLayout && (
+      {!isVertical && (
         <>
           <PanelStudyBrowserHeader
             viewPresets={viewPresets}
@@ -436,7 +453,7 @@ function PanelStudyBrowser({
         onClickThumbnail={() => {}}
         onDoubleClickThumbnail={onDoubleClickThumbnailHandler}
         activeDisplaySetInstanceUIDs={activeDisplaySetInstanceUIDs}
-        showSettings={!isVerticalLayout && actionIcons.find(icon => icon.id === 'settings')?.value}
+        showSettings={!isVertical && actionIcons.find(icon => icon.id === 'settings')?.value}
         viewPresets={viewPresets}
         ThumbnailMenuItems={MoreDropdownMenu({
           commandsManager,

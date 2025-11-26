@@ -392,6 +392,7 @@ const useResizablePanels = (
       id: panelGroupDefinition.right.panelId,
     },
     onHandleDragging,
+    isVerticalLayout,
   ];
 };
 
