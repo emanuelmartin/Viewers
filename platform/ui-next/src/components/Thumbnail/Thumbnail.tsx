@@ -26,6 +26,7 @@ const Thumbnail = ({
   thumbnailType,
   modality,
   viewPreset = 'thumbnails',
+  isHorizontalLayout = false,
   isHydratedForDerivedDisplaySet = false,
   isTracked = false,
   canReject = false,
@@ -59,6 +60,10 @@ const Thumbnail = ({
   };
 
   const renderThumbnailPreset = () => {
+    const imageSize = isHorizontalLayout 
+      ? { container: 'h-[140px] w-[180px]', img: 'h-[140px] w-[180px]' }
+      : { container: 'h-[114px] w-[128px]', img: 'h-[114px] w-[128px]' };
+    
     return (
       <div
         className={classnames(
@@ -66,17 +71,17 @@ const Thumbnail = ({
           isActive && 'bg-popover rounded'
         )}
       >
-        <div className="h-[114px] w-[128px]">
+        <div className={imageSize.container}>
           <div className="relative bg-black">
             {imageSrc ? (
               <img
                 src={imageSrc}
                 alt={imageAltText}
-                className="h-[114px] w-[128px] rounded object-contain"
+                className={`${imageSize.img} rounded object-contain`}
                 crossOrigin="anonymous"
               />
             ) : (
-              <div className="bg-background h-[114px] w-[128px] rounded"></div>
+              <div className={`bg-background ${imageSize.container} rounded`}></div>
             )}
 
             {/* bottom left */}
@@ -253,8 +258,9 @@ const Thumbnail = ({
     <div
       className={classnames(
         className,
-        'bg-muted hover:bg-primary/30 group flex cursor-pointer select-none flex-col rounded outline-none',
-        viewPreset === 'thumbnails' && 'h-[170px] w-[135px]',
+        'bg-muted hover:bg-primary/30 group flex cursor-pointer select-none flex-col rounded outline-none flex-shrink-0',
+        viewPreset === 'thumbnails' && !isHorizontalLayout && 'h-[170px] w-[135px]',
+        viewPreset === 'thumbnails' && isHorizontalLayout && 'h-full w-[200px]',
         viewPreset === 'list' && 'h-[40px] w-full'
       )}
       id={`thumbnail-${displaySetInstanceUID}`}

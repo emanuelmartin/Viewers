@@ -13,7 +13,7 @@ import { useSystem } from '@ohif/core';
  * @param {object} commandsManager
  * @param {object} extensionManager
  */
-function WrappedPanelStudyBrowser() {
+function WrappedPanelStudyBrowser({ isVerticalLayout }) {
   const { extensionManager } = useSystem();
   // TODO: This should be made available a different way; route should have
   // already determined our datasource
@@ -34,6 +34,7 @@ function WrappedPanelStudyBrowser() {
       getImageSrc={_getImageSrcFromImageId}
       getStudiesForPatientByMRN={_getStudiesForPatientByMRN}
       requestDisplaySetCreationForStudy={_requestDisplaySetCreationForStudy}
+      isVerticalLayout={isVerticalLayout}
     />
   );
 }

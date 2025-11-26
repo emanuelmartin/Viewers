@@ -52,6 +52,63 @@
   @apply hidden;
 }
 
+/* HORIZONTAL SCROLLBAR FOR THUMBNAILS */
+.ohif-scrollbar-horizontal {
+  scrollbar-color: #173239 transparent;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.ohif-scrollbar-horizontal::-webkit-scrollbar {
+  height: 8px;
+  scrollbar-width: thin;
+}
+
+.ohif-scrollbar-horizontal::-webkit-scrollbar-track {
+  @apply rounded;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.ohif-scrollbar-horizontal::-webkit-scrollbar-thumb {
+  @apply rounded;
+  @apply bg-secondary-dark;
+  background-color: #173239;
+}
+
+.ohif-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+  background-color: #2a5a6b;
+}
+
+.ohif-scrollbar-horizontal::-webkit-scrollbar-thumb:window-inactive {
+  background-color: #173239;
+}
+
 .invisible-scrollbar::-webkit-scrollbar-thumb:window-inactive {
   @apply hidden;
 }
+
+/* HORIZONTAL SCROLLBAR FOR TOOLBAR */
+.ohif-scrollbar-toolbar {
+  scrollbar-color: #173239 transparent;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.ohif-scrollbar-toolbar::-webkit-scrollbar {
+  height: 4px;
+  scrollbar-width: thin;
+}
+
+.ohif-scrollbar-toolbar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.ohif-scrollbar-toolbar::-webkit-scrollbar-thumb {
+  @apply rounded;
+  background-color: rgba(23, 50, 57, 0.5);
+}
+
+.ohif-scrollbar-toolbar::-webkit-scrollbar-thumb:hover {
+  background-color: #173239;
+}
+

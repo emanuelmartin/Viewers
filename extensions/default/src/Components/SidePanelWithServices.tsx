@@ -16,6 +16,7 @@ export type SidePanelWithServicesProps = {
   expandedInsideBorderSize?: number;
   collapsedInsideBorderSize?: number;
   collapsedOutsideBorderSize?: number;
+  isVerticalLayout?: boolean;
 };
 
 const SidePanelWithServices = ({
@@ -26,6 +27,7 @@ const SidePanelWithServices = ({
   tabs: tabsProp,
   onOpen,
   onClose,
+  isVerticalLayout,
   ...props
 }: SidePanelWithServicesProps) => {
   const { panelService, toolbarService, viewportGridService } = servicesManager.services;
@@ -115,6 +117,7 @@ const SidePanelWithServices = ({
       onOpen={handleOpen}
       onClose={handleClose}
       onActiveTabIndexChange={handleActiveTabIndexChange}
+      isVerticalLayout={isVerticalLayout}
     />
   );
 };

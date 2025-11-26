@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useRef } from 'react';
+import { useState, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 import { getPanelElement, getPanelGroupElement } from 'react-resizable-panels';
 import { getPanelGroupDefinition } from './constants/panels';
 
@@ -45,6 +45,12 @@ const useResizablePanels = (
     })
   );
 
+  // Detect if device is mobile or in portrait orientation
+  const [isVerticalLayout, setIsVerticalLayout] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+  });
+
   const [leftPanelExpandedWidth, setLeftPanelExpandedWidth] = useState(
     panelGroupDefinition.left.initialExpandedWidth
   );
@@ -55,6 +61,39 @@ const useResizablePanels = (
   const [rightResizablePanelMinimumSize, setRightResizablePanelMinimumSize] = useState(0);
   const [leftResizablePanelCollapsedSize, setLeftResizePanelCollapsedSize] = useState(0);
   const [rightResizePanelCollapsedSize, setRightResizePanelCollapsedSize] = useState(0);
+
+  // Listen to window resize and orientation changes
+  useEffect(() => {
+    const handleResize = () => {
+      const shouldBeVertical = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+      setIsVerticalLayout(shouldBeVertical);
+      
+      if (shouldBeVertical) {
+        // Auto-expand left panel (thumbnails) in vertical mode
+        if (hasLeftPanels && leftPanelClosed) {
+          setLeftPanelClosed(false);
+          setTimeout(() => {
+            resizableLeftPanelAPIRef?.current?.expand(40);
+          }, 100);
+        }
+        // Auto-close right panel (segmentations) in vertical mode
+        if (hasRightPanels && !rightPanelClosed) {
+          setRightPanelClosed(true);
+          setTimeout(() => {
+            resizableRightPanelAPIRef?.current?.collapse();
+          }, 100);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [hasLeftPanels, leftPanelClosed, setLeftPanelClosed, hasRightPanels, rightPanelClosed, setRightPanelClosed]);
 
   const resizablePanelGroupElemRef = useRef(null);
   const resizableLeftPanelElemRef = useRef(null);
@@ -91,20 +130,36 @@ const useResizablePanels = (
     // on the very first render check if either/both side panels should be expanded.
     // we use the initialExpandedOffsetWidth on the first render incase the panel has min width but we want the initial state to be larger than that
 
-    if (!leftPanelClosed) {
-      const leftResizablePanelExpandedSize = getPercentageSize(
+    // Check if we're in vertical mode on initial load
+    const isInitiallyVertical = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+
+    if (isInitiallyVertical) {
+      // Force open left panel in vertical mode
+      setLeftPanelClosed(false);
+      const leftSize = 40;
+      // Use longer timeout to ensure DOM is ready
+      setTimeout(() => {
+        if (resizableLeftPanelAPIRef?.current) {
+          resizableLeftPanelAPIRef.current.expand(leftSize);
+        }
+      }, 200);
+    } else if (!leftPanelClosed) {
+      const leftSize = getPercentageSize(
         panelGroupDefinition.left.initialExpandedOffsetWidth
       );
-      resizableLeftPanelAPIRef?.current?.expand(leftResizablePanelExpandedSize);
+      resizableLeftPanelAPIRef?.current?.expand(leftSize);
       setMinMaxWidth(leftPanelElem, panelGroupDefinition.left.initialExpandedOffsetWidth);
     }
 
-    if (!rightPanelClosed) {
+    if (!rightPanelClosed && !isInitiallyVertical) {
       const rightResizablePanelExpandedSize = getPercentageSize(
         panelGroupDefinition.right.initialExpandedOffsetWidth
       );
       resizableRightPanelAPIRef?.current?.expand(rightResizablePanelExpandedSize);
       setMinMaxWidth(rightPanelElem, panelGroupDefinition.right.initialExpandedOffsetWidth);
+    } else if (isInitiallyVertical) {
+      // Collapse right panel in vertical mode
+      resizableRightPanelAPIRef?.current?.collapse();
     }
   }, []); // no dependencies because this useLayoutEffect is only needed on the very first render
 
@@ -304,20 +359,26 @@ const useResizablePanels = (
       onClose: onRightPanelClose,
       onOpen: onRightPanelOpen,
     },
-    { direction: 'horizontal', id: panelGroupDefinition.groupId },
+    { direction: isVerticalLayout ? 'vertical' : 'horizontal', id: panelGroupDefinition.groupId },
     {
-      defaultSize: leftResizablePanelMinimumSize,
-      minSize: leftResizablePanelMinimumSize,
+      defaultSize: isVerticalLayout ? 40 : leftResizablePanelMinimumSize,
+      minSize: isVerticalLayout ? 25 : leftResizablePanelMinimumSize,
+      maxSize: isVerticalLayout ? 50 : undefined,
       onResize: onLeftPanelResize,
       collapsible: true,
       collapsedSize: leftResizablePanelCollapsedSize,
       onCollapse: () => setLeftPanelClosed(true),
       onExpand: () => setLeftPanelClosed(false),
       ref: resizableLeftPanelAPIRef,
-      order: 0,
+      order: isVerticalLayout ? 1 : 0,
       id: panelGroupDefinition.left.panelId,
     },
-    { order: 1, id: 'viewerLayoutResizableViewportGridPanel' },
+    { 
+      order: isVerticalLayout ? 0 : 1, 
+      id: 'viewerLayoutResizableViewportGridPanel',
+      defaultSize: isVerticalLayout ? 60 : undefined,
+      minSize: isVerticalLayout ? 50 : undefined,
+    },
     {
       defaultSize: rightResizablePanelMinimumSize,
       minSize: rightResizablePanelMinimumSize,
@@ -327,7 +388,7 @@ const useResizablePanels = (
       onCollapse: () => setRightPanelClosed(true),
       onExpand: () => setRightPanelClosed(false),
       ref: resizableRightPanelAPIRef,
-      order: 2,
+      order: isVerticalLayout ? 2 : 2,
       id: panelGroupDefinition.right.panelId,
     },
     onHandleDragging,

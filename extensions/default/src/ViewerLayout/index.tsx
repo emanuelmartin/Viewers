@@ -41,8 +41,19 @@ function ViewerLayout({
 
   const [hasRightPanels, setHasRightPanels] = useState(hasPanels('right'));
   const [hasLeftPanels, setHasLeftPanels] = useState(hasPanels('left'));
-  const [leftPanelClosedState, setLeftPanelClosed] = useState(leftPanelClosed);
-  const [rightPanelClosedState, setRightPanelClosed] = useState(rightPanelClosed);
+  
+  // Detect vertical layout (mobile/portrait)
+  const [isVerticalLayout, setIsVerticalLayout] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+  });
+  
+  // Initialize panel states based on initial layout
+  const initialLeftPanelClosed = isVerticalLayout ? false : leftPanelClosed;
+  const initialRightPanelClosed = isVerticalLayout ? true : rightPanelClosed;
+  
+  const [leftPanelClosedState, setLeftPanelClosed] = useState(initialLeftPanelClosed);
+  const [rightPanelClosedState, setRightPanelClosed] = useState(initialRightPanelClosed);
 
   const [
     leftPanelProps,
@@ -53,9 +64,9 @@ function ViewerLayout({
     resizableRightPanelProps,
     onHandleDragging,
   ] = useResizablePanels(
-    leftPanelClosed,
+    initialLeftPanelClosed,
     setLeftPanelClosed,
-    rightPanelClosed,
+    initialRightPanelClosed,
     setRightPanelClosed,
     hasLeftPanels,
     hasRightPanels,
@@ -87,6 +98,40 @@ function ViewerLayout({
       document.body.classList.remove('overflow-hidden');
     };
   }, []);
+  
+  // Listen to window resize for vertical layout detection
+  useEffect(() => {
+    const handleResize = () => {
+      const shouldBeVertical = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+      setIsVerticalLayout(shouldBeVertical);
+      
+      // Force panels state in vertical mode
+      if (shouldBeVertical) {
+        // Open left panel (thumbnails) in vertical mode
+        if (hasLeftPanels) {
+          setLeftPanelClosed(false);
+        }
+        // Close right panel (segmentations) in vertical mode
+        if (hasRightPanels) {
+          setRightPanelClosed(true);
+        }
+      }
+    };
+
+    // Run on mount with a small delay to ensure everything is initialized
+    const timeoutId = setTimeout(() => {
+      handleResize();
+    }, 100);
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [hasLeftPanels, hasRightPanels]);
 
   const getComponent = id => {
     const entry = extensionManager.getModuleEntry(id);
@@ -158,20 +203,24 @@ function ViewerLayout({
         appConfig={appConfig}
       />
       <div
-        className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
+        className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black portrait:flex-col md:max-h-[768px]:portrait:flex-col"
         style={{ height: 'calc(100vh - 52px' }}
       >
         <React.Fragment>
           {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-black" />}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
-            {/* LEFT SIDEPANELS */}
-            {hasLeftPanels ? (
+            {/* In vertical mode: Viewport first, then thumbnails */}
+            {/* In horizontal mode: Thumbnails left, viewport center, segmentations right */}
+            
+            {/* LEFT SIDEPANELS - Show first in horizontal, second in vertical */}
+            {!isVerticalLayout && hasLeftPanels ? (
               <>
                 <ResizablePanel {...resizableLeftPanelProps}>
                   <SidePanelWithServices
                     side="left"
                     isExpanded={!leftPanelClosedState}
                     servicesManager={servicesManager}
+                    isVerticalLayout={isVerticalLayout}
                     {...leftPanelProps}
                   />
                 </ResizablePanel>
@@ -182,7 +231,8 @@ function ViewerLayout({
                 />
               </>
             ) : null}
-            {/* TOOLBAR + GRID */}
+            
+            {/* TOOLBAR + GRID - Always in the middle (horizontal) or first (vertical) */}
             <ResizablePanel {...resizableViewportGridPanelProps}>
               <div className="flex h-full flex-1 flex-col">
                 <div
@@ -197,7 +247,29 @@ function ViewerLayout({
                 </div>
               </div>
             </ResizablePanel>
-            {hasRightPanels ? (
+            
+            {/* LEFT SIDEPANELS in vertical mode - Show after viewport */}
+            {isVerticalLayout && hasLeftPanels ? (
+              <>
+                <ResizableHandle
+                  onDragging={onHandleDragging}
+                  disabled={!leftPanelResizable}
+                  className={resizableHandleClassName}
+                />
+                <ResizablePanel {...resizableLeftPanelProps}>
+                  <SidePanelWithServices
+                    side="left"
+                    isExpanded={!leftPanelClosedState}
+                    servicesManager={servicesManager}
+                    isVerticalLayout={isVerticalLayout}
+                    {...leftPanelProps}
+                  />
+                </ResizablePanel>
+              </>
+            ) : null}
+            
+            {/* RIGHT SIDEPANELS - Hidden in vertical mode */}
+            {!isVerticalLayout && hasRightPanels ? (
               <>
                 <ResizableHandle
                   onDragging={onHandleDragging}
@@ -209,6 +281,7 @@ function ViewerLayout({
                     side="right"
                     isExpanded={!rightPanelClosedState}
                     servicesManager={servicesManager}
+                    isVerticalLayout={isVerticalLayout}
                     {...rightPanelProps}
                   />
                 </ResizablePanel>

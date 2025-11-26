@@ -28,6 +28,7 @@ type SidePanelProps = {
   collapsedInsideBorderSize: number;
   collapsedOutsideBorderSize: number;
   tabs: any;
+  isVerticalLayout?: boolean;
 };
 
 type StyleMap = {
@@ -167,10 +168,10 @@ const getToolTipContent = (label: string, disabled: boolean) => {
   );
 };
 
-const createBaseStyle = (expandedWidth: number) => {
+const createBaseStyle = (expandedWidth: number, isVerticalLayout: boolean = false) => {
   return {
-    maxWidth: `${expandedWidth}px`,
-    width: `${expandedWidth}px`,
+    maxWidth: isVerticalLayout ? '100%' : `${expandedWidth}px`,
+    width: isVerticalLayout ? '100%' : `${expandedWidth}px`,
     // To align the top of the side panel with the top of the viewport grid, use position relative and offset the
     // top by the same top offset as the viewport grid. Also adjust the height so that there is no overflow.
     position: 'relative',
@@ -193,6 +194,7 @@ const SidePanel = ({
   expandedInsideBorderSize = 4,
   collapsedInsideBorderSize = 8,
   collapsedOutsideBorderSize = 4,
+  isVerticalLayout = false,
 }: SidePanelProps) => {
   const [panelOpen, setPanelOpen] = useState(isExpanded);
   const [activeTabIndex, setActiveTabIndex] = useState(activeTabIndexProp ?? 0);
@@ -207,7 +209,7 @@ const SidePanel = ({
     )
   );
 
-  const [baseStyle, setBaseStyle] = useState(createBaseStyle(expandedWidth));
+  const [baseStyle, setBaseStyle] = useState(createBaseStyle(expandedWidth, isVerticalLayout));
 
   const [gridAvailableWidth, setGridAvailableWidth] = useState(
     expandedWidth - closeIconWidth - gridHorizontalPadding
@@ -261,7 +263,7 @@ const SidePanel = ({
         collapsedOutsideBorderSize
       )
     );
-    setBaseStyle(createBaseStyle(expandedWidth));
+    setBaseStyle(createBaseStyle(expandedWidth, isVerticalLayout));
 
     const gridAvailableWidth = expandedWidth - closeIconWidth - gridHorizontalPadding;
     setGridAvailableWidth(gridAvailableWidth);
@@ -273,6 +275,7 @@ const SidePanel = ({
     expandedInsideBorderSize,
     tabs.length,
     collapsedOutsideBorderSize,
+    isVerticalLayout,
   ]);
 
   useEffect(() => {
@@ -465,7 +468,7 @@ const SidePanel = ({
           {getOpenStateComponent()}
           {tabs.map((tab, tabIndex) => {
             if (tabIndex === activeTabIndex) {
-              return <tab.content key={tabIndex} />;
+              return <tab.content key={tabIndex} isVerticalLayout={isVerticalLayout} />;
             }
             return null;
           })}

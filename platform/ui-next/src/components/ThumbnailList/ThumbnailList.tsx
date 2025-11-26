@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 import { Thumbnail } from '../Thumbnail';
 import { useDynamicMaxHeight } from '../../hooks/useDynamicMaxHeight';
@@ -15,6 +16,27 @@ const ThumbnailList = ({
 }) => {
   // Use the dynamic height hook on the parent container
   const { ref, maxHeight } = useDynamicMaxHeight(thumbnails);
+  
+  // Detect vertical layout (mobile/portrait)
+  const [isVerticalLayout, setIsVerticalLayout] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+  });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      const shouldBeVertical = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
+      setIsVerticalLayout(shouldBeVertical);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
 
   // Filter thumbnails into list items and thumbnail items
   const listItems = thumbnails?.filter(
@@ -26,15 +48,25 @@ const ThumbnailList = ({
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full w-full">
       <div
         ref={ref}
-        className="flex flex-col gap-[2px] pt-[4px] pr-[2.5px] pl-[5px] pb-[4px]"
+        className={classnames(
+          'flex gap-[2px]',
+          isVerticalLayout 
+            ? 'flex-row h-full py-[8px] px-[8px] ohif-scrollbar-horizontal' 
+            : 'flex-col pt-[4px] pr-[2.5px] pl-[5px] pb-[4px] ohif-scrollbar'
+        )}
       >
         {thumbnailItems.length > 0 && (
           <div
             id="ohif-thumbnail-list"
-            className="bg-bkg-low grid grid-cols-[repeat(auto-fit,_minmax(0,135px))] place-items-start gap-[4px]"
+            className={classnames(
+              'bg-bkg-low gap-[8px]',
+              isVerticalLayout
+                ? 'flex flex-row flex-nowrap h-full items-center'
+                : 'grid grid-cols-[repeat(auto-fit,_minmax(0,135px))] place-items-start gap-[4px]'
+            )}
           >
             {thumbnailItems.map(item => {
               const { displaySetInstanceUID, componentType, numInstances, ...rest } = item;
@@ -49,6 +81,7 @@ const ThumbnailList = ({
                   isActive={isActive}
                   thumbnailType={componentType}
                   viewPreset="thumbnails"
+                  isHorizontalLayout={isVerticalLayout}
                   onClick={onThumbnailClick.bind(null, displaySetInstanceUID)}
                   onDoubleClick={onThumbnailDoubleClick.bind(null, displaySetInstanceUID)}
                   onClickUntrack={onClickUntrack.bind(null, displaySetInstanceUID)}
