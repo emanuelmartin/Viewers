@@ -37,16 +37,10 @@ MOBILE_TESTING_GUIDE.md    (Pruebas en mobile)
 ### 1. Instalar Dependencias
 ```bash
 cd /Users/emanuelmartin/Documents/GitHub/ViewersOriginal
-npm install --legacy-peer-deps
+yarn install --frozen-lockfile
 ```
 
-### 2. Instalar Bun
-```bash
-curl -fsSL https://bun.sh/install | bash
-exec /bin/zsh
-```
-
-### 3. Ejecutar Orthanc (Docker)
+### 2. Ejecutar Orthanc (Docker)
 ```bash
 docker run -it --rm -p 8042:8042 -p 4242:4242 jodogne/orthanc
 ```
@@ -54,9 +48,9 @@ docker run -it --rm -p 8042:8042 -p 4242:4242 jodogne/orthanc
 ### 4. Cargar Estudios
 Ir a http://localhost:8042 → Upload → seleccionar archivo DICOM
 
-### 5. Ejecutar OHIF
+### 4. Ejecutar OHIF
 ```bash
-npm run dev:fast
+yarn dev:fast
 # Acceder a http://localhost:3000
 ```
 
@@ -166,6 +160,17 @@ curl http://localhost:8042/api/studies
 - F12 → Network → Ver peticiones a `/orthanc/dicom-web`
 - F12 → Console → Verificar sin errores
 
+## 📦 Gestor de Paquetes
+
+**Yarn Workspaces** está habilitado para este monorepo:
+```bash
+# Verificar
+yarn workspaces list
+
+# Ver dependencias específicas
+yarn workspace @ohif/viewer info
+```
+
 ## 📚 Documentación Disponible
 
 | Archivo | Contenido |
@@ -200,29 +205,31 @@ curl http://localhost:8042/api/studies
 
 ```bash
 # Instalar/actualizar
-npm install --legacy-peer-deps
+yarn install --frozen-lockfile
 
 # Desarrollo
-npm run dev
-npm run dev:fast
+yarn dev
+yarn dev:fast
 
 # Build
-npm run build:viewer
+yarn build:viewer
 
 # Tests
-npm run test:unit
+yarn test:unit
 
 # Limpieza
-npm run clean
+yarn clean
+
+# Workspaces
+yarn workspaces list
 ```
 
 ## ✅ Checklist de Verificación
 
-- [ ] Dependencias instaladas
-- [ ] Bun disponible en PATH
+- [ ] Dependencias instaladas con yarn
 - [ ] Orthanc corriendo en puerto 8042
 - [ ] Estudios DICOM en Orthanc
-- [ ] `npm run dev` ejecutándose
+- [ ] `yarn dev` ejecutándose
 - [ ] App accesible en http://localhost:3000
 - [ ] Imágenes cargando sin errores
 - [ ] DevTools sin errores rojos
