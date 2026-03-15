@@ -36,37 +36,15 @@ const useResizablePanels = (
   leftPanelMinimumExpandedWidth,
   rightPanelMinimumExpandedWidth
 ) => {
-  // Detect if we're in mobile (vertical) mode
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [panelDirection, setPanelDirection] = useState(isMobile ? 'vertical' : 'horizontal');
-
-  // For mobile, reduce panel sizes significantly to maximize viewport
-  const getMobileAdjustedWidths = () => {
-    if (!isMobile) {
-      return {
-        left: leftPanelInitialExpandedWidth,
-        right: rightPanelInitialExpandedWidth,
-        leftMin: leftPanelMinimumExpandedWidth,
-        rightMin: rightPanelMinimumExpandedWidth,
-      };
-    }
-    // In mobile (vertical layout), panels take up less vertical space
-    return {
-      left: leftPanelInitialExpandedWidth,
-      right: rightPanelInitialExpandedWidth,
-      leftMin: leftPanelMinimumExpandedWidth,
-      rightMin: rightPanelMinimumExpandedWidth,
-    };
-  };
-
-  const mobileAdjustedWidths = getMobileAdjustedWidths();
+  // Desktop always uses horizontal direction. Mobile is handled separately in ViewerLayout.
+  const [panelDirection] = useState<'horizontal'>('horizontal');
 
   const [panelGroupDefinition] = useState(
     getPanelGroupDefinition({
-      leftPanelInitialExpandedWidth: mobileAdjustedWidths.left,
-      rightPanelInitialExpandedWidth: mobileAdjustedWidths.right,
-      leftPanelMinimumExpandedWidth: mobileAdjustedWidths.leftMin,
-      rightPanelMinimumExpandedWidth: mobileAdjustedWidths.rightMin,
+      leftPanelInitialExpandedWidth,
+      rightPanelInitialExpandedWidth,
+      leftPanelMinimumExpandedWidth,
+      rightPanelMinimumExpandedWidth,
     })
   );
 
@@ -91,24 +69,16 @@ const useResizablePanels = (
   // The total width of both handles.
   const resizableHandlesWidth = useRef(null);
 
-  // Add responsive listener for mobile/desktop transitions
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      setPanelDirection(mobile ? 'vertical' : 'horizontal');
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   // This useLayoutEffect is used to...
   // - Grab a reference to the various resizable panel elements needed for
   //   converting between percentages and pixels in various callbacks.
   // - Expand those panels that are initially expanded.
   useLayoutEffect(() => {
     const panelGroupElem = getPanelGroupElement(panelGroupDefinition.groupId);
+    if (!panelGroupElem) {
+      // On mobile the ResizablePanelGroup is not rendered.
+      return;
+    }
     resizablePanelGroupElemRef.current = panelGroupElem;
 
     const leftPanelElem = getPanelElement(panelGroupDefinition.left.panelId);
@@ -155,6 +125,11 @@ const useResizablePanels = (
   //   values whenever the resizable panel group is resized (e.g. whenever the
   //   browser window is resized).
   useLayoutEffect(() => {
+    // On mobile the ResizablePanelGroup is not rendered.
+    if (!resizablePanelGroupElemRef.current) {
+      return;
+    }
+
     // Ensure the side panels' percentage size is in synch with the pixel width of the
     // expanded side panels. In general the two get out-of-sync during a browser
     // window resize. Note that this code is here and NOT in the ResizeObserver
@@ -306,8 +281,11 @@ const useResizablePanels = (
    * Note that the width attributed to the handles must be taken into account.
    */
   const getPercentageSize = pixelSize => {
-    const { width: panelGroupWidth } = resizablePanelGroupElemRef.current?.getBoundingClientRect();
-    return (pixelSize / (panelGroupWidth - resizableHandlesWidth.current)) * 100;
+    const rect = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return 0;
+    }
+    return (pixelSize / (rect.width - resizableHandlesWidth.current)) * 100;
   };
 
   /**
@@ -315,9 +293,12 @@ const useResizablePanels = (
    * Note that the width attributed to the handles must be taken into account.
    */
   const getExpandedPixelWidth = percentageSize => {
-    const { width: panelGroupWidth } = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    const rect = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return 0;
+    }
     const expandedWidth =
-      (percentageSize / 100) * (panelGroupWidth - resizableHandlesWidth.current) -
+      (percentageSize / 100) * (rect.width - resizableHandlesWidth.current) -
       panelGroupDefinition.shared.expandedInsideBorderSize;
     return expandedWidth;
   };

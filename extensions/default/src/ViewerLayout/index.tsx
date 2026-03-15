@@ -8,6 +8,7 @@ import ViewerHeader from './ViewerHeader';
 import SidePanelWithServices from '../Components/SidePanelWithServices';
 import { Onboarding, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@ohif/ui-next';
 import useResizablePanels from './ResizablePanelsHook';
+import MobileBottomPanels from './MobileBottomPanels';
 
 const resizableHandleClassName = 'mt-[1px] bg-background';
 
@@ -34,8 +35,19 @@ function ViewerLayout({
   const { panelService, hangingProtocolService, customizationService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
 
-  // In mobile, close right panel by default to maximize viewport
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  // Reactive mobile detection
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const initialRightPanelClosed = isMobile ? true : rightPanelClosed;
   const initialLeftPanelClosed = isMobile ? true : leftPanelClosed;
 
@@ -48,6 +60,10 @@ function ViewerLayout({
   const [hasLeftPanels, setHasLeftPanels] = useState(hasPanels('left'));
   const [leftPanelClosedState, setLeftPanelClosed] = useState(initialLeftPanelClosed);
   const [rightPanelClosedState, setRightPanelClosed] = useState(initialRightPanelClosed);
+
+  // Mobile: get panel tabs directly for bottom panel rendering
+  const [leftPanelTabs, setLeftPanelTabs] = useState(() => panelService.getPanels('left'));
+  const [rightPanelTabs, setRightPanelTabs] = useState(() => panelService.getPanels('right'));
 
   const [
     leftPanelProps,
@@ -138,6 +154,8 @@ function ViewerLayout({
       ({ options }) => {
         setHasLeftPanels(hasPanels('left'));
         setHasRightPanels(hasPanels('right'));
+        setLeftPanelTabs(panelService.getPanels('left'));
+        setRightPanelTabs(panelService.getPanels('right'));
         if (options?.leftPanelClosed !== undefined) {
           setLeftPanelClosed(options.leftPanelClosed);
         }
@@ -154,6 +172,43 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
+  // Mobile layout: viewport fills available space, panels at bottom
+  if (isMobile) {
+    return (
+      <div className="flex h-screen flex-col overflow-hidden">
+        <ViewerHeader
+          hotkeysManager={hotkeysManager}
+          extensionManager={extensionManager}
+          servicesManager={servicesManager}
+          appConfig={appConfig}
+        />
+        {showLoadingIndicator && (
+          <LoadingIndicatorProgress className="h-full w-full bg-background" />
+        )}
+        {/* Viewport area - takes all remaining space */}
+        <div
+          className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
+          onMouseEnter={handleMouseEnter}
+        >
+          <ViewportGridComp
+            servicesManager={servicesManager}
+            viewportComponents={viewportComponents}
+            commandsManager={commandsManager}
+          />
+        </div>
+        {/* Bottom panels */}
+        <MobileBottomPanels
+          leftPanelTabs={leftPanelTabs}
+          rightPanelTabs={rightPanelTabs}
+          servicesManager={servicesManager}
+        />
+        <Onboarding tours={customizationService.getCustomization('ohif.tours')} />
+        <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
+      </div>
+    );
+  }
+
+  // Desktop layout: left panels | viewport | right panels
   return (
     <div>
       <ViewerHeader
@@ -163,7 +218,7 @@ function ViewerLayout({
         appConfig={appConfig}
       />
       <div
-        className="relative flex w-full flex-col lg:flex-row flex-nowrap items-stretch overflow-hidden bg-background"
+        className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-background"
         style={{ height: 'calc(100vh - 52px)' }}
       >
         <React.Fragment>
