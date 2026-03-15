@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useRef } from 'react';
+import { useState, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 import { getPanelElement, getPanelGroupElement } from 'react-resizable-panels';
 import { getPanelGroupDefinition } from './constants/panels';
 
@@ -36,12 +36,37 @@ const useResizablePanels = (
   leftPanelMinimumExpandedWidth,
   rightPanelMinimumExpandedWidth
 ) => {
+  // Detect if we're in mobile (vertical) mode
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [panelDirection, setPanelDirection] = useState(isMobile ? 'vertical' : 'horizontal');
+
+  // For mobile, reduce panel sizes significantly to maximize viewport
+  const getMobileAdjustedWidths = () => {
+    if (!isMobile) {
+      return {
+        left: leftPanelInitialExpandedWidth,
+        right: rightPanelInitialExpandedWidth,
+        leftMin: leftPanelMinimumExpandedWidth,
+        rightMin: rightPanelMinimumExpandedWidth,
+      };
+    }
+    // In mobile (vertical layout), panels take up less vertical space
+    return {
+      left: leftPanelInitialExpandedWidth,
+      right: rightPanelInitialExpandedWidth,
+      leftMin: leftPanelMinimumExpandedWidth,
+      rightMin: rightPanelMinimumExpandedWidth,
+    };
+  };
+
+  const mobileAdjustedWidths = getMobileAdjustedWidths();
+
   const [panelGroupDefinition] = useState(
     getPanelGroupDefinition({
-      leftPanelInitialExpandedWidth,
-      rightPanelInitialExpandedWidth,
-      leftPanelMinimumExpandedWidth,
-      rightPanelMinimumExpandedWidth,
+      leftPanelInitialExpandedWidth: mobileAdjustedWidths.left,
+      rightPanelInitialExpandedWidth: mobileAdjustedWidths.right,
+      leftPanelMinimumExpandedWidth: mobileAdjustedWidths.leftMin,
+      rightPanelMinimumExpandedWidth: mobileAdjustedWidths.rightMin,
     })
   );
 
@@ -65,6 +90,18 @@ const useResizablePanels = (
 
   // The total width of both handles.
   const resizableHandlesWidth = useRef(null);
+
+  // Add responsive listener for mobile/desktop transitions
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      setPanelDirection(mobile ? 'vertical' : 'horizontal');
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // This useLayoutEffect is used to...
   // - Grab a reference to the various resizable panel elements needed for
@@ -304,7 +341,7 @@ const useResizablePanels = (
       onClose: onRightPanelClose,
       onOpen: onRightPanelOpen,
     },
-    { direction: 'horizontal', id: panelGroupDefinition.groupId },
+    { direction: panelDirection, id: panelGroupDefinition.groupId },
     {
       defaultSize: leftResizablePanelMinimumSize,
       minSize: leftResizablePanelMinimumSize,
