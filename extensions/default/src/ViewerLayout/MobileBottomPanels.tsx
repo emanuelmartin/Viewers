@@ -66,23 +66,23 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
       }}
     >
       {/* Tab bar + expand toggle */}
-      <div className="bg-secondary-dark flex h-[44px] flex-shrink-0 items-center border-t border-black">
+      <div className="bg-secondary-dark flex h-[40px] flex-shrink-0 items-center border-t border-black">
         {/* Expand/Collapse arrow button */}
         <button
-          className="text-primary flex h-full w-[36px] items-center justify-center"
+          className="text-primary flex h-full w-[32px] items-center justify-center flex-shrink-0"
           onClick={toggleExpand}
           aria-label={isExpanded ? 'Collapse panel' : 'Expand panel'}
         >
           <Icons.ChevronDown
             className={classnames(
-              'text-primary h-5 w-5 transition-transform duration-200',
+              'text-primary h-4 w-4 transition-transform duration-200',
               isExpanded ? '' : 'rotate-180'
             )}
           />
         </button>
 
         {/* Tab buttons */}
-        <div className="flex flex-1 items-center gap-1 overflow-x-auto px-1">
+        <div className="flex flex-1 items-center gap-0.5 overflow-x-auto px-0.5">
           {allTabs.map((tab, index) => {
             const isActive = index === activeTabIndex && isExpanded;
             return (
@@ -90,7 +90,7 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
                 key={`${tab.source}-${tab.name}-${index}`}
                 onClick={() => handleTabClick(index)}
                 className={classnames(
-                  'flex h-[32px] items-center gap-1.5 rounded px-2.5 text-xs whitespace-nowrap transition-colors',
+                  'flex h-[28px] items-center gap-1 rounded px-2 text-xs whitespace-nowrap transition-colors',
                   {
                     'bg-customblue-40 text-white': isActive,
                     'text-primary hover:bg-primary-dark': !isActive && !tab.disabled,
