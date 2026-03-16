@@ -2,6 +2,11 @@
   "About OHIF Viewer": "Sobre OHIF Viewer",
   "Browser": "Navegador",
   "Build number": "Número de compilación",
+  "Commit hash": "Hash de commit",
+  "Commit Hash": "Hash de commit",
+  "Current Browser & OS": "Navegador y SO actual",
+  "Data citation": "Citación de datos",
+  "Important links": "Enlaces importantes",
   "Last master commits": "Últimos Master Commits",
   "More details": "Más detalles",
   "Name": "Nombre",
@@ -10,5 +15,6 @@
   "Repository URL": "URL del repositorio",
   "Value": "Valor",
   "Version information": "Información de la versión",
+  "Version number": "Número de versión",
   "Visit the forum": "Visita el foro"
 }

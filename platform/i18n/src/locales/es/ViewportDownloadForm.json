@@ -1,14 +1,14 @@
 {
-  "emptyFilenameError": "El nombre del fichero no puede ser vacío.",
-  "fileType": "Tipo de fichero",
-  "filename": "Nombre del fichero",
-  "formTitle": "Por favor especifica las dimensiones, nombre del fichero, y el tipo deseado para el fichero generado.",
+  "emptyFilenameError": "El nombre del archivo no puede estar vacío.",
+  "fileType": "Tipo de archivo",
+  "filename": "Nombre del archivo",
+  "formTitle": "Por favor especifique las dimensiones, nombre del archivo y tipo deseado para la imagen generada.",
   "imageHeight": "Altura de la imagen (px)",
-  "imagePreview": "Preview de la imagen",
-  "imageWidth": "Anchura de la imagen (px)",
-  "keepAspectRatio": "Mantener el ratio de aspecto",
-  "loadingPreview": "Cargando el preview de la imagen...",
-  "minHeightError": "La altura mínima es 100px.",
-  "minWidthError": "La anchura mínima es 100px.",
-  "showAnnotations": "Mostrar las anotaciones"
+  "imagePreview": "Vista previa de la imagen",
+  "imageWidth": "Ancho de la imagen (px)",
+  "keepAspectRatio": "Mantener relación de aspecto",
+  "loadingPreview": "Cargando vista previa de la imagen...",
+  "minHeightError": "La altura mínima válida es 100px.",
+  "minWidthError": "El ancho mínimo válido es 100px.",
+  "showAnnotations": "Mostrar anotaciones"
 }

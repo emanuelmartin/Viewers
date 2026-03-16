@@ -1,0 +1,18 @@
+{
+  "Display Set Messages": "Mensajes del conjunto de visualización",
+  "1": "No se encontraron instancias válidas en la serie.",
+  "2": "El conjunto de visualización tiene información de posición faltante.",
+  "3": "El conjunto de visualización no es un volumen 3D reconstruible.",
+  "4": "Los conjuntos de visualización de múltiples fotogramas no tienen información de medida de píxeles.",
+  "5": "Los conjuntos de visualización de múltiples fotogramas no tienen información de orientación.",
+  "6": "Los conjuntos de visualización de múltiples fotogramas no tienen información de posición.",
+  "7": "El conjunto de visualización tiene fotogramas faltantes.",
+  "8": "El conjunto de visualización tiene espaciamiento irregular.",
+  "9": "El conjunto de visualización tiene dimensiones inconsistentes entre fotogramas.",
+  "10": "El conjunto de visualización tiene fotogramas con número inconsistente de componentes.",
+  "11": "El conjunto de visualización tiene fotogramas con orientaciones inconsistentes.",
+  "12": "El conjunto de visualización tiene información de posición inconsistente.",
+  "13": "Conjunto de visualización no compatible.",
+  "14": "El UID de clase SOP {{ sopClassUid }} no es compatible.",
+  "15": "El conjunto de visualización no tiene un UID de clase SOP. Por favor verifique el archivo."
+}
