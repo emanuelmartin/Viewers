@@ -43,7 +43,7 @@ window.config = {
   // Customizaciones de UI
   ui: {
     whiteLabeling: {
-      logo: '/images/logo.png', // Ruta relativa a /images
+      logo: '/images/logo-hsrl.png', // Logo del Hospital Real San Lucas TEPA
       menuTitle: 'HSRL DICOM Viewer',
     },
   },
