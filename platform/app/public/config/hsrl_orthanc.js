@@ -56,12 +56,11 @@ window.config = {
       configuration: {
         friendlyName: 'HSRL Orthanc DICOM Server',
         name: 'HSRL',
-        // Ajusta estas URLs según tu instalación de Orthanc
-        // Por ejemplo: http://hsrl.hospital.local:8042/dicom-web
-        // O si está en un proxy inverso: http://hsrl.hospital.local/orthanc/dicom-web
-        wadoUriRoot: '/orthanc/dicom-web',
-        qidoRoot: '/orthanc/dicom-web',
-        wadoRoot: '/orthanc/dicom-web',
+        // Configuración HSRL - Hospital Real San Lucas
+        // Rutas del servidor DICOMWeb
+        wadoUriRoot: 'https://imagen.hospitalrealsanlucas.com.mx/wado',
+        qidoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
+        wadoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
         // Configuración de capacidades
         qidoSupportsIncludeField: true,
         supportsReject: true,
