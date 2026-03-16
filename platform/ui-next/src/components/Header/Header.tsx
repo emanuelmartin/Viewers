@@ -60,7 +60,8 @@ function Header({
         isSticky={isSticky}
         {...props}
       >
-        <div className="relative h-[48px] items-center">
+        {/* Desktop layout (>= 1024px): absolute positioning for precise placement */}
+        <div className="relative hidden h-[48px] items-center lg:block">
           <div className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center">
             <div
               className={classNames(
@@ -119,6 +120,67 @@ function Header({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+          </div>
+        </div>
+        {/* Mobile/Tablet layout (< 1024px): flex-based, no overlap */}
+        <div className="flex flex-col lg:hidden">
+          {/* Row 1: Logo + Patient Info + Settings */}
+          <div className="flex h-[40px] items-center justify-between px-1">
+            <div className="flex min-w-0 flex-1 items-center">
+              <div
+                className={classNames(
+                  'inline-flex flex-shrink-0 items-center',
+                  isReturnEnabled && 'cursor-pointer'
+                )}
+                onClick={onClickReturn}
+                data-cy="return-to-work-list"
+              >
+                {isReturnEnabled && <Icons.ArrowLeft className="text-primary ml-0.5 h-5 w-5" />}
+                <div className="ml-0.5">
+                  {WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />}
+                </div>
+              </div>
+              <div className="ml-2 min-w-0 flex-1 truncate">{PatientInfo}</div>
+            </div>
+            <div className="flex flex-shrink-0 items-center">
+              {UndoRedo}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-primary hover:bg-primary-dark h-8 w-8"
+                  >
+                    <Icons.GearSettings className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {menuOptions.map((option, index) => {
+                    const IconComponent = option.icon
+                      ? Icons[option.icon as keyof typeof Icons]
+                      : null;
+                    return (
+                      <DropdownMenuItem
+                        key={index}
+                        onSelect={option.onClick}
+                        className="flex items-center gap-2 py-2"
+                      >
+                        {IconComponent && (
+                          <span className="flex h-4 w-4 items-center justify-center">
+                            <Icons.ByName name={option.icon} />
+                          </span>
+                        )}
+                        <span className="flex-1">{option.title}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          {/* Row 2: Primary toolbar - scrollable */}
+          <div className="border-secondary-dark flex h-[36px] items-center justify-center overflow-x-auto border-t px-1">
+            <div className="flex items-center gap-1">{children}</div>
           </div>
         </div>
       </NavBar>

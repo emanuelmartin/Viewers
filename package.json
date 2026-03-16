@@ -79,6 +79,7 @@
     "link-list": "npm ls --depth=0 --link=true"
   },
   "dependencies": {
+    "ajv": "^8.18.0",
     "execa": "8.0.1"
   },
   "optionalDependencies": {

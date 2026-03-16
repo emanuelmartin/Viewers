@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "chrome-devtools": {
+  "command": "/Users/emanuelmartin/.nvm/versions/node/v22.21.1/bin/node",
+  "args": [
+    "/Users/emanuelmartin/Documents/GitHub/chrome-devtools-mcp/build/src/index.js"
+  ],
+  "env": {
+    "CHROME_DEBUG_PORT": "9222"
+  },
+  "stdInEncoding": "utf-8",
+  "stdOutEncoding": "utf-8",
+  "tools": ["*"]
+}
+  }
+}
