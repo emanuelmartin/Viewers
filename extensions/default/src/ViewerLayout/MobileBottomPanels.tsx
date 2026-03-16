@@ -113,7 +113,7 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
 
       {/* Panel content area */}
       {isExpanded && activeTab && (
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
+        <div className="flex-1 overflow-auto bg-black">
           <activeTab.content />
         </div>
       )}
