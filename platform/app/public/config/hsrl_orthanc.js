@@ -6,7 +6,7 @@
 
 /** @type {AppTypes.Config} */
 window.config = {
-  routerBasename: '/images',
+  routerBasename: '/',
   extensions: [],
   modes: [],
   // Desactivar explorador de estudios
