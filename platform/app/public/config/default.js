@@ -301,4 +301,23 @@ window.config = {
   //     );
   //   },
   // },
+  
+  // Pixos Whitelabeling Configuration
+  whiteLabeling: {
+    createLogoComponentFn: function (React) {
+      return React.createElement('img', {
+        src: '/images/pixos-logo.webp',
+        alt: 'Pixos Logo',
+        className: 'h-10 w-auto object-contain',
+      });
+    },
+  },
+  
+  // UI Customization
+  ui: {
+    whiteLabeling: {
+      logo: '/images/pixos-logo.webp',
+      menuTitle: 'Pixos DICOM Viewer',
+    },
+  },
 };
