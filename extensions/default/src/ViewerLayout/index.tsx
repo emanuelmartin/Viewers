@@ -9,6 +9,8 @@ import SidePanelWithServices from '../Components/SidePanelWithServices';
 import { Onboarding, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@ohif/ui-next';
 import useResizablePanels from './ResizablePanelsHook';
 import MobileBottomPanels from './MobileBottomPanels';
+import MobileNavTabs, { MobileTab } from './MobileNavTabs';
+import PanelInterpretations from '../Panels/PanelInterpretations';
 
 const resizableHandleClassName = 'mt-[1px] bg-background';
 
@@ -64,6 +66,7 @@ function ViewerLayout({
   // Mobile: get panel tabs directly for bottom panel rendering
   const [leftPanelTabs, setLeftPanelTabs] = useState(() => panelService.getPanels('left'));
   const [rightPanelTabs, setRightPanelTabs] = useState(() => panelService.getPanels('right'));
+  const [mobileTab, setMobileTab] = useState<MobileTab>('images');
 
   const [
     leftPanelProps,
@@ -172,7 +175,12 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
-  // Mobile layout: viewport fills available space, panels at bottom
+  // Bottom-panel tabs: exclude interpretations (it has its own top tab on mobile)
+  const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
+  // Study browser: first left panel tab
+  const studiesPanelTab = leftPanelTabs[0];
+
+  // Mobile layout: header + 3-tab nav (Estudios | Imágenes | Interpretación)
   if (isMobile) {
     return (
       <div className="flex h-screen flex-col overflow-hidden">
@@ -183,28 +191,57 @@ function ViewerLayout({
           appConfig={appConfig}
         />
         {showLoadingIndicator && (
-          <LoadingIndicatorProgress 
-            className="h-full w-full bg-background" 
+          <LoadingIndicatorProgress
+            className="h-full w-full bg-background"
             logo={appConfig?.ui?.whiteLabeling?.logo}
           />
         )}
-        {/* Viewport area - takes all remaining space */}
-        <div
-          className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
-          onMouseEnter={handleMouseEnter}
-        >
-          <ViewportGridComp
+
+        {/* Top navigation tabs */}
+        <MobileNavTabs
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+        />
+
+        {/* Estudios tab — study browser */}
+        {mobileTab === 'studies' && (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
+            {studiesPanelTab ? (
+              <studiesPanelTab.content />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Sin estudios disponibles
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Imágenes tab — keep viewport always mounted to avoid reloading DICOM */}
+        <div className={mobileTab === 'images' ? 'flex flex-1 flex-col overflow-hidden' : 'hidden'}>
+          <div
+            className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
+            onMouseEnter={handleMouseEnter}
+          >
+            <ViewportGridComp
+              servicesManager={servicesManager}
+              viewportComponents={viewportComponents}
+              commandsManager={commandsManager}
+            />
+          </div>
+          <MobileBottomPanels
+            leftPanelTabs={leftPanelTabs}
+            rightPanelTabs={bottomRightTabs}
             servicesManager={servicesManager}
-            viewportComponents={viewportComponents}
-            commandsManager={commandsManager}
           />
         </div>
-        {/* Bottom panels */}
-        <MobileBottomPanels
-          leftPanelTabs={leftPanelTabs}
-          rightPanelTabs={rightPanelTabs}
-          servicesManager={servicesManager}
-        />
+
+        {/* Interpretación tab */}
+        {mobileTab === 'interpretations' && (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
+            <PanelInterpretations />
+          </div>
+        )}
+
         <Onboarding tours={customizationService.getCustomization('ohif.tours')} />
         <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
       </div>
