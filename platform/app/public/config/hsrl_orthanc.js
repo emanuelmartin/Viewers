@@ -146,5 +146,11 @@ window.config = {
     orthancBaseUrl: 'https://imagen.hospitalrealsanlucas.com.mx/pacs-web',
     // Campo de studiesClass que almacena el UUID interno de Orthanc
     orthancUuidField: 'orthancUUID',
+
+    // --- Descarga de PDF de interpretación vía Parse Cloud ---
+    // Campo de interpretationsClass que contiene la URL del PDF pre-generado
+    interpretationsPdfUrlField: 'pdfUrl',
+    // Nombre de la función Cloud de Parse que genera/entrega el PDF
+    interpretationsPdfCloudFunction: 'interpretationPDF',
   },
 };

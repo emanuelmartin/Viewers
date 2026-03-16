@@ -31,6 +31,10 @@ export interface InterpretationsPanelSchema {
   orthancBaseUrl?: string;
   /** Field in studiesClass that stores the Orthanc study UUID (default: 'orthancUUID') */
   orthancUuidField: string;
+  /** Field in interpretationsClass that stores the pre-generated PDF URL (default: 'pdfUrl') */
+  interpretationsPdfUrlField: string;
+  /** Parse Cloud function name that generates the interpretation PDF (default: 'interpretationPDF') */
+  interpretationsPdfCloudFunction: string;
 }
 
 const DEFAULT_SCHEMA: InterpretationsPanelSchema = {
@@ -47,6 +51,8 @@ const DEFAULT_SCHEMA: InterpretationsPanelSchema = {
   interpretationsSignedAtField: 'signedAt',
   orthancBaseUrl: undefined,
   orthancUuidField: 'orthancUUID',
+  interpretationsPdfUrlField: 'pdfUrl',
+  interpretationsPdfCloudFunction: 'interpretationPDF',
 };
 
 function getSchema(): InterpretationsPanelSchema {
@@ -135,6 +141,47 @@ async function fetchInterpretationsByStudies(
   return data.results ?? [];
 }
 
+async function downloadInterpretationPdf(
+  interp: any,
+  schema: InterpretationsPanelSchema
+): Promise<void> {
+  const pdfUrl: string | undefined = interp[schema.interpretationsPdfUrlField];
+  const now = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const fileName = `Interpretacion - ${now}.pdf`;
+
+  const headers = buildHeaders(schema);
+  // Parse Cloud REST endpoint: POST /functions/<functionName>
+  const endpoint = `${schema.parseUrl}/functions/${schema.interpretationsPdfCloudFunction}`;
+
+  let pdfDataUrl: string | undefined;
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ pdfUrl, fileName }),
+    });
+    if (!res.ok) throw new Error(`Cloud function responded ${res.status}`);
+    const data = await res.json();
+    pdfDataUrl = data?.result?.pdf ?? data?.result;
+  } catch (err) {
+    console.error('[PanelInterpretations] downloadInterpretationPdf error', err);
+  }
+
+  if (!pdfDataUrl) return;
+
+  // Attempt download first; if popup is blocked fall back to new tab
+  try {
+    const link = document.createElement('a');
+    link.href = pdfDataUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch {
+    window.open(pdfDataUrl);
+  }
+}
+
 function formatDateTime(iso?: string): string {
   if (!iso) {
     return '';
@@ -155,6 +202,7 @@ const PanelInterpretations: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
   const [downloadNotice, setDownloadNotice] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState<Record<string, boolean>>({});
 
   // Inject Quill output CSS once
   useEffect(() => {
@@ -296,6 +344,8 @@ const PanelInterpretations: React.FC = () => {
 
       {interpretations.map((interp, index) => {
         const isOpen = expandedIndex === index;
+        const interpPdfUrl: string | undefined = interp[schema.interpretationsPdfUrlField];
+        const hasPdf = !!interpPdfUrl && !!schema.parseUrl;
         const signedAtRaw = interp[schema.interpretationsSignedAtField];
         const dateStr = formatDateTime(
           typeof signedAtRaw === 'object' ? signedAtRaw?.iso : signedAtRaw || interp.createdAt
@@ -326,9 +376,39 @@ const PanelInterpretations: React.FC = () => {
                   )}
                 </div>
               </div>
-              <span className="text-muted-foreground ml-2 flex-shrink-0 text-xs">
-                {isOpen ? '▲' : '▼'}
-              </span>
+              <div className="ml-2 flex flex-shrink-0 items-center gap-1">
+                {hasPdf && (
+                  <button
+                    title="Descargar PDF"
+                    disabled={!!pdfBusy[interp.objectId]}
+                    onClick={async e => {
+                      e.stopPropagation();
+                      setPdfBusy(prev => ({ ...prev, [interp.objectId]: true }));
+                      try {
+                        await downloadInterpretationPdf(interp, schema);
+                      } finally {
+                        setPdfBusy(prev => ({ ...prev, [interp.objectId]: false }));
+                      }
+                    }}
+                    className="text-muted-foreground hover:text-foreground flex items-center rounded p-1 transition-colors disabled:opacity-40"
+                  >
+                    {pdfBusy[interp.objectId] ? (
+                      <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="12" y1="18" x2="12" y2="12" />
+                        <polyline points="9 15 12 18 15 15" />
+                      </svg>
+                    )}
+                  </button>
+                )}
+                <span className="text-muted-foreground text-xs">{isOpen ? '▲' : '▼'}</span>
+              </div>
             </button>
 
             {/* Content – rendered Quill HTML */}
