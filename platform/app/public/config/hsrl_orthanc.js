@@ -103,4 +103,6 @@ window.config = {
   httpErrorHandler: error => {
     console.warn(`HTTP Error Handler (status: ${error.status})`, error);
   },
+  // Disable medical use disclaimer
+  investigationalUseDialog: { option: 'never' },
 };

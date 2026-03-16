@@ -320,4 +320,6 @@ window.config = {
       menuTitle: 'Pixos DICOM Viewer',
     },
   },
+  // Disable medical use disclaimer
+  investigationalUseDialog: { option: 'never' },
 };
