@@ -10,8 +10,8 @@ interface MobileNavTabsProps {
 
 const TABS: { id: MobileTab; label: string }[] = [
   { id: 'studies', label: 'Estudios' },
-  { id: 'images', label: 'Imagenes' },
-  { id: 'interpretations', label: 'Interpretacion' },
+  { id: 'images', label: 'Imágenes' },
+  { id: 'interpretations', label: 'Interpretación' },
 ];
 
 const MobileNavTabs: React.FC<MobileNavTabsProps> = ({ activeTab, onTabChange }) => {

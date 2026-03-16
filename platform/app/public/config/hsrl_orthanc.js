@@ -143,7 +143,7 @@ window.config = {
     // URL base del servidor Orthanc (sin barra al final).
     // Al estar configurada, aparece el botón "Descargar" en el panel.
     // Cada estudio se descarga como ZIP desde: {orthancBaseUrl}/studies/{uuid}/archive
-    orthancBaseUrl: 'https://imagen.hospitalrealsanlucas.com.mx/orthanc',
+    orthancBaseUrl: 'https://imagen.hospitalrealsanlucas.com.mx/pacs-web',
     // Campo de studiesClass que almacena el UUID interno de Orthanc
     orthancUuidField: 'orthancUUID',
   },

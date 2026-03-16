@@ -175,12 +175,12 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
-  // Bottom-panel tabs: exclude interpretations (it has its own top tab on mobile)
-  const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
-  // Study browser: first left panel tab
+  // Study browser tab: first left panel (PanelStudyBrowser)
   const studiesPanelTab = leftPanelTabs[0];
+  // Bottom series panel: right tabs excluding interpretations (it lives in its own top tab)
+  const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
 
-  // Mobile layout: header + 3-tab nav (Estudios | Imágenes | Interpretación)
+  // Mobile layout: header + top nav tabs + content area
   if (isMobile) {
     return (
       <div className="flex h-screen flex-col overflow-hidden">
@@ -197,13 +197,13 @@ function ViewerLayout({
           />
         )}
 
-        {/* Top navigation tabs */}
+        {/* Top navigation tabs: Estudios | Imágenes | Interpretación */}
         <MobileNavTabs
           activeTab={mobileTab}
           onTabChange={setMobileTab}
         />
 
-        {/* Estudios tab — study browser */}
+        {/* Estudios tab — study browser panel */}
         {mobileTab === 'studies' && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
             {studiesPanelTab ? (
@@ -216,7 +216,7 @@ function ViewerLayout({
           </div>
         )}
 
-        {/* Imágenes tab — keep viewport always mounted to avoid reloading DICOM */}
+        {/* Imágenes tab — viewport always mounted (hidden when inactive to avoid reload) */}
         <div className={mobileTab === 'images' ? 'flex flex-1 flex-col overflow-hidden' : 'hidden'}>
           <div
             className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
@@ -235,7 +235,7 @@ function ViewerLayout({
           />
         </div>
 
-        {/* Interpretación tab */}
+        {/* Interpretaciones tab */}
         {mobileTab === 'interpretations' && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
             <PanelInterpretations />

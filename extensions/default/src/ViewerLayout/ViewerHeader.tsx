@@ -117,7 +117,6 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
           >
             <Icons.Redo className="" />
           </Button>
-          <div className="border-primary-dark mx-1.5 h-[25px] border-r" />
           <HeaderDownloadButton />
         </div>
       }
