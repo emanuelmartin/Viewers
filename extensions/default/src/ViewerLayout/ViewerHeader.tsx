@@ -9,6 +9,7 @@ import HeaderPatientInfo from './HeaderPatientInfo';
 import { PatientInfoVisibility } from './HeaderPatientInfo/HeaderPatientInfo';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
+import HeaderDownloadButton from './HeaderDownloadButton';
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
@@ -121,6 +122,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
     >
       <div className="relative flex justify-center gap-[4px]">
         <Toolbar buttonSection="primary" />
+        <HeaderDownloadButton />
       </div>
     </Header>
   );
