@@ -31,7 +31,7 @@ function PanelStudyBrowserHeader({
                 )}
               </div>
             </div>
-            <div className="ml-auto flex h-full items-center justify-center">
+            <div className="hidden lg:flex ml-auto h-full items-center justify-center">
               <ToggleGroup
                 type="single"
                 value={viewPresets.filter(preset => preset.selected)[0].id}

@@ -67,7 +67,7 @@ const StudyBrowser = ({
       >
         <div className="flex flex-col lg:flex-col gap-[4px]">
           {showSettings && (
-            <div className="w-100 bg-background flex h-[48px] items-center justify-center gap-[10px] px-[8px] py-[10px]">
+            <div className="hidden lg:flex w-100 bg-background h-[48px] items-center justify-center gap-[10px] px-[8px] py-[10px]">
               <>
                 <StudyBrowserViewOptions
                   tabs={tabs}
