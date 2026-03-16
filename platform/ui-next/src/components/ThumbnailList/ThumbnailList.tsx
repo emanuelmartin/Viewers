@@ -26,15 +26,15 @@ const ThumbnailList = ({
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex w-full min-w-0 flex-col">
       <div
         ref={ref}
-        className="flex flex-col gap-[2px] pt-[4px] pr-[2.5px] pl-[5px] pb-[4px]"
+        className="flex w-full min-w-0 flex-col gap-[2px] pt-[4px] pr-[2.5px] pl-[5px] pb-[4px]"
       >
         {thumbnailItems.length > 0 && (
           <div
             id="ohif-thumbnail-list"
-            className="bg-background grid lg:grid-cols-[repeat(auto-fit,_minmax(0,135px))] grid-cols-[repeat(auto-fit,_minmax(0,100px))] place-items-start gap-[4px] lg:gap-[4px] gap-[2px] overflow-x-auto"
+            className="bg-background lg:grid lg:grid-cols-[repeat(auto-fit,_minmax(0,135px))] lg:place-items-start flex flex-row overflow-x-auto gap-[2px] lg:gap-[4px]"
           >
             {thumbnailItems.map(item => {
               const { displaySetInstanceUID, componentType, numInstances, ...rest } = item;
@@ -62,7 +62,7 @@ const ThumbnailList = ({
         {listItems.length > 0 && (
           <div
             id="ohif-thumbnail-list"
-            className="bg-background grid grid-cols-[repeat(auto-fit,_minmax(0,275px))] place-items-start gap-[2px] overflow-x-auto"
+            className="bg-background grid grid-cols-[repeat(auto-fit,_minmax(0,275px))] place-items-start gap-[2px]"
           >
             {listItems.map(item => {
               const { displaySetInstanceUID, componentType, numInstances, ...rest } = item;

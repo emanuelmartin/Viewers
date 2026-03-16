@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useDrag } from 'react-dnd';
@@ -45,17 +45,9 @@ const Thumbnail = ({
     },
   });
 
-  const [lastTap, setLastTap] = useState(0);
-
   const handleTouchEnd = e => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-      onDoubleClick(e);
-    } else {
-      onClick(e);
-    }
-    setLastTap(currentTime);
+    // On mobile a single tap is sufficient to load the series into the viewport.
+    onDoubleClick(e);
   };
 
   const renderThumbnailPreset = () => {
@@ -66,17 +58,17 @@ const Thumbnail = ({
           isActive && 'bg-popover rounded'
         )}
       >
-        <div className="h-[114px] w-[128px]">
+        <div className="h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px]">
           <div className="relative bg-black">
             {imageSrc ? (
               <img
                 src={imageSrc}
                 alt={imageAltText}
-                className="h-[114px] w-[128px] rounded object-contain"
+                className="h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px] rounded object-contain"
                 crossOrigin="anonymous"
               />
             ) : (
-              <div className="bg-background h-[114px] w-[128px] rounded"></div>
+              <div className="bg-background h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px] rounded"></div>
             )}
 
             {/* bottom left */}
@@ -140,12 +132,12 @@ const Thumbnail = ({
             </div>
           </div>
         </div>
-        <div className="flex h-[52px] w-[128px] flex-col justify-start pt-px">
+        <div className="flex h-[46px] w-[98px] md:h-[50px] md:w-[112px] lg:h-[52px] lg:w-[128px] flex-col justify-start pt-px">
           <Tooltip>
             <TooltipContent>{description}</TooltipContent>
             <TooltipTrigger>
               <div
-                className="min-h-[18px] w-[128px] overflow-hidden text-ellipsis whitespace-nowrap pb-0.5 pl-1 text-left text-[12px] font-normal leading-4 text-white"
+                className="min-h-[18px] w-[98px] md:w-[112px] lg:w-[128px] overflow-hidden text-ellipsis whitespace-nowrap pb-0.5 pl-1 text-left text-[11px] lg:text-[12px] font-normal leading-4 text-white"
                 data-cy="series-description-label"
               >
                 {description}
@@ -270,7 +262,7 @@ const Thumbnail = ({
       className={classnames(
         className,
         'bg-muted hover:bg-primary/30 group flex cursor-pointer select-none flex-col rounded outline-none',
-        viewPreset === 'thumbnails' && 'h-[170px] w-[135px]',
+        viewPreset === 'thumbnails' && 'h-[130px] w-[105px] md:h-[150px] md:w-[120px] lg:h-[170px] lg:w-[135px]',
         viewPreset === 'list' && 'h-[40px] w-full'
       )}
       id={`thumbnail-${displaySetInstanceUID}`}

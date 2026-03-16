@@ -78,7 +78,7 @@ const StudyBrowser = ({
               </>
             </div>
           )}
-          <div className="flex lg:flex-col flex-row overflow-x-auto lg:overflow-x-visible gap-[4px]">
+          <div className="flex flex-col gap-[4px]">
             {getTabContent()}
           </div>
         </div>
