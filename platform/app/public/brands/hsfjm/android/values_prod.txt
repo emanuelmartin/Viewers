@@ -1,0 +1,3 @@
+# Template for Android strings.xml and build.gradle changes
+app_name=Hospital San Francisco Javier Memorial
+applicationId=com.pixos.hsfjm

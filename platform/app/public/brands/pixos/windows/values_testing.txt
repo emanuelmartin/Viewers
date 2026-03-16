@@ -1,0 +1,5 @@
+# Configuración Windows - PIXOS DesarrTestingollo
+DisplayName=PIXOS Hospital Testing
+PackageName=com.pixos.hospital.testing
+Publisher=CN=PIXOS Hospital
+Description=PIXOS Hospital Management System - Testing

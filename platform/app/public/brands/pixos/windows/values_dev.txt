@@ -1,0 +1,5 @@
+# Configuración Windows - PIXOS Desarrollo
+DisplayName=PIXOS Hospital Dev
+PackageName=com.pixos.hospital.dev
+Publisher=CN=PIXOS Hospital
+Description=PIXOS Hospital Management System - Development

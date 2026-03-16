@@ -1,0 +1,4 @@
+// SplashScreen nativo para iOS, Android y Windows:
+// 1. Elimina cualquier texto del LaunchScreen.storyboard (iOS), launch_screen.xml (Android) y SplashScreen.xaml (Windows).
+// 2. Usa splash_logo.png centrado y fondo blanco.
+// 3. La animación real la maneja React Native en SplashScreen.tsx.

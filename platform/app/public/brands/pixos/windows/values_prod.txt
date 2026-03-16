@@ -1,0 +1,5 @@
+# Configuración Windows - PIXOS Producción
+DisplayName=PIXOS Hospital
+PackageName=com.pixos.hospital
+Publisher=CN=PIXOS Hospital
+Description=PIXOS Hospital Management System

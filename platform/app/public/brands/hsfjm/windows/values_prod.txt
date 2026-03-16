@@ -1,0 +1,5 @@
+# Configuración Windows - HSFJM Producción
+DisplayName=HSFJM Hospital
+PackageName=com.hsfjm.hospital
+Publisher=CN=Hospital San Francisco Javier Memorial
+Description=Hospital San Francisco Javier Memorial - Sistema de Gestión Hospitalaria

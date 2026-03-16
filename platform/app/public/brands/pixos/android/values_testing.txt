@@ -1,0 +1,3 @@
+# Template for Android strings.xml and build.gradle changes
+app_name=Pixos Testing
+applicationId=com.pixos.pixos.testing

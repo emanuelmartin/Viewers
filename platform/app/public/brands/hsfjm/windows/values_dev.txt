@@ -1,0 +1,5 @@
+# Configuración Windows - HSFJM Desarrollo
+DisplayName=HSFJM Hospital Dev
+PackageName=com.hsfjm.hospital.dev
+Publisher=CN=Hospital San Francisco Javier Memorial
+Description=Hospital San Francisco Javier Memorial - Sistema de Gestión Hospitalaria - Development

@@ -1,0 +1,112 @@
+{
+  "brand": "hsfjm",
+  "name": "Hospital San Francisco Javier Memorial",
+  "description": "Tema diseñado para el Hospital San Francisco Javier Memorial con colores médicos profesionales",
+  "colors": {
+    "light": {
+      "primary": "#1E3A5F",
+      "primaryLight": "#4A7C9D",
+      "primaryDark": "#0F1D32",
+      "secondary": "#00B4D8",
+      "secondaryLight": "#33C4E2",
+      "secondaryDark": "#0092B3",
+      "accent": "#66D9EF",
+      
+      "background": "#F8FBFF",
+      "surface": "#FFFFFF",
+      "card": "#F1F8FF",
+      
+      "text": "#1E3A5F",
+      "textSecondary": "#4A5568",
+      "textDisabled": "#9CA3AF",
+      
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#06B6D4",
+      
+      "border": "#E2E8F0",
+      "divider": "#F1F5F9",
+      
+      "inputBackground": "#FFFFFF",
+      "inputBorder": "#CBD5E1",
+      "inputPlaceholder": "#94A3B8",
+      "inputFocusedBorder": "#00B4D8",
+      
+      "buttonDisabled": "#F1F5F9",
+      "buttonDisabledText": "#9CA3AF",
+      
+      "overlay": "rgba(30, 58, 95, 0.5)",
+      "shadow": "rgba(30, 58, 95, 0.1)"
+    },
+    "dark": {
+      "primary": "#4A7C9D",
+      "primaryLight": "#66D9EF",
+      "primaryDark": "#1E3A5F",
+      "secondary": "#33C4E2",
+      "secondaryLight": "#66D9EF",
+      "secondaryDark": "#00B4D8",
+      "accent": "#66D9EF",
+      
+      "background": "#0F1419",
+      "surface": "#1A2332",
+      "card": "#243242",
+      
+      "text": "#F8FBFF",
+      "textSecondary": "#94A3B8",
+      "textDisabled": "#64748B",
+      
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#06B6D4",
+      
+      "border": "#334155",
+      "divider": "#1E293B",
+      
+      "inputBackground": "#1A2332",
+      "inputBorder": "#475569",
+      "inputPlaceholder": "#64748B",
+      "inputFocusedBorder": "#00B4D8",
+      
+      "buttonDisabled": "#1E293B",
+      "buttonDisabledText": "#64748B",
+      
+      "overlay": "rgba(15, 20, 25, 0.7)",
+      "shadow": "rgba(0, 0, 0, 0.3)"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "regular": "System",
+      "medium": "System",
+      "bold": "System"
+    },
+    "fontSize": {
+      "h1": 32,
+      "h2": 28,
+      "h3": 24,
+      "h4": 20,
+      "h5": 18,
+      "h6": 16,
+      "body": 16,
+      "caption": 14,
+      "small": 12
+    }
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 48
+  },
+  "borderRadius": {
+    "none": 0,
+    "small": 4,
+    "medium": 8,
+    "large": 12,
+    "round": 9999
+  }
+}

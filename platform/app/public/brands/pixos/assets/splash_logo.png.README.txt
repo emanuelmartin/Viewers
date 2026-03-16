@@ -1,0 +1,4 @@
+// Copia este archivo como splash_logo.png en los siguientes destinos:
+// iOS: ios/pixos/Images.xcassets/SplashLogo.imageset/splash_logo.png
+// Android: android/app/src/main/res/drawable/splash_logo.png
+// Windows: windows/pixos/Assets/splash_logo.png
