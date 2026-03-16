@@ -167,13 +167,22 @@ const getToolTipContent = (label: string, disabled: boolean) => {
   );
 };
 
-const createBaseStyle = (expandedWidth: number) => {
+const createBaseStyle = (expandedWidth: number, isMobileVertical: boolean) => {
+  if (isMobileVertical) {
+    return {
+      maxWidth: '100%',
+      width: '100%',
+      position: 'relative' as const,
+      top: '0',
+      height: '100%',
+    };
+  }
   return {
     maxWidth: `${expandedWidth}px`,
     width: `${expandedWidth}px`,
     // To align the top of the side panel with the top of the viewport grid, use position relative and offset the
     // top by the same top offset as the viewport grid. Also adjust the height so that there is no overflow.
-    position: 'relative',
+    position: 'relative' as const,
     top: '0.2%',
     height: '99.8%',
   };
@@ -197,6 +206,17 @@ const SidePanel = ({
   const [panelOpen, setPanelOpen] = useState(isExpanded);
   const [activeTabIndex, setActiveTabIndex] = useState(activeTabIndexProp ?? 0);
 
+  // Detect mobile (vertical panel layout) for responsive styling
+  const [isMobileVertical, setIsMobileVertical] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => setIsMobileVertical(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [styleMap, setStyleMap] = useState(
     createStyleMap(
       expandedWidth,
@@ -207,7 +227,7 @@ const SidePanel = ({
     )
   );
 
-  const [baseStyle, setBaseStyle] = useState(createBaseStyle(expandedWidth));
+  const [baseStyle, setBaseStyle] = useState(createBaseStyle(expandedWidth, isMobileVertical));
 
   const [gridAvailableWidth, setGridAvailableWidth] = useState(
     expandedWidth - closeIconWidth - gridHorizontalPadding
@@ -215,7 +235,9 @@ const SidePanel = ({
 
   const [gridWidth, setGridWidth] = useState(getGridWidth(tabs.length, gridAvailableWidth));
   const openStatus = panelOpen ? 'open' : 'closed';
-  const style = Object.assign({}, styleMap[openStatus][side], baseStyle);
+  const style = isMobileVertical
+    ? Object.assign({}, baseStyle, panelOpen ? {} : { display: 'none' })
+    : Object.assign({}, styleMap[openStatus][side], baseStyle);
 
   const updatePanelOpen = useCallback(
     (isOpen: boolean) => {
@@ -261,7 +283,7 @@ const SidePanel = ({
         collapsedOutsideBorderSize
       )
     );
-    setBaseStyle(createBaseStyle(expandedWidth));
+    setBaseStyle(createBaseStyle(expandedWidth, isMobileVertical));
 
     const gridAvailableWidth = expandedWidth - closeIconWidth - gridHorizontalPadding;
     setGridAvailableWidth(gridAvailableWidth);
@@ -273,6 +295,7 @@ const SidePanel = ({
     expandedInsideBorderSize,
     tabs.length,
     collapsedOutsideBorderSize,
+    isMobileVertical,
   ]);
 
   useEffect(() => {
@@ -285,7 +308,7 @@ const SidePanel = ({
       <>
         <div
           className={classnames(
-            'bg-secondary-dark flex h-[28px] w-full cursor-pointer items-center rounded-md',
+            'hidden lg:flex bg-secondary-dark h-[28px] w-full cursor-pointer items-center rounded-md',
             side === 'left' ? 'justify-end pr-2' : 'justify-start pl-2'
           )}
           onClick={() => {
@@ -297,7 +320,7 @@ const SidePanel = ({
             className={classnames('text-primary', side === 'left' && 'rotate-180 transform')}
           />
         </div>
-        <div className={classnames('mt-3 flex flex-col space-y-3')}>
+        <div className={classnames('hidden lg:flex mt-3 flex-col space-y-3')}>
           {_childComponents.map((childComponent, index) => (
             <Tooltip key={index}>
               <TooltipTrigger>
