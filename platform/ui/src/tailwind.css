@@ -31,30 +31,30 @@
 
 @layer base {
   :root {
-    --highlight: 207 92% 80%;
-    --neutral: 213 30% 50%;
-    --neutral-light: 207 92% 90%;
-    --neutral-dark: 207 30% 30%;
-    --background: 207 62% 5%;
+    --highlight: 210 92% 80%;
+    --neutral: 210 30% 50%;
+    --neutral-light: 210 92% 90%;
+    --neutral-dark: 210 30% 30%;
+    --background: 210 63% 7%;
     --foreground: 0 0% 98%;
-    --card: 207 62% 15%;
+    --card: 210 61% 16%;
     --card-foreground: 0 0% 98%;
-    --popover: 207 90% 20%;
+    --popover: 210 61% 20%;
     --popover-foreground: 0 0% 98%;
-    --primary: 207 79% 50%;
+    --primary: 210 79% 50%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 207 66% 42%;
-    --secondary-foreground: 207 50% 85%;
-    --muted: 207 64% 15%;
-    --muted-foreground: 207 46% 60%;
-    --accent: 207 79% 35%;
+    --secondary: 210 66% 42%;
+    --secondary-foreground: 210 50% 85%;
+    --muted: 210 61% 16%;
+    --muted-foreground: 210 46% 60%;
+    --accent: 210 79% 35%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 207 49% 28%;
-    --input: 207 52% 20%;
-    --ring: 207 98% 60%;
-    --chart-1: 207 70% 50%;
+    --border: 210 49% 28%;
+    --input: 210 52% 22%;
+    --ring: 210 98% 60%;
+    --chart-1: 210 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;

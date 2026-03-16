@@ -18,8 +18,8 @@ const formatWithEllipsis = (str, maxLength) => {
 
 function HeaderPatientInfo({ servicesManager, appConfig }: withAppTypes) {
   const initialExpandedState =
-    appConfig.showPatientInfo === PatientInfoVisibility.VISIBLE ||
-    appConfig.showPatientInfo === PatientInfoVisibility.VISIBLE_READONLY;
+    appConfig.showPatientInfo !== PatientInfoVisibility.DISABLED &&
+    appConfig.showPatientInfo !== PatientInfoVisibility.VISIBLE_COLLAPSED;
   const [expanded, setExpanded] = useState(initialExpandedState);
   const { patientInfo, isMixedPatients } = usePatientInfo(servicesManager);
 

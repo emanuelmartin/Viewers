@@ -86,7 +86,7 @@ function Header({
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
-            <div className="flex-shrink-0">
+            <div className="hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -149,7 +149,7 @@ function Header({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-primary hover:bg-primary-dark h-8 w-8"
+                    className="hidden"
                   >
                     <Icons.GearSettings className="h-5 w-5" />
                   </Button>

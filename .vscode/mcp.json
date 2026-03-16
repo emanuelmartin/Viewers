@@ -1,5 +1,15 @@
 {
   "servers": {
+    "parse-server": {
+      "command": "/Users/emanuelmartin/.nvm/versions/node/v22.21.1/bin/node",
+      "cwd": "/Users/emanuelmartin/Documents/GitHub/mcp-parse-server",
+      "args": ["dist/index.js"],
+      "envFile": "/Users/emanuelmartin/Documents/GitHub/dasner-react/.env",
+      "stdInEncoding": "utf-8",
+      "stdOutEncoding": "utf-8",
+      "tools": ["*"]
+    },
+
     "chrome-devtools": {
   "command": "/Users/emanuelmartin/.nvm/versions/node/v22.21.1/bin/node",
   "args": [

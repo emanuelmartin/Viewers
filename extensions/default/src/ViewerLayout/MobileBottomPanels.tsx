@@ -59,10 +59,15 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
     <div
       className="bg-black flex flex-col"
       style={{
-        height: isExpanded ? '45vh' : '44px',
-        minHeight: '44px',
-        maxHeight: isExpanded ? '55vh' : '44px',
+        height: isExpanded
+          ? 'calc(45vh + env(safe-area-inset-bottom, 0px))'
+          : 'calc(44px + env(safe-area-inset-bottom, 0px))',
+        minHeight: 'calc(44px + env(safe-area-inset-bottom, 0px))',
+        maxHeight: isExpanded
+          ? 'calc(55vh + env(safe-area-inset-bottom, 0px))'
+          : 'calc(44px + env(safe-area-inset-bottom, 0px))',
         transition: 'height 0.25s ease-in-out, max-height 0.25s ease-in-out',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
       {/* Tab bar + expand toggle */}

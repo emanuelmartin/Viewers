@@ -33,9 +33,12 @@ window.config = {
   whiteLabeling: {
     createLogoComponentFn: function(React) {
       return React.createElement('div', {
-        className: 'font-bold text-white',
-        style: { fontSize: '16px' },
-      }, 'HSRL Imaging');
+        style: { padding: '4px 8px', display: 'flex', alignItems: 'center' },
+      }, React.createElement('img', {
+        src: '/images/images/logo-hsrl.png',
+        alt: 'HSRL',
+        style: { height: '28px', width: 'auto', objectFit: 'contain' },
+      }));
     },
     createStudyListFetcher: () => null,
   },
@@ -43,7 +46,7 @@ window.config = {
   // Customizaciones de UI
   ui: {
     whiteLabeling: {
-      logo: '/images/logo-hsrl.png', // Logo del Hospital Real San Lucas TEPA
+      logo: '/images/images/logo-hsrl.png', // Logo del Hospital Real San Lucas TEPA
       menuTitle: 'HSRL DICOM Viewer',
     },
   },
@@ -105,4 +108,43 @@ window.config = {
   },
   // Disable medical use disclaimer
   investigationalUseDialog: { option: 'never' },
+
+  // ---------------------------------------------------------------------------
+  // Configuración del panel de interpretaciones
+  // Ajusta los nombres de clases y campos si conectas una base de datos diferente.
+  // ---------------------------------------------------------------------------
+  interpretationsPanel: {
+    // URL base del servidor Parse (sin barra al final)
+    parseUrl: 'https://imagen.hospitalrealsanlucas.com.mx/server',
+    // Application ID de Parse
+    appId: '2aa9a978-cae0-4a8d-96f6-036ab4aa13c7',
+    // JavaScript client key de Parse (omite si no aplica)
+    jsKey: '3f3d7912-270b-4d62-a2b9-d9e895191307',
+    // Token de sesión opcional (para acceso restringido)
+    // sessionToken: 'r:xxxx',
+
+    // --- Clase que contiene los estudios DICOM ---
+    studiesClass: 'Studies',
+    // Campo de studiesClass que almacena el StudyInstanceUID DICOM
+    studiesUidField: 'instanceUUID',
+
+    // --- Clase que contiene las interpretaciones / informes ---
+    interpretationsClass: 'Interpretations',
+    // Campo Pointer de interpretationsClass que apunta a studiesClass
+    interpretationsStudyField: 'study',
+    // Campo con el contenido HTML del informe
+    interpretationsContentField: 'content',
+    // Campo booleano: indica si el informe está firmado/finalizado
+    interpretationsSignedField: 'signed',
+    // Campo de fecha: cuándo fue firmado el informe
+    interpretationsSignedAtField: 'signedAt',
+
+    // --- Descarga de imágenes DICOM vía Orthanc ---
+    // URL base del servidor Orthanc (sin barra al final).
+    // Al estar configurada, aparece el botón "Descargar" en el panel.
+    // Cada estudio se descarga como ZIP desde: {orthancBaseUrl}/studies/{uuid}/archive
+    orthancBaseUrl: 'https://imagen.hospitalrealsanlucas.com.mx/orthanc',
+    // Campo de studiesClass que almacena el UUID interno de Orthanc
+    orthancUuidField: 'orthancUUID',
+  },
 };
