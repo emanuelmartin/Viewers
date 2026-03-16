@@ -8,8 +8,9 @@ import { Icons } from '../Icons';
  * if progress is not provided, it will render an infinite loading indicator
  * if progress is provided, it will render a progress bar
  * Optionally a textBlock can be provided to display a message
+ * Optionally a logo can be provided to display instead of the OHIF mark
  */
-function LoadingIndicatorProgress({ className, textBlock, progress }) {
+function LoadingIndicatorProgress({ className, textBlock, progress, logo }) {
   return (
     <div
       className={classNames(
@@ -17,10 +18,31 @@ function LoadingIndicatorProgress({ className, textBlock, progress }) {
         className
       )}
     >
-      <Icons.LoadingOHIFMark className="h-12 w-12 text-white" />
-      <div className="w-48">
-        <ProgressLoadingBar progress={progress} />
+      {/* Logo or default OHIF mark */}
+      {logo ? (
+        <img 
+          src={logo} 
+          alt="Hospital Logo" 
+          className="h-16 w-auto max-w-xs object-contain"
+        />
+      ) : (
+        <Icons.LoadingOHIFMark className="h-12 w-12 text-white" />
+      )}
+      
+      {/* Loading spinner animation */}
+      <div className="flex flex-col items-center space-y-3">
+        <div className="flex items-center justify-center space-x-1">
+          <div className="h-2 w-2 rounded-full bg-primary loading-dot" style={{ animationDelay: '0s' }} />
+          <div className="h-2 w-2 rounded-full bg-primary loading-dot" style={{ animationDelay: '0.2s' }} />
+          <div className="h-2 w-2 rounded-full bg-primary loading-dot" style={{ animationDelay: '0.4s' }} />
+        </div>
+        
+        {/* Progress bar */}
+        <div className="w-48">
+          <ProgressLoadingBar progress={progress} />
+        </div>
       </div>
+      
       {textBlock}
     </div>
   );

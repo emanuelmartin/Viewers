@@ -183,7 +183,10 @@ function ViewerLayout({
           appConfig={appConfig}
         />
         {showLoadingIndicator && (
-          <LoadingIndicatorProgress className="h-full w-full bg-background" />
+          <LoadingIndicatorProgress 
+            className="h-full w-full bg-background" 
+            logo={appConfig?.ui?.whiteLabeling?.logo}
+          />
         )}
         {/* Viewport area - takes all remaining space */}
         <div
@@ -222,7 +225,7 @@ function ViewerLayout({
         style={{ height: 'calc(100vh - 52px)' }}
       >
         <React.Fragment>
-          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-background" />}
+          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-background" logo={appConfig?.ui?.whiteLabeling?.logo} />}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
             {/* LEFT SIDEPANELS */}
             {hasLeftPanels ? (
