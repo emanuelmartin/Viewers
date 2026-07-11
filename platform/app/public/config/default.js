@@ -19,10 +19,29 @@
 window.config = {
   name: 'config/default.js',
   routerBasename: null,
-  // whiteLabeling: {},
+  whiteLabeling: {
+    createLogoComponentFn: function(React) {
+      return React.createElement(
+        'a',
+        {
+          target: '_self',
+          rel: 'noopener noreferrer',
+          className: 'flex items-center',
+          href: '/',
+        },
+        React.createElement('img', {
+          src: './assets/logo.png',
+          alt: 'Logo',
+          className: 'h-8',
+        })
+      );
+    },
+  },
   extensions: [],
   modes: [],
-  customizationService: {},
+  customizationService: {
+    'panelSegmentation.hideByDefault': true,
+  },
 
   // --- URL-driven customizations (?customization=) ----------------------------
   // OFF by default. To allow loading customization data files from the URL, set
@@ -54,6 +73,7 @@ window.config = {
   },
   // ----------------------------------------------------------------------------
   showStudyList: true,
+  investigationalUseDialog: { option: 'never' },
   // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,
   // below flag is for performance reasons, but it might not work for all servers

@@ -59,6 +59,7 @@ const Thumbnail = ({
   onClickUntrack = () => {},
   ThumbnailMenuItems = () => {},
   onImageLoadError = () => {},
+  isHorizontalLayout = false,
 }: withAppTypes): React.ReactNode => {
   const [lastTap, setLastTap] = useState(0);
   const [imageLoadFailed, setImageLoadFailed] = useState(false);
@@ -81,6 +82,9 @@ const Thumbnail = ({
   };
 
   const renderThumbnailPreset = () => {
+    const imageSize = isHorizontalLayout
+      ? { container: 'h-[140px] w-[180px]', img: 'h-[140px] w-[180px]' }
+      : { container: 'h-[114px] w-[128px]', img: 'h-[114px] w-[128px]' };
     return (
       <div
         className={classnames(
@@ -88,13 +92,13 @@ const Thumbnail = ({
           isActive && 'bg-popover rounded'
         )}
       >
-        <div className="h-[114px] w-[128px]">
+        <div className={imageSize.container}>
           <div className="relative bg-background">
             {shouldRenderThumbnailImage ? (
               <img
                 src={imageSrc}
                 alt={imageAltText}
-                className="h-[114px] w-[128px] rounded object-contain"
+                className={classnames(imageSize.img, 'rounded object-contain')}
                 crossOrigin="anonymous"
                 onError={() => {
                   setImageLoadFailed(true);
@@ -102,7 +106,7 @@ const Thumbnail = ({
                 }}
               />
             ) : (
-              <div className="bg-background h-[114px] w-[128px] rounded">{children}</div>
+              <div className={classnames('bg-background rounded', imageSize.img)}>{children}</div>
             )}
 
             {/* bottom left */}
@@ -295,10 +299,11 @@ const Thumbnail = ({
     <div
       className={classnames(
         className,
-        'bg-muted group flex select-none flex-col rounded outline-none',
+        'bg-muted group flex select-none flex-col rounded outline-none flex-shrink-0',
         isDraggable && 'hover:bg-primary/30 cursor-pointer',
         !isDraggable && 'cursor-default',
-        viewPreset === 'thumbnails' && 'h-[170px] w-[135px]',
+        viewPreset === 'thumbnails' && !isHorizontalLayout && 'h-[170px] w-[135px]',
+        viewPreset === 'thumbnails' && isHorizontalLayout && 'h-full w-[200px]',
         viewPreset === 'list' && 'h-[40px] w-full'
       )}
       id={`thumbnail-${displaySetInstanceUID}`}

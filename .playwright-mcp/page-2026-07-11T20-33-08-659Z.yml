@@ -1,0 +1,45 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e9]:
+        - img "HSRL"
+      - generic [ref=e11]:
+        - button "Ver" [ref=e13] [cursor=pointer]
+        - button "Descargar" [ref=e18] [cursor=pointer]
+      - generic [ref=e28]:
+        - generic [ref=e30]:
+          - button "Longitud" [ref=e34] [cursor=pointer]
+          - button [ref=e48] [cursor=pointer]
+        - button "Ampliar" [ref=e56] [cursor=pointer]
+        - button "Desplazar" [ref=e65] [cursor=pointer]
+        - button "Rotación 3D" [ref=e76] [cursor=pointer]
+        - button "W/L" [ref=e92] [cursor=pointer]
+        - button "Capturar" [ref=e101] [cursor=pointer]
+        - button "Cambiar disposición" [ref=e111] [cursor=pointer]
+        - button "Punto de mira" [ref=e127] [cursor=pointer]
+        - generic [ref=e134]:
+          - button "Restaurar vista" [ref=e138] [cursor=pointer]
+          - button [ref=e146] [cursor=pointer]
+      - generic [ref=e152] [cursor=pointer]:
+        - button [ref=e153]
+        - button [ref=e161]
+    - generic [ref=e183]:
+      - generic [ref=e184]:
+        - img "Hospital Logo"
+      - generic [ref=e188]:
+        - generic [ref=e190]:
+          - generic [ref=e192] [cursor=pointer]:
+            - img "icon-panel-close-left" [ref=e194]
+            - generic [ref=e200]: Estudios
+          - group [ref=e215]:
+            - radio "list" [ref=e216] [cursor=pointer]
+            - radio "thumbnails" [checked] [ref=e223] [cursor=pointer]
+        - separator [ref=e233]
+        - separator [ref=e237]
+        - generic [ref=e239]:
+          - generic [ref=e249]:
+            - button [ref=e250] [cursor=pointer]
+            - button [ref=e260] [cursor=pointer]
+            - button [ref=e273] [cursor=pointer]
+          - generic [ref=e282]: Cargando interpretaciones…

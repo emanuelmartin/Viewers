@@ -1,0 +1,10 @@
+[     763ms] Unexpected identifier 'extensions'
+[    1166ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ https://imagen.hospitalrealsanlucas.com.mx/images/app.js:313767
+[    1420ms] TypeError: Cannot read properties of undefined (reading 'dangerouslyUseDynamicConfig')
+    at __WEBPACK_DEFAULT_EXPORT__ (https://imagen.hospitalrealsanlucas.com.mx/images/app.js:121085:35)
+    at ./index.js (https://imagen.hospitalrealsanlucas.com.mx/images/app.js:121032:63)
+    at Module.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/app.js:533146:30)
+    at __webpack_require__ (https://imagen.hospitalrealsanlucas.com.mx/images/app.js:532916:32)
+    at https://imagen.hospitalrealsanlucas.com.mx/images/app.js:533323:37
+    at https://imagen.hospitalrealsanlucas.com.mx/images/app.js:533325:12
+[    1702ms] [WARNING] Error while trying to use the following icon from the Manifest: https://imagen.hospitalrealsanlucas.com.mx/icon-192.webp (Download error or resource isn't a valid image) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/viewer?StudyInstanceUIDs=1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441:0

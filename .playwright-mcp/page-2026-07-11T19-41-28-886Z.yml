@@ -1,0 +1,11 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - region "Notifications alt+T"
+  - dialog [ref=f1e4]:
+    - generic [ref=f1e6]:
+      - banner [ref=f1e7]:
+        - heading "Scrolling Through Images" [level=3] [ref=f1e8]
+      - generic [ref=f1e9]: You can scroll through the images using the mouse wheel or scrollbar.
+      - contentinfo [ref=f1e10]:
+        - button "Skip all" [ref=f1e11] [cursor=pointer]
+        - generic [ref=f1e12]: 1/12

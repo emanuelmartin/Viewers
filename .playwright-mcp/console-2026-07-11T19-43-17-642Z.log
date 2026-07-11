@@ -1,0 +1,80 @@
+[    1702ms] [WARNING] Error while trying to use the following icon from the Manifest: https://imagen.hospitalrealsanlucas.com.mx/assets/android-chrome-144x144.png (Download error or resource isn't a valid image) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/viewer?StudyInstanceUIDs=1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441:0
+[    2130ms] [LOG] CornerstoneRender: using GPU rendering @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:175
+[    2132ms] [LOG] New 'Cornerstone3DTools@0.1' source added. @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2138ms] [LOG] Registering worklist route /viewers2/ /viewers2 @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:8
+[    2461ms] [LOG] using... touch backend? false @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:16
+[    2812ms] [TIMEEND] studyToDisplaySetsLoaded: 317.420166015625 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2813ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2815ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 2605a21f-4f7d-ddcf-12f6-ad90a5e1d50a, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2815ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2815ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 2605a21f-4f7d-ddcf-12f6-ad90a5e1d50a, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2816ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2816ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 2605a21f-4f7d-ddcf-12f6-ad90a5e1d50a, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2816ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2816ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 2605a21f-4f7d-ddcf-12f6-ad90a5e1d50a, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:11
+[    2861ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24
+[    2862ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24
+[    2862ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24
+[    2862ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24
+[    2862ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24
+[    2862ms] [ERROR] Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=null&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at sJ (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1650039)
+    at s (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1585095)
+    at ol (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1605188)
+    at l (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1655229)
+    at sL (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1633102)
+    at sN (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1632972)
+    at sx (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1629743)
+    at sC (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1628298)
+    at E (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1731678)
+    at MessagePort.T (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:25:1732199) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.01fae403a5897b4e.js:24

@@ -1,0 +1,13 @@
+{
+  "name": "@ohif/extension-pixos",
+  "version": "1.0.0",
+  "description": "PixOS custom panels and features for OHIF Viewer",
+  "author": "PixOS",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "@ohif/core": "workspace:*",
+    "@ohif/ui-next": "workspace:*",
+    "react": "18.3.1"
+  }
+}

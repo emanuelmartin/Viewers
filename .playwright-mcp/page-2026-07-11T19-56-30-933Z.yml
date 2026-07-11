@@ -1,0 +1,31 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e9]:
+        - img "HSRL"
+      - generic [ref=e11]:
+        - button "Ver" [ref=e13] [cursor=pointer]
+        - button "Descargar" [ref=e18] [cursor=pointer]
+      - generic [ref=e27] [cursor=pointer]:
+        - button [ref=e28]
+        - button [ref=e36]
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - img "Hospital Logo"
+      - generic [ref=e63]:
+        - generic [ref=e65]:
+          - generic [ref=e67] [cursor=pointer]:
+            - img "icon-panel-close-left" [ref=e69]
+            - generic [ref=e75]: Estudios
+          - group [ref=e90]:
+            - radio "list" [ref=e91] [cursor=pointer]
+            - radio "thumbnails" [checked] [ref=e98] [cursor=pointer]
+        - separator [ref=e108]
+        - separator [ref=e112]
+        - generic [ref=e114]:
+          - generic [ref=e124]:
+            - button [ref=e125] [cursor=pointer]
+            - button [ref=e135] [cursor=pointer]
+            - button [ref=e148] [cursor=pointer]
+          - generic [ref=e157]: Cargando interpretaciones…

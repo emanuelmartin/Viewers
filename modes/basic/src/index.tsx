@@ -29,6 +29,10 @@ export const ohif = {
     '@ohif/extension-cornerstone.sopClassHandlerModule.DicomMicroscopySopClassHandler',
 };
 
+export const pixos = {
+  pixos: "@ohif/extension-pixos.panelModule.pixos",
+};
+
 export const cornerstone = {
   measurements: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
   labelMapSegmentationPanel:
@@ -263,7 +267,7 @@ export const basicLayout = {
     // before the sidebars resolve.
     leftPanels: [ohif.thumbnailList],
     leftPanelResizable: true,
-    rightPanels: [cornerstone.segmentation, cornerstone.measurements],
+    rightPanels: [pixos.pixos, cornerstone.segmentation, cornerstone.measurements],
     rightPanelClosed: true,
     rightPanelResizable: true,
     viewports: [

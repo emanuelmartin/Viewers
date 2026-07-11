@@ -1,0 +1,115 @@
+[     793ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:313767
+[    1081ms] [LOG] CornerstoneRender: using GPU rendering @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:22002
+[    1082ms] [LOG] New 'Cornerstone3DTools@0.1' source added. @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:67885
+[    1090ms] [WARNING] Error while trying to use the following icon from the Manifest: https://imagen.hospitalrealsanlucas.com.mx/icon-192.webp (Download error or resource isn't a valid image) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/viewer?StudyInstanceUIDs=1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441:0
+[    1101ms] [LOG] Registering worklist route /viewers2/ /viewers2 @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:124551
+[    1142ms] [LOG] using... touch backend? false @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:112720
+[    1496ms] [TIMEEND] studyToDisplaySetsLoaded: 253.036865234375 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62930
+[    1525ms] [ERROR] Warning: validateDOMNesting(...): %s cannot appear as a descendant of <%s>.%s <button> button 
+    at button
+    at div
+    at button
+    at div
+    at div
+    at PanelInterpretations (https://imagen.hospitalrealsanlucas.com.mx/images/extensions_default_src_index_ts.js:6250:96)
+    at div
+    at SidePanel (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:107970:3)
+    at SidePanelWithServices (https://imagen.hospitalrealsanlucas.com.mx/images/extensions_default_src_index_ts.js:910:3)
+    at div
+    at PanelWithForwardedRef (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:316523:3)
+    at forwardRef(Panel)
+    at div
+    at PanelGroupWithForwardedRef (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:318146:3)
+    at forwardRef(PanelGroup)
+    at ResizablePanelGroup (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:105415:3)
+    at div
+    at div
+    at ViewerLayoutWithServices (https://imagen.hospitalrealsanlucas.com.mx/images/extensions_default_src_index_ts.js:13148:69)
+    at DndProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:280650:23)
+    at DragAndDropProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:112716:3)
+    at TrackedMeasurementsContextProvider (https://imagen.hospitalrealsanlucas.com.mx/images/extensions_measurement-tracking_src_index_tsx.js:67:3)
+    at https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:122674:5
+    at ImageViewerProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:112886:3)
+    at ModeRoute (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:122353:3)
+    at children
+    at ErrorBoundary (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:314857:35)
+    at ErrorBoundary (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:83175:3)
+    at RouteWithErrorBoundary (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:124566:5)
+    at PrivateRoute (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:123231:3)
+    at RenderedRoute (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:321177:5)
+    at Routes (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:321911:5)
+    at Router (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:321845:15)
+    at BrowserRouter (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:319748:5)
+    at Uo (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:525554:13)
+    at ModalProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:113117:3)
+    at DialogProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:112596:3)
+    at Provider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:412168:15)
+    at TooltipProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:419415:5)
+    at NotificationProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:113234:3)
+    at CineProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:112426:3)
+    at ViewportDialogProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:113683:3)
+    at ViewportGridProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:113860:3)
+    at ViewportRefsProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62548:3)
+    at SystemContextProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:60616:3)
+    at ThemeWrapper (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:109412:3)
+    at I18nextProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:520564:19)
+    at UserAuthenticationProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:113500:3)
+    at AppConfigProvider (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:124672:3)
+    at CombinedProviders (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:120182:5)
+    at App (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:120079:3) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:283962
+[    1792ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66455
+[    1794ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 76b717d8-fced-d7e8-6887-3133501e751b, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66537
+[    1794ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66455
+[    1795ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 76b717d8-fced-d7e8-6887-3133501e751b, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66537
+[    1795ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66455
+[    1796ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 76b717d8-fced-d7e8-6887-3133501e751b, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66537
+[    1796ms] [LOG] ProtocolEngine::matchImages [] [Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66455
+[    1797ms] [LOG] ProtocolEngine::matchImages bestMatch {StudyInstanceUID: 1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441, SeriesInstanceUID: 1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006, displaySetInstanceUID: 76b717d8-fced-d7e8-6887-3133501e751b, matchingScore: 10, matchDetails: Object} [Object, Object, Object, Object, Object, Object] @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:66537
+[    2168ms] [TIMEEND] displaySetsToFirstImage: 671.77001953125 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62930
+[    2168ms] [TIMEEND] studyToFirstImage: 925.1259765625 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62930
+[    2169ms] [TIMEEND] scriptToView: 1888.887939453125 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62930
+[    2169ms] [TIMEEND] displaySetsToAllImages: 672.072021484375 ms @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:62930
+[    2315ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000006/instances/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000015/rendered?accept=image/jpeg:0
+[    2315ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2316ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2316ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2316ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2331ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000072/instances/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000081/rendered?accept=image/jpeg:0
+[    2332ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000138/instances/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000147/rendered?accept=image/jpeg:0
+[    2332ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2332ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2332ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2332ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2332ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2333ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2333ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2333ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2335ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000039/instances/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000048/rendered?accept=image/jpeg:0
+[    2335ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2335ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2336ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2336ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2336ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000105/instances/1.3.12.2.1107.5.2.52.196740.30000026071109124139200000114/rendered?accept=image/jpeg:0
+[    2336ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2336ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2336ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2336ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2637ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://imagen.hospitalrealsanlucas.com.mx/dicom-web/studies/1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441/series/1.3.12.2.1107.5.2.52.196740.30000026071112094389500000006/instances/1.3.12.2.1107.5.2.52.196740.30000026071112094389500000015/rendered?accept=image/jpeg:0
+[    2638ms] [ERROR] request failed:  XMLHttpRequest @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1961
+[    2638ms] [ERROR] Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1962
+[    2638ms] [ERROR] ArrayBuffer(416) @ https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1963
+[    2638ms] [WARNING] HTTP Error 400 Error: request failed
+    at XMLHttpRequest.<anonymous> (https://imagen.hospitalrealsanlucas.com.mx/images/vendors-node_modules_cornerstonejs_calculate-suv_dist_calculate-suv_esm_js-node_modules_brows-f8a8b3.js:1957:27) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app-config.js:33
+[    2655ms] [LOG] No source mapping e80ba0f3-5ab4-ada4-9c9f-34c91e19fbf4 ReferenceLines {uid: e80ba0f3-5ab4-ada4-9c9f-34c91e19fbf4, name: Cornerstone3DTools, version: 0.1, annotationToMeasurement: , remove: } @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:68094
+[    2656ms] [LOG] Measurement is invalidated, skipping... {annotation: Object, viewportId: default, renderingEngineId: OHIFCornerstoneRenderingEngine, uid: 1e70a606-b776-4aaa-bdb1-2a5dc36e3a8f} @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.js:68189

@@ -1,0 +1,4 @@
+[    2147ms] [WARNING] Error while trying to use the following icon from the Manifest: https://imagen.hospitalrealsanlucas.com.mx/assets/android-chrome-144x144.png (Download error or resource isn't a valid image) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/viewer?StudyInstanceUIDs=1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441:0
+[    3542ms] [LOG] CornerstoneRender: using GPU rendering @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.ae24a17cb6ab6007.js:175
+[    3545ms] [LOG] New 'Cornerstone3DTools@0.1' source added. @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.ae24a17cb6ab6007.js:11
+[    3555ms] [LOG] Registering worklist route /viewers2/ /viewers2 @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.ae24a17cb6ab6007.js:8

@@ -1,0 +1,140 @@
+- generic [ref=f6e2]:
+  - region "Notifications alt+T"
+  - generic [ref=f6e3]:
+    - generic [ref=f6e5]:
+      - img "HSRL" [ref=f6e10]
+      - generic [ref=f6e13]:
+        - generic [ref=f6e15]:
+          - button "Longitud" [ref=f6e19] [cursor=pointer]
+          - button [ref=f6e33] [cursor=pointer]
+        - button "Ampliar" [ref=f6e41] [cursor=pointer]
+        - button "Mover" [ref=f6e50] [cursor=pointer]
+        - generic [ref=f6e60]:
+          - button "3D Rotate" [disabled]
+        - button "Window Level" [ref=f6e64] [cursor=pointer]
+        - button "Capture" [ref=f6e73] [cursor=pointer]
+        - button "Change layout" [ref=f6e83] [cursor=pointer]
+        - generic [ref=f6e98]:
+          - button "Punto de mira" [disabled]
+        - generic [ref=f6e100]:
+          - button "Reset View" [ref=f6e104] [cursor=pointer]
+          - button [ref=f6e112] [cursor=pointer]
+      - generic [ref=f6e117]:
+        - generic [ref=f6e118] [cursor=pointer]: Patient
+        - button [ref=f6e133] [cursor=pointer]
+    - generic [ref=f6e142]:
+      - generic [ref=f6e144]:
+        - generic [ref=f6e146] [cursor=pointer]:
+          - img "icon-panel-close-left" [ref=f6e148]
+          - generic [ref=f6e154]: Estudios
+        - group [ref=f6e169]:
+          - radio "list" [ref=f6e170] [cursor=pointer]
+          - radio "thumbnails" [checked] [ref=f6e177] [cursor=pointer]
+        - button [ref=f6e190] [cursor=pointer]:
+          - generic [ref=f6e191]:
+            - heading [level=3] [ref=f6e192]:
+              - button "11-Jul-2026 MR 90" [expanded] [ref=f6e193]:
+                - generic [ref=f6e195]:
+                  - generic [ref=f6e196]: 11-Jul-2026
+                  - generic [ref=f6e199]:
+                    - generic [ref=f6e200]: MR
+                    - generic [ref=f6e201]: "90"
+            - region "11-Jul-2026 MR 90" [ref=f6e204]:
+              - generic [ref=f6e208]:
+                - button "MR t2_tse_sag S:5 info-mpr 15" [ref=f6e209]:
+                  - generic [ref=f6e211]:
+                    - generic [ref=f6e212]: MR
+                    - generic [ref=f6e219]:
+                      - button "t2_tse_sag" [ref=f6e220]
+                      - generic [ref=f6e222]:
+                        - generic [ref=f6e223]: S:5
+                        - generic [ref=f6e225]:
+                          - img "info-mpr" [ref=f6e226]
+                          - generic [ref=f6e232]: "15"
+                - button "MR t1_tse_dark-fluid_sag S:6 info-mpr 15" [ref=f6e233]:
+                  - generic [ref=f6e235]:
+                    - generic [ref=f6e236]: MR
+                    - generic [ref=f6e243]:
+                      - button "t1_tse_dark-fluid_sag" [ref=f6e244]
+                      - generic [ref=f6e246]:
+                        - generic [ref=f6e247]: S:6
+                        - generic [ref=f6e249]:
+                          - img "info-mpr" [ref=f6e250]
+                          - generic [ref=f6e256]: "15"
+                - button "MR t2_tse_cor S:7 info-mpr 15" [ref=f6e257]:
+                  - generic [ref=f6e259]:
+                    - generic [ref=f6e260]: MR
+                    - generic [ref=f6e267]:
+                      - button "t2_tse_cor" [ref=f6e268]
+                      - generic [ref=f6e270]:
+                        - generic [ref=f6e271]: S:7
+                        - generic [ref=f6e273]:
+                          - img "info-mpr" [ref=f6e274]
+                          - generic [ref=f6e280]: "15"
+                - button "MR t2_tse_stir_sag S:8 info-mpr 15" [ref=f6e281]:
+                  - generic [ref=f6e283]:
+                    - generic [ref=f6e284]: MR
+                    - generic [ref=f6e291]:
+                      - button "t2_tse_stir_sag" [ref=f6e292]
+                      - generic [ref=f6e294]:
+                        - generic [ref=f6e295]: S:8
+                        - generic [ref=f6e297]:
+                          - img "info-mpr" [ref=f6e298]
+                          - generic [ref=f6e304]: "15"
+                - button "MR t2_tse_tra_msma S:9 info-series 15" [ref=f6e305]:
+                  - generic [ref=f6e307]:
+                    - generic [ref=f6e309]:
+                      - generic [ref=f6e311]: MR
+                      - button [ref=f6e315]
+                    - generic [ref=f6e324]:
+                      - button "t2_tse_tra_msma" [ref=f6e325]
+                      - generic [ref=f6e327]:
+                        - generic [ref=f6e328]: S:9
+                        - generic [ref=f6e330]:
+                          - img "info-series" [ref=f6e331]
+                          - generic [ref=f6e337]: "15"
+                - button "MR t1_tse_tra_msma S:10 info-series 15" [ref=f6e338]:
+                  - generic [ref=f6e340]:
+                    - generic [ref=f6e342]:
+                      - generic [ref=f6e344]: MR
+                      - button [ref=f6e348]
+                    - generic [ref=f6e357]:
+                      - button "t1_tse_tra_msma" [ref=f6e358]
+                      - generic [ref=f6e360]:
+                        - generic [ref=f6e361]: S:10
+                        - generic [ref=f6e363]:
+                          - img "info-series" [ref=f6e364]
+                          - generic [ref=f6e370]: "15"
+      - separator [ref=f6e371]
+      - generic [ref=f6e380]:
+        - generic [ref=f6e381]:
+          - generic:
+            - slider "Image navigation scrollbar" [ref=f6e387]
+            - generic:
+              - generic:
+                - generic:
+                  - generic "Study date": 11-Jul-2026
+                - generic:
+                  - generic "Series description": t2_tse_sag
+              - generic:
+                - generic:
+                  - generic "Instance Number": I:1 (1/15)
+              - generic:
+                - generic:
+                  - generic "Window Level":
+                    - generic: "W:"
+                    - generic: "1500"
+                    - generic: "L:"
+                    - generic: "732"
+            - generic:
+              - generic: HL
+              - generic: A
+        - generic:
+          - generic [ref=f6e393]:
+            - button "Orientation" [ref=f6e397] [cursor=pointer]
+            - button "Data Overlay" [ref=f6e406] [cursor=pointer]
+          - button "Window Level" [ref=f6e416] [cursor=pointer]
+      - separator [ref=f6e426]
+      - generic [ref=f6e433]:
+        - button [ref=f6e434] [cursor=pointer]
+        - button [ref=f6e444] [cursor=pointer]

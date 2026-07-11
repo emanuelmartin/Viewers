@@ -1,0 +1,261 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - img "HSRL" [ref=e10]
+      - generic [ref=e12]:
+        - button "Ver" [ref=e14] [cursor=pointer]
+        - button "Descargar" [ref=e19] [cursor=pointer]
+      - generic [ref=e29]:
+        - generic [ref=e31]:
+          - button "Longitud" [ref=e35] [cursor=pointer]
+          - button [ref=e49] [cursor=pointer]
+        - button "Ampliar" [ref=e57] [cursor=pointer]
+        - button "Desplazar" [ref=e66] [cursor=pointer]
+        - generic [ref=e76]:
+          - button "Rotación 3D" [disabled]
+        - button "W/L" [ref=e93] [cursor=pointer]
+        - button "Capturar" [ref=e102] [cursor=pointer]
+        - button "Cambiar disposición" [ref=e112] [cursor=pointer]
+        - generic [ref=e127]:
+          - button "Punto de mira" [disabled]
+        - generic [ref=e135]:
+          - button "Restaurar vista" [ref=e139] [cursor=pointer]
+          - button [ref=e147] [cursor=pointer]
+      - generic [ref=e152]:
+        - generic [ref=e153] [cursor=pointer]:
+          - button [ref=e154]
+          - button [ref=e162]
+        - generic [ref=e286] [cursor=pointer]:
+          - generic [ref=e287]: BECERRA FRANCO, MARIA
+          - generic [ref=e288]:
+            - generic [ref=e289]: P-007792
+            - generic [ref=e290]: F
+            - generic [ref=e291]: 24-jul-1969
+    - generic [ref=e190]:
+      - generic [ref=e192]:
+        - generic [ref=e194] [cursor=pointer]:
+          - img "icon-panel-close-left" [ref=e196]
+          - generic [ref=e202]: Estudios
+        - group [ref=e217]:
+          - radio "list" [ref=e218] [cursor=pointer]
+          - radio "thumbnails" [checked] [ref=e225] [cursor=pointer]
+        - button [ref=e296] [cursor=pointer]:
+          - generic [ref=e297]:
+            - heading [level=3] [ref=e298]:
+              - button "11-jul-2026 MR 90" [expanded] [ref=e299]:
+                - generic [ref=e301]:
+                  - generic [ref=e302]: 11-jul-2026
+                  - generic [ref=e305]:
+                    - generic [ref=e306]: MR
+                    - generic [ref=e307]: "90"
+            - region "11-jul-2026 MR 90" [ref=e310]:
+              - generic [ref=e314]:
+                - button "MR t2_tse_sag S:5 info-mpr 15" [ref=e315]:
+                  - generic [ref=e317]:
+                    - generic [ref=e318]: MR
+                    - generic [ref=e325]:
+                      - button "t2_tse_sag" [ref=e326]
+                      - generic [ref=e328]:
+                        - generic [ref=e329]: S:5
+                        - generic [ref=e331]:
+                          - img "info-mpr" [ref=e332]
+                          - generic [ref=e338]: "15"
+                - button "MR t1_tse_dark-fluid_sag S:6 info-mpr 15" [ref=e339]:
+                  - generic [ref=e341]:
+                    - generic [ref=e342]: MR
+                    - generic [ref=e349]:
+                      - button "t1_tse_dark-fluid_sag" [ref=e350]
+                      - generic [ref=e352]:
+                        - generic [ref=e353]: S:6
+                        - generic [ref=e355]:
+                          - img "info-mpr" [ref=e356]
+                          - generic [ref=e362]: "15"
+                - button "MR t2_tse_cor S:7 info-mpr 15" [ref=e363]:
+                  - generic [ref=e365]:
+                    - generic [ref=e366]: MR
+                    - generic [ref=e373]:
+                      - button "t2_tse_cor" [ref=e374]
+                      - generic [ref=e376]:
+                        - generic [ref=e377]: S:7
+                        - generic [ref=e379]:
+                          - img "info-mpr" [ref=e380]
+                          - generic [ref=e386]: "15"
+                - button "MR t2_tse_stir_sag S:8 info-mpr 15" [ref=e387]:
+                  - generic [ref=e389]:
+                    - generic [ref=e390]: MR
+                    - generic [ref=e397]:
+                      - button "t2_tse_stir_sag" [ref=e398]
+                      - generic [ref=e400]:
+                        - generic [ref=e401]: S:8
+                        - generic [ref=e403]:
+                          - img "info-mpr" [ref=e404]
+                          - generic [ref=e410]: "15"
+                - button "MR t2_tse_tra_msma S:9 info-series 15" [ref=e411]:
+                  - generic [ref=e413]:
+                    - generic [ref=e415]:
+                      - generic [ref=e417]: MR
+                      - button [ref=e421]
+                    - generic [ref=e430]:
+                      - button "t2_tse_tra_msma" [ref=e431]
+                      - generic [ref=e433]:
+                        - generic [ref=e434]: S:9
+                        - generic [ref=e436]:
+                          - img "info-series" [ref=e437]
+                          - generic [ref=e443]: "15"
+                - button "MR t1_tse_tra_msma S:10 info-series 15" [ref=e444]:
+                  - generic [ref=e446]:
+                    - generic [ref=e448]:
+                      - generic [ref=e450]: MR
+                      - button [ref=e454]
+                    - generic [ref=e463]:
+                      - button "t1_tse_tra_msma" [ref=e464]
+                      - generic [ref=e466]:
+                        - generic [ref=e467]: S:10
+                        - generic [ref=e469]:
+                          - img "info-series" [ref=e470]
+                          - generic [ref=e476]: "15"
+      - separator [ref=e235]
+      - generic [ref=e482]:
+        - generic [ref=e483]:
+          - generic:
+            - slider "Image navigation scrollbar" [ref=e489]: "0"
+            - generic:
+              - generic:
+                - generic:
+                  - generic "Study date": 11-jul-2026
+                - generic:
+                  - generic "Series description": t2_tse_sag
+              - generic: I:1 (1/15)
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "W:"
+                    - generic: "1500"
+                    - generic: "L:"
+                    - generic: "732"
+            - generic:
+              - generic: HL
+              - generic: A
+        - generic:
+          - generic [ref=e490]:
+            - button "Orientación" [ref=e494] [cursor=pointer]
+            - button "Superposición de datos" [ref=e503] [cursor=pointer]
+          - button "W/L" [ref=e513] [cursor=pointer]
+      - separator [ref=e239]
+      - generic [ref=e241]:
+        - generic [ref=e251]:
+          - button [ref=e252] [cursor=pointer]
+          - button [ref=e262] [cursor=pointer]
+          - button [ref=e275] [cursor=pointer]
+        - generic [ref=e284]:
+          - paragraph [ref=e524]: Interpretaciones1
+          - generic [ref=e525]:
+            - button "11 jul 2026, 10:53 a.m. ✓ Firmada Jhon Stead Saray Jiménez ▲" [ref=e526] [cursor=pointer]:
+              - generic [ref=e527]:
+                - generic [ref=e528]: 11 jul 2026, 10:53 a.m.
+                - generic [ref=e529]:
+                  - generic [ref=e530]: ✓
+                  - generic [ref=e531]: Firmada
+                - generic [ref=e532]: Jhon Stead Saray Jiménez
+              - generic [ref=e533]:
+                - button "Descargar PDF" [ref=e534]
+                - generic [ref=e539]: ▲
+            - generic [ref=e540]:
+              - paragraph [ref=e541]:
+                - strong [ref=e542]: "Información clínica:"
+                - text: No se cuenta con resumen médico.
+              - paragraph [ref=e543]:
+                - strong [ref=e544]: "Estudios previos:"
+                - text: sin existencia en sistema pixos hospitalario, ni estudios externos comparativos.
+              - paragraph [ref=e545]:
+                - strong [ref=e546]
+              - paragraph [ref=e547]:
+                - strong [ref=e548]: RESONANCIA MAGNETICA DE COLUMNA LUMBAR
+              - paragraph [ref=e549]: "Se realiza estudio de región mencionada, con equipo siemens de 3 Teslas, enfatizada en ponderaciones T1, T2 Y STIR, en fase simple, con adquisiciones transversales, sagitales y coronales, observando lo siguiente:"
+              - paragraph [ref=e550]
+              - paragraph [ref=e551]:
+                - strong [ref=e552]: "Tejidos blandos:"
+                - text: sin señales de sospecha. Atrofia grasa grado II de músculos erectores, con edema leve asociado.
+              - paragraph [ref=e553]:
+                - strong [ref=e554]: "Estructuras ligamentarias:"
+                - text: ligamento longitudinal anterior y posterior de configuración habitual, con espesor normal. Ligamento amarillo muestra engrosamiento a nivel de L4 y L5 principalmente. Edema tenue en ligamentos interespinosos.
+              - paragraph [ref=e555]:
+                - strong [ref=e556]: "Estructuras óseas:"
+                - text: morfología conservada de los somas. Sin defectos de fusión o segmentación aparentes. Medula ósea con patrón en general adecuados. Sin fracturas. Cambios de aspecto degenerativo en plataformas con esclerosis leve, algunas esquinas anteriores somáticas con depósitos grasos, y osteítis leve en algunas excrecencias. Cambios Modic I parciales leves a nivel izquierdo de unión discovertebral de L5-S1. Sin erosiones sospechosas. Artropatía facetaria importante con hipertrofia de facetas, irregularidad, disminución de espacios, sinovitis, con algunos quistes parafacetarios externos de predominio en L4-L5 y L5-S1.
+              - paragraph [ref=e557]:
+                - strong [ref=e558]: "Alineación:"
+                - text: En plano sagital con ángulo de lordosis de 42 grados; anterolistesis grado I de L4. Tendencia a desplazamiento laterales sin curvatura patológica.
+              - paragraph [ref=e559]: Sacro con tendencia a horizontalizacion, con ángulo de inclinación sacra de 48 grados.
+              - paragraph [ref=e560]:
+                - strong [ref=e561]: "Discos intervertebrales:"
+                - text: "con disminución de señal del núcleo pulposo difuso, conservando altura, que traduce cambios entre grado 4/8 en escala de Pfirmman modificado. Hernias a continuación descritas:"
+              - paragraph [ref=e562]: Discos de L1-L2, L2-L3 y L3-4 con abombamiento anular posterior leve.
+              - paragraph [ref=e563]: Disco de L4-L5 con pseudoprotrusion posterior de base ancha leve.
+              - paragraph [ref=e564]: Disco de L5-S1 con protrusion posterior de base ancha, con longitud AP de 6.5 mm.
+              - paragraph [ref=e565]:
+                - strong [ref=e566]: "Canal vertebral:"
+                - text: disminución de diámetros de grado moderado a severa en L4-L5 y L5-S1 con aglomeración de raíces; en L3-L4 con disminución de diámetros de grado leve a moderado.
+                - strong [ref=e567]
+                - text: Cono medular termina a nivel de L1; medula espinal y filum sin señales de sospecha. Saco dural termina a nivel de L5-S1. Sin colecciones intrarraquídeas evidentes.
+              - paragraph [ref=e568]:
+                - strong [ref=e569]: "Recesos laterales:"
+                - text: con disminución de amplitud de alto grado a nivel bilateral de L5-S1, en L4-L5 de grado moderado.
+              - paragraph [ref=e570]:
+                - strong [ref=e571]: "Neuroforamenes:"
+                - text: grasa perineural con obliteración moderada en L5-S1. Quiste perineural en foramen derecho de D12-L1 con diámetro mayor de 0.7 cm.
+              - paragraph [ref=e572]:
+                - strong [ref=e573]: "Hallazgos adicionales:"
+                - text: Lo visualizado en abdomen sin señales de sospecha.
+              - paragraph [ref=e574]:
+                - strong [ref=e575]:
+                  - emphasis [ref=e576]
+              - paragraph [ref=e577]:
+                - strong [ref=e578]:
+                  - emphasis [ref=e579]: "Conclusión:"
+              - paragraph [ref=e580]:
+                - strong [ref=e581]:
+                  - emphasis [ref=e582]: "Estudios que muestra datos compatibles con:"
+              - paragraph [ref=e583]:
+                - strong [ref=e584]:
+                  - emphasis [ref=e585]: 1. Artropatia facetaria de grado moderado a severo principalmente en L4-L5 y L5-S1.
+              - paragraph [ref=e586]:
+                - strong [ref=e587]:
+                  - emphasis [ref=e588]: 2. Cambios crónicos de menor grado en plataformas somáticas. Discretos cambios Modic a nivel izquierdo de unión discovertebral de L5-S1. Sin erosiones ni signos de proceso inflamatorio sospechoso.
+              - paragraph [ref=e589]:
+                - strong [ref=e590]:
+                  - emphasis [ref=e591]: 3. Engrosamiento de ligamento amarillo de predominio en L4 y L5.
+              - paragraph [ref=e592]:
+                - strong [ref=e593]:
+                  - emphasis [ref=e594]: 4. Anterolistesis grado I de L4. Lordosis lumbar de 42 grados. Angulo de inclinación sacra de 48 grados.
+              - paragraph [ref=e595]:
+                - strong [ref=e596]:
+                  - emphasis [ref=e597]: "5. Cambios crónicos en discos intervertebrales de grado 4/8 en escala de Pfirmman modificado. Hernias a continuación descritas:"
+              - paragraph [ref=e598]:
+                - strong [ref=e599]:
+                  - emphasis [ref=e600]: Discos de L1-L2, L2-L3 y L3-4 con abombamiento anular posterior leve.
+              - paragraph [ref=e601]:
+                - strong [ref=e602]:
+                  - emphasis [ref=e603]: Disco de L4-L5 con pseudoprotrusion posterior de base ancha leve.
+              - paragraph [ref=e604]:
+                - strong [ref=e605]:
+                  - emphasis [ref=e606]: Disco de L5-S1 con protrusion posterior de base ancha, con longitud AP de 6.5 mm.
+              - paragraph [ref=e607]:
+                - strong [ref=e608]:
+                  - emphasis [ref=e609]: 6. Conducto vertebral con estenosis moderada a severa en L4-L5 y L5-S1, de causa multifactorial degenerativa; grado 2-3/3 en escala de Lee.
+              - paragraph [ref=e610]:
+                - strong [ref=e611]:
+                  - emphasis [ref=e612]: 7. Estenosis de recesos laterales de alto grado en L5-S1; grado 3/3 en escala de Bartynski. De grado moderado en recesos de L4-L5.
+              - paragraph [ref=e613]:
+                - strong [ref=e614]:
+                  - emphasis [ref=e615]: 8. Obliteraciones de grasa perineural en forámenes de L5-S1 de grado moderado. Grado 2/3, basado en escala de Zurich-Lee.
+              - paragraph [ref=e616]:
+                - strong [ref=e617]:
+                  - emphasis [ref=e618]: 9. Quiste perineural derecho en D12-L1 de 0.7 cm.
+              - paragraph [ref=e619]:
+                - strong [ref=e620]:
+                  - emphasis [ref=e621]: 10. Atrofia grasa de músculos erectores grado II.
+              - paragraph [ref=e622]:
+                - strong [ref=e623]:
+                  - emphasis [ref=e624]: Demás datos y hallazgos comentados en texto. Hacer correlación clinicorradiologica y con métodos complementarios a criterio del médico tratante para integrar datos de imagen, determinar diagnósticos definitivos y normar conducta apropiada.
+              - paragraph [ref=e625]

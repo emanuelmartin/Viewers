@@ -1,0 +1,8 @@
+[     441ms] Unexpected identifier 'extensions'
+[    1442ms] TypeError: Cannot read properties of undefined (reading 'dangerouslyUseDynamicConfig')
+    at https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.1255cb75aa93a691.js:9:175313
+    at 98329 (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.1255cb75aa93a691.js:9:175501)
+    at u (https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.1255cb75aa93a691.js:1382:125478)
+    at https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.1255cb75aa93a691.js:1382:131560
+    at https://imagen.hospitalrealsanlucas.com.mx/viewers2/app.bundle.1255cb75aa93a691.js:1382:131570
+[    1533ms] [WARNING] Error while trying to use the following icon from the Manifest: https://imagen.hospitalrealsanlucas.com.mx/icon-192.webp (Download error or resource isn't a valid image) @ https://imagen.hospitalrealsanlucas.com.mx/viewers2/viewer?StudyInstanceUIDs=1.2.826.0.1.3680043.8.498.11720868185761461590540679539517119441:0
