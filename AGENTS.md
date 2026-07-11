@@ -203,3 +203,32 @@ Define how images are arranged and displayed:
 - Bidirectional measurements, polylines, annotations
 - Export capabilities (DICOM SR, CSV reports)
 - AI-assisted measurements via ONNX models
+
+## Deploy — OHIF Viewer (HSRL)
+
+**Repo:** `git@github.com:emanuelmartin/Viewers.git`, rama `pixos-v3`
+**SSH:** `ssh pixos-hrsl`
+
+### Staging (/viewers2)
+```bash
+PUBLIC_URL=/viewers2/ APP_CONFIG=config/hsrl-staging.js pnpm --filter @ohif/app run build:viewer
+rsync -az --delete -e "ssh -i ~/.ssh/pixos_access_key -p 42895" platform/app/dist/ pixos@imagen.hospitalrealsanlucas.com.mx:/tmp/viewers2-build/
+ssh pixos-hrsl "echo 'P1x0s.96!' | sudo -S bash -c 'rm -rf /home/pixos/imagelink/viewer/images2/*; cp -a /tmp/viewers2-build/* /home/pixos/imagelink/viewer/images2/; cd /home/pixos/imagelink/viewer; sed -i \"/routerBasename/s|/images/|/viewers2/|\" images2/app-config.js; chown -R pixos:pixos images2'"
+```
+
+### Produccion (/images)
+```bash
+PUBLIC_URL=/images/ APP_CONFIG=config/hsrl.js pnpm --filter @ohif/app run build:viewer
+rsync -az --delete -e "ssh -i ~/.ssh/pixos_access_key -p 42895" platform/app/dist/ pixos@imagen.hospitalrealsanlucas.com.mx:/tmp/viewer-build/
+ssh pixos-hrsl "echo 'P1x0s.96!' | sudo -S bash -c 'rm -rf /home/pixos/imagelink/viewer/images/*; cp -a /tmp/viewer-build/* /home/pixos/imagelink/viewer/images/; chown -R pixos:pixos /home/pixos/imagelink/viewer/images'"
+```
+
+### PixOS Extension
+Extension `@ohif/extension-pixos` con paneles custom y AI Workstation.
+Los 6 errores React #130 en build rspack son pre-existentes de OHIF v3.13, NO de PixOS.
+
+### AI Pipeline
+URL: `https://ai.pixos.com.mx/api/pipeline/`
+Server: `ssh ubuntu-ai`, puerto 8100
+PM2: `pm2 status` en ubuntu-ai (medical-ai-api, workers)
+END
