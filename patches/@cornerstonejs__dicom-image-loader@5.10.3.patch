@@ -1,0 +1,19 @@
+diff --git a/dist/esm/imageLoader/createImage.js b/dist/esm/imageLoader/createImage.js
+index 4e9b86ff63d28005ab3d5b0055f6039ea1471a21..637c0802d348e0ba14412ea13ce528fbc078f4cb 100644
+--- a/dist/esm/imageLoader/createImage.js
++++ b/dist/esm/imageLoader/createImage.js
+@@ -264,8 +264,12 @@ async function createImage(imageId, pixelData, transferSyntax, options = {}) {
+                 windowWidth: voiLutModule.windowWidth
+                     ? voiLutModule.windowWidth[0]
+                     : undefined,
+-                voiLUTFunction: (voiLutModule.voiLUTFunction?.length &&
+-                    voiLutModule.voiLUTFunction[0]) ||
++                // Metadata providers return either ['LINEAR'] or 'LINEAR';
++                // indexing a string gave 'L' and toLowHighRange threw
++                // "Invalid VOI LUT function".
++                voiLUTFunction: (Array.isArray(voiLutModule.voiLUTFunction)
++                    ? voiLutModule.voiLUTFunction[0]
++                    : voiLutModule.voiLUTFunction) ||
+                     voiLutModule.voiLutFunction ||
+                     undefined,
+                 decodeTimeInMS: imageFrame.decodeTimeInMS,

@@ -135,3 +135,5 @@ overrides:
   # browserslist-stats.json).
   'browserslist@<4.28.7': 4.28.8
   'image-size@>=0.6.3 <2.0.4': 2.0.4
+patchedDependencies:
+  '@cornerstonejs/dicom-image-loader@5.10.3': patches/@cornerstonejs__dicom-image-loader@5.10.3.patch
