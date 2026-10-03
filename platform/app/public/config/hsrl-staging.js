@@ -89,7 +89,8 @@ window.config = {
         // Orthanc no decodifica %2F en QIDO: PatientID como "380/26" se manda como "380*26"
         qidoUnsafeCharsAsWildcard: true,
         supportsReject: true,
-        dicomUploadEnabled: true,
+        // Public Orthanc paths are read-only (Apache): uploads would fail.
+        dicomUploadEnabled: false,
         imageRendering: 'wadors',
         // Phones build thumbnails from the first frame, as the previous viewer
         // did; server-rendered thumbnails make Orthanc open every instance,
