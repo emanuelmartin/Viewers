@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useCine } from '@ohif/ui-next';
 import { Enums, eventTarget, cache } from '@cornerstonejs/core';
 import { useAppConfig } from '@state';
+import getCineFrameRate from '../../utils/getCineFrameRate';
 
 function WrappedCinePlayer({
   enabledVPElement,
@@ -38,15 +39,16 @@ function WrappedCinePlayer({
 
     const { viewports } = viewportGridService.getState();
     const { displaySetInstanceUIDs } = viewports.get(viewportId);
+    const frameRateDefaults = customizationService.getCustomization('cinePlayer.defaultFrameRates');
     let frameRate = 24;
     let isPlaying = cines[viewportId]?.isPlaying || false;
     displaySetInstanceUIDs.forEach(displaySetInstanceUID => {
       const displaySet = displaySetService.getDisplaySetByUID(displaySetInstanceUID);
 
+      // The series' own timing (FrameTime, RecommendedDisplayFrameRate,
+      // CineRate) or the configured default for its modality.
+      frameRate = getCineFrameRate(displaySet, frameRateDefaults);
       if (displaySet.FrameRate) {
-        // displaySet.FrameRate corresponds to DICOM tag (0018,1063) which is defined as the the frame time in milliseconds
-        // So a bit of math to get the actual frame rate.
-        frameRate = Math.round(1000 / displaySet.FrameRate);
         isPlaying ||= !!appConfig.autoPlayCine;
       }
 
@@ -72,7 +74,15 @@ function WrappedCinePlayer({
     }
     cineService.setCine({ id: viewportId, isPlaying, frameRate });
     setNewStackFrameRate(frameRate);
-  }, [displaySetService, viewportId, viewportGridService, cines, isCineEnabled, enabledVPElement]);
+  }, [
+    displaySetService,
+    customizationService,
+    viewportId,
+    viewportGridService,
+    cines,
+    isCineEnabled,
+    enabledVPElement,
+  ]);
 
   useEffect(() => {
     isMountedRef.current = true;

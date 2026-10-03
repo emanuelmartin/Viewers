@@ -5,5 +5,6 @@ import 'moment/locale/es';
 import { id } from './id';
 import getPanelModule from './getPanelModule';
 import getCustomizationModule from './getCustomizationModule';
+import getCommandsModule from './getCommandsModule';
 
-export default { id, getPanelModule, getCustomizationModule };
+export default { id, getPanelModule, getCustomizationModule, getCommandsModule };

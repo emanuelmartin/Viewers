@@ -1,9 +1,34 @@
+import { defaults } from '@ohif/core';
+
+// Space plays/pauses the series (upstream: reset viewport, moved to shift+space).
+const hotkeyBindings = [
+  ...defaults.hotkeyBindings.map(binding =>
+    binding.commandName === 'resetViewport' ? { ...binding, keys: ['shift+space'] } : binding
+  ),
+  { commandName: 'toggleCinePlayback', label: 'Reproducir / pausar', keys: ['space'] },
+];
+
 function getCustomizationModule() {
   return [
     {
       name: 'default',
       value: {
         'studyBrowser.thumbnailMenuItems': [],
+        'ohif.hotkeyBindings': hotkeyBindings,
+        // Playback rate when the series has no FrameTime / RecommendedDisplayFrameRate.
+        // Angiography and ultrasound loops are acquired at ~30 fps; cross-sectional
+        // stacks read better slower.
+        'cinePlayer.defaultFrameRates': {
+          XA: 30,
+          RF: 30,
+          XRF: 30,
+          US: 30,
+          CT: 10,
+          MR: 8,
+          PT: 8,
+          NM: 8,
+          default: 15,
+        },
         'panelSegmentation.hideByDefault': true,
         'cornerstone.windowLevelPresets': {
           CT: [
