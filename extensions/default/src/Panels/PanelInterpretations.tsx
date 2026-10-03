@@ -182,26 +182,53 @@ async function fetchInterpretationsByStudies(
   return data.results ?? [];
 }
 
+async function runCloudFunction(name: string, params: object, schema: InterpretationsPanelSchema) {
+  const res = await fetch(`${schema.parseUrl}/functions/${name}`, {
+    method: 'POST',
+    headers: buildHeaders(schema),
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    throw new Error(`${name} failed: ${res.status}`);
+  }
+  const json = await res.json();
+  return json?.result ?? json;
+}
+
+/**
+ * Patients open the viewer from a shared link, without a RIS session; the
+ * Parse classes require one, so the signed reports come from a public cloud
+ * function scoped to the StudyInstanceUIDs of the link. Shaped like the
+ * Interpretations rows the panel renders.
+ */
+async function fetchPublicInterpretations(uids: string[], schema: InterpretationsPanelSchema): Promise<any[]> {
+  if (!uids.length) {
+    return [];
+  }
+  const rows = await runCloudFunction('getPublicStudyInterpretations', { StudyInstanceUIDs: uids }, schema);
+  return (rows || []).map(r => ({
+    objectId: r.interpretationId,
+    createdAt: r.signedAt?.iso || r.signedAt,
+    [schema.interpretationsContentField]: r.content,
+    [schema.interpretationsSignedField]: true,
+    [schema.interpretationsSignedAtField]: r.signedAt,
+    [schema.interpretationsUserField]: { [schema.userNameField]: r.signerName },
+    [schema.interpretationsPdfUrlField]: r.pdfUrl,
+    publicStudyUID: r.studyUID,
+  }));
+}
+
 async function downloadInterpretationPdf(
   interp: any,
   schema: InterpretationsPanelSchema,
   target: DownloadTarget
 ): Promise<void> {
   try {
-    const res = await fetch(
-      `${schema.parseUrl}/functions/${schema.interpretationsPdfCloudFunction}`,
-      {
-        method: 'POST',
-        headers: buildHeaders(schema),
-        body: JSON.stringify({ interpretationId: interp.objectId }),
-      }
-    );
-    if (!res.ok) {
-      throw new Error(`Cloud function failed: ${res.status}`);
-    }
-    const json = await res.json();
-    // Parse REST wraps the result in { result: ... }
-    const result: any = json?.result ?? json;
+    // Shared link: the stored PDF of that study's signed report
+    const result: any = interp.publicStudyUID
+      ? await runCloudFunction('getPublicInterpretationPdf',
+          { StudyInstanceUID: interp.publicStudyUID, interpretationId: interp.objectId }, schema)
+      : await runCloudFunction(schema.interpretationsPdfCloudFunction, { interpretationId: interp.objectId }, schema);
     const pdfBase64 = result?.pdf;
     const pdfUrl = result?.pdfUrl;
     const fileName = 'Interpretacion.pdf';
@@ -252,6 +279,10 @@ async function loadInterpretations(): Promise<{ interpretations: any[]; error: s
       throw new Error('interpretationsPanel.parseUrl y appId son requeridos en window.config');
     }
     const uids = getStudyInstanceUIDs();
+    if (!schema.sessionToken) {
+      // Shared link without a RIS session: signed reports of these studies only
+      return { interpretations: await fetchPublicInterpretations(uids, schema), error: null };
+    }
     const studies = await fetchStudiesByUIDs(uids, schema);
     const interpretations = await fetchInterpretationsByStudies(studies, schema);
     return { interpretations, error: null };
