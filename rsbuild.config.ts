@@ -280,7 +280,13 @@ export default defineConfig(({ env }) => {
         // Full source maps in dev too - see the devtool comment in
         // .webpack/webpack.base.js for why line-only maps stopped being
         // enough once the React Compiler was turned on.
-        js: QUICK_BUILD ? false : 'source-map',
+        // HIDDEN_SOURCEMAP=true still writes the maps but drops the
+        // sourceMappingURL comment, for deploys that keep the maps private.
+        js: QUICK_BUILD
+          ? false
+          : process.env.HIDDEN_SOURCEMAP === 'true'
+            ? 'hidden-source-map'
+            : 'source-map',
         css: isProd && !QUICK_BUILD,
       },
       copy: [

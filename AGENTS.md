@@ -207,26 +207,27 @@ Define how images are arranged and displayed:
 
 ## Deploy — OHIF Viewer (HSRL)
 
-**Repo:** `git@github.com:emanuelmartin/Viewers.git`, rama `pixos-v3`
+**Repo:** `git@github.com:emanuelmartin/Viewers.git`, rama `pixos-v3.14` (OHIF 3.14, React 19)
 **SSH:** `ssh pixos-hrsl`
 
-### Staging (/viewers2)
+### Deploy (staging /viewers2, production /images)
 ```bash
-PUBLIC_URL=/viewers2/ APP_CONFIG=config/hsrl-staging.js pnpm --filter @ohif/app run build:viewer
-rsync -az --delete -e "ssh -i ~/.ssh/pixos_access_key -p 42895" platform/app/dist/ pixos@imagen.hospitalrealsanlucas.com.mx:/tmp/viewers2-build/
-ssh pixos-hrsl "echo 'P1x0s.96!' | sudo -S bash -c 'rm -rf /home/pixos/imagelink/viewer/images2/*; cp -a /tmp/viewers2-build/* /home/pixos/imagelink/viewer/images2/; cd /home/pixos/imagelink/viewer; sed -i \"/routerBasename/s|/images/|/viewers2/|\" images2/app-config.js; chown -R pixos:pixos images2'"
+scripts/deploy-hsrl.sh staging              # build + upload to /viewers2
+scripts/deploy-hsrl.sh production --release # build + upload to /images + git tag + GitHub release
 ```
+The script builds with hidden source maps, uploads **without** `*.map`, archives the maps in
+`release/<tag>-sourcemaps.tar.gz` and, with `--release`, attaches them to a GitHub release on
+`emanuelmartin/Viewers` tagged `hsrl-<env>-v<version>-<date>`. It asks for the remote sudo password.
 
-### Produccion (/images)
+### Local development against HSRL
 ```bash
-PUBLIC_URL=/images/ APP_CONFIG=config/hsrl.js pnpm --filter @ohif/app run build:viewer
-rsync -az --delete -e "ssh -i ~/.ssh/pixos_access_key -p 42895" platform/app/dist/ pixos@imagen.hospitalrealsanlucas.com.mx:/tmp/viewer-build/
-ssh pixos-hrsl "echo 'P1x0s.96!' | sudo -S bash -c 'rm -rf /home/pixos/imagelink/viewer/images/*; cp -a /tmp/viewer-build/* /home/pixos/imagelink/viewer/images/; chown -R pixos:pixos /home/pixos/imagelink/viewer/images'"
+cd platform/app && pnpm dev:hsrl   # http://localhost:3000/images/viewer?StudyInstanceUIDs=...
 ```
+Proxies `/dicom-web` and `/wado` to the HSRL server (same origin, no CORS preflight per frame).
 
 ### PixOS Extension
 Extension `@ohif/extension-pixos` con paneles custom y AI Workstation.
-Los 6 errores React #130 en build rspack son pre-existentes de OHIF v3.13, NO de PixOS.
+Imágenes del visor: Orthanc tarda 0.5-1.1 s por frame en multiframes grandes (MaximumStorageCacheSize 128 MB, Apache sin HTTP/2).
 
 ### AI Pipeline
 URL: `https://ai.pixos.com.mx/api/pipeline/`
