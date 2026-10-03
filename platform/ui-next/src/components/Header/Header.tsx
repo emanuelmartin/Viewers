@@ -28,9 +28,14 @@ interface HeaderProps {
   WhiteLabeling?: {
     createLogoComponentFn?: (React: any, props: any) => ReactNode;
   };
-  PatientInfo?: ReactNode;
   Secondary?: ReactNode;
-  UndoRedo?: ReactNode;
+  /**
+   * Ordered slots filling the right of the menu bar, ahead of the settings
+   * menu — patient info, undo/redo, whatever a site puts there. Each is
+   * followed by a separator, and a slot whose content renders nothing takes
+   * its separator with it.
+   */
+  RightSide?: ReactNode[];
 }
 
 function Header({
@@ -40,8 +45,7 @@ function Header({
   onClickReturnButton,
   isSticky = false,
   WhiteLabeling,
-  PatientInfo,
-  UndoRedo,
+  RightSide = [],
   Secondary,
   ...props
 }: HeaderProps): ReactNode {
@@ -75,22 +79,24 @@ function Header({
             </div>
             {Secondary && <div className="ml-2">{Secondary}</div>}
           </div>
-
           <div className="flex-1 flex justify-center min-w-0 px-2">
             <div className="flex items-center justify-center space-x-2 overflow-x-auto overflow-y-hidden ohif-scrollbar-toolbar w-full">
               {children}
             </div>
           </div>
 
-          <div className="flex items-center flex-shrink-0 gap-2">
-            {UndoRedo && (
-              <>
-                {UndoRedo}
-                <div className="border-primary-dark h-[25px] border-r"></div>
-              </>
-            )}
-            {PatientInfo}
-            <div className="border-primary-dark h-[25px] border-r"></div>
+          <div className="flex items-center flex-shrink-0 select-none">
+            {RightSide.map((item, index) => (
+              // The separator is an `::after` so that `empty:hidden` can drop
+              // the whole slot — separator included — when the item rendered
+              // nothing (e.g. patient info with `showPatientInfo: 'disabled'`).
+              <div
+                key={index}
+                className="after:border-primary-dark flex items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']"
+              >
+                {item}
+              </div>
+            ))}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

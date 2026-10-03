@@ -428,6 +428,8 @@ class SegmentationService extends PubSubService implements ISegmentationServiceI
       segments?: { [segmentIndex: number]: Partial<cstTypes.Segment> };
       FrameOfReferenceUID?: string;
       label?: string;
+      /** The caller invented the label, so the user has not chosen a name. */
+      labelIsGenerated?: boolean;
     }
   ): Promise<string> {
     return this._createSegmentationForDisplaySet(displaySet, LABELMAP, options);
@@ -440,6 +442,8 @@ class SegmentationService extends PubSubService implements ISegmentationServiceI
       segments?: { [segmentIndex: number]: Partial<cstTypes.Segment> };
       FrameOfReferenceUID?: string;
       label?: string;
+      /** The caller invented the label, so the user has not chosen a name. */
+      labelIsGenerated?: boolean;
     }
   ): Promise<string> {
     return this._createSegmentationForDisplaySet(displaySet, CONTOUR, options);
@@ -461,6 +465,8 @@ class SegmentationService extends PubSubService implements ISegmentationServiceI
       segments?: { [segmentIndex: number]: Partial<cstTypes.Segment> };
       FrameOfReferenceUID?: string;
       label?: string;
+      /** The caller invented the label, so the user has not chosen a name. */
+      labelIsGenerated?: boolean;
     }
   ): Promise<string> {
     // Todo: random does not makes sense, make this better, like
@@ -496,6 +502,8 @@ class SegmentationService extends PubSubService implements ISegmentationServiceI
       },
       config: {
         label,
+        // Explicit, because `label` below always has a value by this point.
+        labelIsGenerated: options?.labelIsGenerated ?? !options?.label,
         fallbackLabel: `S:${displaySet.SeriesNumber} ${displaySet.Modality}`,
         segments:
           options?.segments && Object.keys(options.segments).length > 0
@@ -511,6 +519,19 @@ class SegmentationService extends PubSubService implements ISegmentationServiceI
         },
       },
     };
+
+    // Create a dedicated color LUT up front and remember its index so that every
+    // representation of this segmentation (one per viewport) reuses the same LUT.
+    // Otherwise each viewport would get its own default LUT copy and editing a
+    // segment color on one viewport would not be reflected on the others (the
+    // segment color appears to revert to the default when interacting elsewhere).
+    // The caller may pass the id of an existing segmentation, which this method
+    // updates rather than replaces; keep its LUT so representations already
+    // rendering it don't diverge from the ones created afterwards.
+    if (!this._segmentationIdToColorLUTIndexMap.has(segmentationId)) {
+      const colorLUTIndex = addColorLUT([[0, 0, 0, 0]] as csTypes.ColorLUT);
+      this._segmentationIdToColorLUTIndexMap.set(segmentationId, colorLUTIndex);
+    }
 
     this.addOrUpdateSegmentation(segmentationPublicInput);
     return segmentationId;

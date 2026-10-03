@@ -211,7 +211,7 @@ const SidePanel = ({
     )
   );
 
-  const [baseStyle, setBaseStyle] = useState(createBaseStyle(expandedWidth, isVerticalLayout));
+  const baseStyle = createBaseStyle(expandedWidth, isVerticalLayout);
 
   const [gridAvailableWidth, setGridAvailableWidth] = useState(
     expandedWidth - closeIconWidth - gridHorizontalPadding
@@ -265,7 +265,6 @@ const SidePanel = ({
         collapsedOutsideBorderSize
       )
     );
-    setBaseStyle(createBaseStyle(expandedWidth, isVerticalLayout));
 
     const gridAvailableWidth = expandedWidth - closeIconWidth - gridHorizontalPadding;
     setGridAvailableWidth(gridAvailableWidth);

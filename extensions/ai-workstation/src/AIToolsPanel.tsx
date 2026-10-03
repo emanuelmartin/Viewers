@@ -78,8 +78,26 @@ async function callAi(tool, studyUID, options) {
   return await P.Cloud.run('aiOhifTools', { tool, studyUID, options: options || {} });
 }
 
+// Kept outside the component: the React Compiler cannot lower try/catch blocks
+// that contain conditionals or optional chaining.
+async function safeCallAi(tool, studyUID, options?) {
+  try {
+    const data = await callAi(tool, studyUID, options);
+    if (data?.status === 'error') return { data: null, error: data.error };
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e.message };
+  }
+}
+
+async function loadAISeries(studyUID) {
+  if (!studyUID) return null;
+  const { data } = await safeCallAi('getAISeries', studyUID);
+  return data?.aiSeries || null;
+}
+
 export default function AIToolsPanel({ servicesManager }) {
-  const [studyUID, setStudyUID] = useState(null);
+  const [studyUID] = useState(() => getStudyUID(servicesManager));
   const [running, setRunning] = useState(null);
   const [results, setResults] = useState([]);
   const [aiSeries, setAiSeries] = useState([]);
@@ -90,17 +108,15 @@ export default function AIToolsPanel({ servicesManager }) {
 
   const fetchAISeries = useCallback(async () => {
     if (!studyUID) return;
-    try {
-      const r = await callAi('getAISeries', studyUID);
-      if (r?.aiSeries) setAiSeries(r.aiSeries);
-    } catch {}
+    const list = await loadAISeries(studyUID);
+    if (list) setAiSeries(list);
   }, [studyUID]);
 
   useEffect(() => {
-    const uid = getStudyUID(servicesManager);
-    setStudyUID(uid);
-    if (uid) fetchAISeries();
-  }, [servicesManager, fetchAISeries]);
+    loadAISeries(studyUID).then(list => {
+      if (list) setAiSeries(list);
+    });
+  }, [studyUID]);
 
   useEffect(() => {
     if (!running || !studyUID) return;
@@ -111,33 +127,36 @@ export default function AIToolsPanel({ servicesManager }) {
   const run = async (tool) => {
     setRunning(tool.key);
     setError(null);
-    try {
-      const r = await callAi(tool.key, studyUID, null);
-      if (r?.status === 'error') throw new Error(r.error);
-      setResults(prev => [{ key: tool.key, label: tool.label, ok: true, data: r, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 20)]);
+    const { data, error } = await safeCallAi(tool.key, studyUID, null);
+    if (error) {
+      setError(error);
+      setResults(prev => [{ key: tool.key, label: tool.label, ok: false, err: error, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 20)]);
+    } else {
+      setResults(prev => [{ key: tool.key, label: tool.label, ok: true, data, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 20)]);
       setTimeout(fetchAISeries, 3000);
-    } catch (e) {
-      setError(e.message);
-      setResults(prev => [{ key: tool.key, label: tool.label, ok: false, err: e.message, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 20)]);
     }
     setRunning(null);
   };
 
   const handleSave = async (seriesId) => {
     setSaving(prev => ({ ...prev, [seriesId]: true }));
-    try {
-      await callAi('saveSeries', studyUID, { seriesId });
+    const { error } = await safeCallAi('saveSeries', studyUID, { seriesId });
+    if (error) {
+      setError(error);
+    } else {
       setAiSeries(prev => prev.map(s => s.seriesId === seriesId ? { ...s, saved: true } : s));
       setTimeout(fetchAISeries, 2000);
-    } catch (e) { setError(e.message); }
+    }
     setSaving(prev => ({ ...prev, [seriesId]: false }));
   };
 
   const handleDiscard = async (seriesId) => {
-    try {
-      await callAi('discardSeries', studyUID, { seriesId });
+    const { error } = await safeCallAi('discardSeries', studyUID, { seriesId });
+    if (error) {
+      setError(error);
+    } else {
       setAiSeries(prev => prev.filter(s => s.seriesId !== seriesId));
-    } catch (e) { setError(e.message); }
+    }
   };
 
   const applyWL = (seriesId, preset) => {

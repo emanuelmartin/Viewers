@@ -1242,6 +1242,8 @@ describe('SegmentationService', () => {
             info: 'S1: Series Description',
           },
           label: 'Segmentation 2',
+          // The caller gave no label, so the service invented this one.
+          labelIsGenerated: true,
           fallbackLabel: 'S:1 SEG',
           segments: {
             '1': {
@@ -1261,6 +1263,56 @@ describe('SegmentationService', () => {
       });
 
       expect(retrievedSegmentationId).toEqual(expect.any(String));
+    });
+
+    describe('labelIsGenerated', () => {
+      // `storeSegmentation` offers the label of a segmentation as the first name
+      // for a new series, but only when the user chose that name.  The service
+      // marks the label that the service invents, so the save can tell the two
+      // apart without a comparison of two strings.  The mark goes into the
+      // public input, and `normalizeSegmentationInput` puts the mark on the
+      // segmentation; the service writes nothing onto the state afterwards.
+      const displaySet = {
+        imageIds: ['imageId'],
+        isDynamicVolume: false,
+        SeriesNumber: 1,
+        SeriesDescription: 'Series Description',
+        Modality: 'SEG',
+      } as unknown as AppTypes.DisplaySet;
+
+      const createWith = async (options?: Record<string, unknown>) => {
+        jest
+          .spyOn(imageLoader, 'createAndCacheDerivedLabelmapImages')
+          .mockReturnValue([{ imageId: 'imageId' }] as csTypes.IImage[]);
+        jest
+          .spyOn(cstSegmentation.state, 'getSegmentations')
+          .mockReturnValue([{ segmentationId: 'segmentationId' }] as cstTypes.Segmentation[]);
+        const add = jest.spyOn(service, 'addOrUpdateSegmentation').mockReturnValue(undefined);
+
+        await service.createLabelmapForDisplaySet(displaySet, options);
+        return (add.mock.calls[0][0] as cstTypes.SegmentationPublicInput).config;
+      };
+
+      it('marks a label that the service invents', async () => {
+        const config = await createWith();
+
+        expect(config.label).toBe('Segmentation 2');
+        expect(config.labelIsGenerated).toBe(true);
+      });
+
+      it('marks nothing for a label that the caller gives', async () => {
+        const config = await createWith({ label: 'Liver' });
+
+        expect(config.label).toBe('Liver');
+        expect(config.labelIsGenerated).toBe(false);
+      });
+
+      it('marks a label that the caller reports as generated', async () => {
+        const config = await createWith({ label: 'Segmentation 7', labelIsGenerated: true });
+
+        expect(config.label).toBe('Segmentation 7');
+        expect(config.labelIsGenerated).toBe(true);
+      });
     });
 
     it('should create a labelmap for a dynamic volume display set', async () => {
@@ -1311,6 +1363,8 @@ describe('SegmentationService', () => {
             info: 'S1: Series Description',
           },
           label: 'Segmentation 2',
+          // The caller gave the label, so the label is not a generated one.
+          labelIsGenerated: false,
           fallbackLabel: 'S:1 SEG',
           segments: {
             '1': {
@@ -1330,6 +1384,51 @@ describe('SegmentationService', () => {
       });
 
       expect(retrievedSegmentationId).toEqual(segmentationId);
+    });
+
+    it('should create a dedicated color LUT and remember its index so every viewport representation reuses it', async () => {
+      const displaySet = {
+        imageIds: ['imageId'],
+        isDynamicVolume: false,
+        SeriesNumber: 1,
+        SeriesDescription: 'Series Description',
+      } as unknown as AppTypes.DisplaySet;
+
+      jest
+        .spyOn(imageLoader, 'createAndCacheDerivedLabelmapImages')
+        .mockReturnValue([{ imageId: 'imageId' }] as csTypes.IImage[]);
+      jest.spyOn(cstSegmentation.state, 'getSegmentations').mockReturnValue([]);
+      jest.spyOn(service, 'addOrUpdateSegmentation').mockReturnValue(undefined);
+      jest.mocked(cstSegmentation.state.addColorLUT).mockReturnValue(7);
+
+      const segmentationId = await service.createLabelmapForDisplaySet(displaySet);
+
+      expect(cstSegmentation.state.addColorLUT).toHaveBeenCalledWith([[0, 0, 0, 0]]);
+      expect(service['_segmentationIdToColorLUTIndexMap'].get(segmentationId)).toBe(7);
+    });
+
+    it('should keep the existing color LUT when called again with the same segmentation id', async () => {
+      const displaySet = {
+        imageIds: ['imageId'],
+        isDynamicVolume: false,
+        SeriesNumber: 1,
+        SeriesDescription: 'Series Description',
+      } as unknown as AppTypes.DisplaySet;
+
+      jest
+        .spyOn(imageLoader, 'createAndCacheDerivedLabelmapImages')
+        .mockReturnValue([{ imageId: 'imageId' }] as csTypes.IImage[]);
+      jest.spyOn(cstSegmentation.state, 'getSegmentations').mockReturnValue([]);
+      jest.spyOn(service, 'addOrUpdateSegmentation').mockReturnValue(undefined);
+      jest.mocked(cstSegmentation.state.addColorLUT).mockReturnValueOnce(7).mockReturnValueOnce(8);
+
+      const segmentationId = await service.createLabelmapForDisplaySet(displaySet);
+      await service.createLabelmapForDisplaySet(displaySet, { segmentationId });
+
+      // Updating an existing segmentation must not strand the representations
+      // already rendering it on the previous LUT.
+      expect(cstSegmentation.state.addColorLUT).toHaveBeenCalledTimes(1);
+      expect(service['_segmentationIdToColorLUTIndexMap'].get(segmentationId)).toBe(7);
     });
   });
 
