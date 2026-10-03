@@ -171,11 +171,15 @@ function mapParams(params, options = {}) {
     return useWildcard && value ? `*${value}*` : value;
   };
 
+  const patientId = options.unsafeCharsAsWildcard
+    ? replaceUnsafeChars(params.patientId)
+    : params.patientId;
+
   const parameters = {
     // Named
     PatientName: withWildcard(params.patientName),
     //PatientID: withWildcard(params.patientId),
-    '00100020': withWildcard(params.patientId), // Temporarily to make the tests pass with dicomweb-server.. Apparently it's broken?
+    '00100020': withWildcard(patientId), // Temporarily to make the tests pass with dicomweb-server.. Apparently it's broken?
     AccessionNumber: withWildcard(params.accessionNumber),
     StudyDescription: withWildcard(params.studyDescription),
     ModalitiesInStudy: params.modalitiesInStudy,
@@ -222,4 +226,33 @@ function mapParams(params, options = {}) {
   return final;
 }
 
-export { mapParams, search, processResults };
+/**
+ * Characters encodeURIComponent leaves as they are. Anything else reaches the
+ * server percent-encoded, and some servers (Orthanc's DICOMweb plugin among
+ * them) match QIDO values without decoding them first: a PatientID of
+ * "380/26" sent as "380%2F26" matches nothing.
+ */
+const UNSAFE_QUERY_CHARS = /[^A-Za-z0-9\-_.!~*'()]+/g;
+
+/**
+ * Replaces every run of characters that would be percent-encoded with the
+ * DICOM "*" wildcard, so "380/26" is sent as "380*26". The wildcard can match
+ * other values too, so callers must narrow the results back down with
+ * matchesPatientId.
+ */
+function replaceUnsafeChars(value) {
+  return typeof value === 'string' ? value.replace(UNSAFE_QUERY_CHARS, '*') : value;
+}
+
+/**
+ * Whether a study returned for a patientId query really belongs to that ID,
+ * honouring the substring match a wildcard search asks for.
+ */
+function matchesPatientId(mrn, patientId, isWildcardSearch) {
+  if (!patientId) {
+    return true;
+  }
+  return isWildcardSearch ? mrn.includes(patientId) : mrn === patientId;
+}
+
+export { mapParams, search, processResults, replaceUnsafeChars, matchesPatientId };

@@ -7,6 +7,8 @@ import {
   seriesInStudy,
   processResults,
   processSeriesResults,
+  replaceUnsafeChars,
+  matchesPatientId,
 } from './qido.js';
 import dcm4cheeReject from './dcm4cheeReject.js';
 
@@ -46,6 +48,7 @@ export type DicomWebConfig = {
   stowRoot?: string; // - Base URL to use for STOW requests (defaults to wadoRoot)
   wadoUri?: string; // - Base URL to use for WADO URI requests
   qidoSupportsIncludeField?: boolean; // - Whether QIDO supports the "Include" option to request additional fields in response
+  qidoUnsafeCharsAsWildcard?: boolean; // - Send PatientID characters that would be percent-encoded (e.g. "/") as "*", for servers such as Orthanc that do not decode QIDO values
   imageRendering?: string; // - wadors | ? (unsure of where/how this is used)
   thumbnailRendering?: string;
   /**
@@ -278,11 +281,27 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
             mapParams(origParams, {
               supportsFuzzyMatching: dicomWebConfig.supportsFuzzyMatching,
               supportsWildcard: dicomWebConfig.supportsWildcard,
+              unsafeCharsAsWildcard: dicomWebConfig.qidoUnsafeCharsAsWildcard,
             }) || {};
 
-          const results = await qidoSearch(dicomWebClient, undefined, undefined, mappedParams);
+          const results = processResults(
+            await qidoSearch(dicomWebClient, undefined, undefined, mappedParams)
+          );
 
-          return processResults(results);
+          const patientId = origParams?.patientId;
+          if (
+            !dicomWebConfig.qidoUnsafeCharsAsWildcard ||
+            replaceUnsafeChars(patientId) === patientId
+          ) {
+            return results;
+          }
+          const isWildcardSearch =
+            origParams.disableWildcard !== undefined
+              ? !origParams.disableWildcard
+              : !!dicomWebConfig.supportsWildcard;
+          return results.filter(study =>
+            matchesPatientId(study.mrn, patientId, isWildcardSearch)
+          );
         },
         processResults: processResults.bind(),
       },

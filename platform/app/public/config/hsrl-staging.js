@@ -62,6 +62,8 @@ window.config = {
         qidoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
         wadoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
         qidoSupportsIncludeField: true,
+        // Orthanc no decodifica %2F en QIDO: PatientID como "380/26" se manda como "380*26"
+        qidoUnsafeCharsAsWildcard: true,
         supportsReject: true,
         dicomUploadEnabled: true,
         imageRendering: 'wadors',
