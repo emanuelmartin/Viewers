@@ -34,10 +34,14 @@ window.config = {
   useNorm16Texture: true,
   experimentalStudyBrowserSort: false,
   groupEnabledModesFirst: false,
+  // Concurrent requests per pool. Over HTTP/2 the browser no longer caps a
+  // host at 6 connections, and each frame request makes Orthanc load the whole
+  // multiframe file (an XA cine is ~60 MB): 100 at once saturated the server.
+  // Orthanc-reader also caps itself at 8 HTTP threads.
   maxNumRequests: {
-    interaction: 100,
-    thumbnail: 10,
-    prefetch: 10,
+    interaction: HSRL_IS_MOBILE ? 4 : 8,
+    thumbnail: HSRL_IS_MOBILE ? 2 : 3,
+    prefetch: HSRL_IS_MOBILE ? 2 : 4,
   },
   maxCacheSize: (HSRL_IS_MOBILE ? 512 : 2048) * 1024 * 1024,
   studyPrefetcher: {
@@ -94,7 +98,7 @@ window.config = {
         // which on a busy server left the mobile panel empty for a long time.
         thumbnailRendering: HSRL_IS_MOBILE ? 'wadors' : 'rendered',
         thumbnailRequestStrategy: 'fetch',
-        enableStudyLazyLoad: false,
+        enableStudyLazyLoad: true,
         supportsFuzzyMatching: true,
         supportsWildcard: true,
         omitQuotationForMultipartRequest: true,
