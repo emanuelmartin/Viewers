@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Icons } from '@ohif/ui-next';
 import { downloadStudyArchives } from './headerStudyActions';
+import { prepareDownloadTarget } from '../utils/fileDownload';
 
 const HeaderDownloadButton: React.FC = () => {
   const [busy, setBusy] = useState(false);
@@ -13,8 +14,9 @@ const HeaderDownloadButton: React.FC = () => {
     if (busy) {
       return;
     }
+    const target = prepareDownloadTarget();
     setBusy(true);
-    downloadStudyArchives(cfg).finally(() => setBusy(false));
+    downloadStudyArchives(cfg, target).finally(() => setBusy(false));
   };
 
   return (

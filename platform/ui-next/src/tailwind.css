@@ -8,35 +8,38 @@
 
 @layer base {
   :root {
-    --highlight: 210 92% 80%;
-    --neutral: 210 30% 50%;
-    --neutral-light: 210 92% 90%;
-    --neutral-dark: 210 30% 30%;
-    --background: 210 63% 7%;
+    --highlight: 22 100% 59%;
+    --neutral: 205 25% 55%;
+    --neutral-light: 205 60% 86%;
+    --neutral-dark: 205 35% 24%;
+    --background: 206 80% 6%;
     --foreground: 0 0% 98%;
-    --card: 210 61% 16%;
+    --card: 205 72% 11%;
     --card-foreground: 0 0% 98%;
-    --popover: 210 61% 20%;
+    --popover: 205 75% 15%;
     --popover-foreground: 0 0% 98%;
-    --primary: 210 79% 50%;
+    --primary: 204 78% 60%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 210 66% 42%;
-    --secondary-foreground: 210 50% 85%;
-    --muted: 210 61% 16%;
-    --muted-foreground: 210 46% 60%;
-    --accent: 210 79% 35%;
+    --secondary: 205 90% 19%;
+    --secondary-foreground: 205 45% 86%;
+    --muted: 205 72% 11%;
+    --muted-foreground: 205 30% 64%;
+    --accent: 205 90% 19%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 49% 28%;
-    --input: 210 52% 22%;
-    --ring: 210 98% 60%;
-    --chart-1: 210 70% 50%;
+    --border: 205 55% 21%;
+    --input: 205 62% 17%;
+    --ring: 22 100% 59%;
+    --chart-1: 205 80% 55%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --radius: 0.5rem;
+    /* Pixos brand (logo): navy #05385c, orange #ff792d */
+    --brand-navy: 205 90% 19%;
+    --brand-orange: 22 100% 59%;
     --success-bg: hsl(143, 85%, 96%);
     --success-border: hsl(145, 92%, 91%);
     --success-text: hsl(140, 100%, 27%);
@@ -55,26 +58,26 @@
   }
 
   .dark {
-    --background: 210 63% 7%;
+    --background: 206 80% 6%;
     --foreground: 0 0% 98%;
-    --card: 210 61% 16%;
+    --card: 205 72% 11%;
     --card-foreground: 0 0% 98%;
-    --popover: 210 61% 16%;
+    --popover: 205 75% 15%;
     --popover-foreground: 0 0% 98%;
-    --primary: 210 79% 50%;
+    --primary: 204 78% 60%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 210 49% 28%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 210 61% 16%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 210 62% 20%;
+    --secondary: 205 90% 19%;
+    --secondary-foreground: 205 45% 86%;
+    --muted: 205 72% 11%;
+    --muted-foreground: 205 30% 64%;
+    --accent: 205 90% 19%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 49% 28%;
-    --input: 210 52% 20%;
-    --ring: 210 98% 60%;
-    --chart-1: 210 70% 50%;
+    --border: 205 55% 21%;
+    --input: 205 62% 17%;
+    --ring: 22 100% 59%;
+    --chart-1: 205 80% 55%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;

@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import {
+  DownloadTarget,
+  base64ToBlob,
+  cancelDownloadTarget,
+  deliverBlob,
+  deliverUrl,
+  prepareDownloadTarget,
+} from '../utils/fileDownload';
 
 // ---------------------------------------------------------------------------
 // Schema configuration — overridable via window.config.interpretationsPanel
@@ -157,10 +165,10 @@ async function fetchInterpretationsByStudies(
 
 async function downloadInterpretationPdf(
   interp: any,
-  schema: InterpretationsPanelSchema
+  schema: InterpretationsPanelSchema,
+  target: DownloadTarget
 ): Promise<void> {
   try {
-    console.log('[PanelInterpretations] Calling Cloud Function:', schema.interpretationsPdfCloudFunction);
     const res = await fetch(
       `${schema.parseUrl}/functions/${schema.interpretationsPdfCloudFunction}`,
       {
@@ -175,43 +183,28 @@ async function downloadInterpretationPdf(
     const json = await res.json();
     // Parse REST wraps the result in { result: ... }
     const result: any = json?.result ?? json;
-    console.log('[PanelInterpretations] Cloud function response:', result);
-
     const pdfBase64 = result?.pdf;
     const pdfUrl = result?.pdfUrl;
+    const fileName = 'Interpretacion.pdf';
 
-    if (!pdfBase64 && !pdfUrl) {
-      throw new Error('Cloud function did not return PDF data');
-    }
-
-    // Prefer base64 for direct download, fallback to URL
     if (pdfBase64) {
-      try {
-        const link = document.createElement('a');
-        link.href = pdfBase64;
-        link.download = `Interpretacion.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch {
-        // Fallback: open base64 in new tab
-        window.open(pdfBase64, '_blank');
-      }
+      // A Blob works everywhere; a data: URL is ignored by <a download> on iOS.
+      deliverBlob(target, base64ToBlob(pdfBase64), fileName);
     } else if (pdfUrl) {
-      try {
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = `Interpretacion.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch {
-        // Fallback: open URL in new tab
-        window.open(pdfUrl, '_blank');
+      // Fetch it so the download keeps its name even when the PDF is served
+      // from another origin (where <a download> is ignored).
+      const pdfRes = await fetch(pdfUrl);
+      if (pdfRes.ok) {
+        deliverBlob(target, await pdfRes.blob(), fileName);
+      } else {
+        deliverUrl(target, pdfUrl, fileName);
       }
+    } else {
+      throw new Error('Cloud function did not return PDF data');
     }
   } catch (err) {
     console.error('[PanelInterpretations] downloadInterpretationPdf error:', err);
+    cancelDownloadTarget(target);
     alert(`Error al descargar PDF: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
@@ -380,8 +373,9 @@ const PanelInterpretations: React.FC = () => {
                     disabled={!!pdfBusy[interp.objectId]}
                     onClick={e => {
                       e.stopPropagation();
+                      const target = prepareDownloadTarget();
                       setPdfBusy(prev => ({ ...prev, [interp.objectId]: true }));
-                      downloadInterpretationPdf(interp, schema).finally(() =>
+                      downloadInterpretationPdf(interp, schema, target).finally(() =>
                         setPdfBusy(prev => ({ ...prev, [interp.objectId]: false }))
                       );
                     }}

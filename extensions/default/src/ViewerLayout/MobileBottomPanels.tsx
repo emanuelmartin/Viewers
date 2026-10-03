@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Icons } from '@ohif/ui-next';
 
@@ -31,6 +31,26 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
   // most of the height; the tab bar still opens the panel on demand.
   const [isExpanded, setIsExpanded] = useState(() => window.innerHeight >= window.innerWidth);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+  // Follow device rotation: open the panel when turning to portrait, fold it
+  // when turning to landscape. Plain resizes that keep the orientation leave
+  // whatever the user chose alone.
+  useEffect(() => {
+    let wasPortrait = window.innerHeight >= window.innerWidth;
+    const onResize = () => {
+      const isPortrait = window.innerHeight >= window.innerWidth;
+      if (isPortrait !== wasPortrait) {
+        wasPortrait = isPortrait;
+        setIsExpanded(isPortrait);
+      }
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
+  }, []);
 
   const toggleExpand = () => {
     setIsExpanded(prev => !prev);
@@ -69,7 +89,7 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
       }}
     >
       {/* Tab bar + expand toggle */}
-      <div className="bg-secondary-dark flex h-[40px] flex-shrink-0 items-center border-t border-black">
+      <div className="bg-card border-border flex h-[40px] flex-shrink-0 items-center border-t">
         {/* Expand/Collapse arrow button */}
         <button
           className="text-primary flex h-full w-[32px] items-center justify-center flex-shrink-0"
@@ -95,8 +115,9 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
                 className={classnames(
                   'flex h-[28px] items-center gap-1 rounded px-2 text-xs whitespace-nowrap transition-colors',
                   {
-                    'bg-customblue-40 text-white': isActive,
-                    'text-primary hover:bg-primary-dark': !isActive && !tab.disabled,
+                    // Pixos: active tab in brand navy with an orange underline
+                    'bg-brand text-white shadow-[inset_0_-2px_0_hsl(var(--brand-orange))]': isActive,
+                    'text-primary hover:bg-brand/50': !isActive && !tab.disabled,
                     'text-muted-foreground cursor-not-allowed opacity-50': tab.disabled,
                   }
                 )}

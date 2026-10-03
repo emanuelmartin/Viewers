@@ -141,16 +141,19 @@ function Header({
         <div className="flex flex-col lg:hidden">
           <div className="flex h-[40px] items-center justify-between gap-1 px-1">
             <div className="flex-shrink-0">{logo}</div>
+            {Secondary && <div className="flex flex-shrink-0 items-center">{Secondary}</div>}
             <div className="flex min-w-0 flex-1 select-none items-center justify-end overflow-hidden">
+              {/* Phones hide the controls before patient info (undo/redo) so the
+                  name has room; tablets keep them. */}
               {renderRightSideItems(
-                'flex-shrink-0',
+                'flex-shrink-0 max-sm:hidden',
                 'min-w-0 overflow-hidden [&_*]:whitespace-nowrap'
               )}
               {/* HSRL: settings menu hidden, as in production */}
-            <div className="hidden">{settingsMenu}</div>
+              <div className="hidden">{settingsMenu}</div>
             </div>
           </div>
-          <div className="border-primary-dark ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1">
+          <div className="border-border ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1">
             <div className="mx-auto flex items-center gap-1">{children}</div>
           </div>
         </div>

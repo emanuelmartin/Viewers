@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { openStudyInViewer } from './headerStudyActions';
+import { prepareDownloadTarget } from '../utils/fileDownload';
 
 const HeaderViewStudyButton: React.FC = () => {
   const [busy, setBusy] = useState(false);
@@ -12,8 +13,9 @@ const HeaderViewStudyButton: React.FC = () => {
     if (busy) {
       return;
     }
+    const target = prepareDownloadTarget(true);
     setBusy(true);
-    openStudyInViewer(cfg).finally(() => setBusy(false));
+    openStudyInViewer(cfg, target).finally(() => setBusy(false));
   };
 
   return (
