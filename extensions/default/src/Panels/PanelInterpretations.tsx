@@ -76,9 +76,28 @@ const DEFAULT_SCHEMA: InterpretationsPanelSchema = {
   studyViewerBaseUrl: undefined,
 };
 
+/**
+ * Session of the user logged into the RIS on this origin: the Parse JS SDK
+ * keeps it in localStorage under Parse/<appId>/currentUser. Lets the panel
+ * read once the Parse classes require a session; viewers opened without a
+ * RIS login keep working anonymously while that is allowed.
+ */
+function getRisSessionToken(appId: string): string | undefined {
+  try {
+    const raw = window.localStorage.getItem(`Parse/${appId}/currentUser`);
+    return raw ? JSON.parse(raw)?.sessionToken || undefined : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function getSchema(): InterpretationsPanelSchema {
   const cfg = (window as any).config?.interpretationsPanel ?? {};
-  return { ...DEFAULT_SCHEMA, ...cfg };
+  const schema = { ...DEFAULT_SCHEMA, ...cfg };
+  if (!schema.sessionToken && schema.appId) {
+    schema.sessionToken = getRisSessionToken(schema.appId);
+  }
+  return schema;
 }
 
 // CSS for Quill-generated HTML output (text alignment classes)
