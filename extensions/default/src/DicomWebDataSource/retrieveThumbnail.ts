@@ -206,7 +206,9 @@ function buildThumbnailEndpointPath(
     return basePath;
   }
 
-  const queryString = queryParams.toString();
+  // "," and "/" are valid in a query string as they are, and some servers
+  // (Orthanc) do not decode them: `viewport=256%2C256` is rejected with a 400.
+  const queryString = queryParams.toString().replace(/%2C/gi, ',').replace(/%2F/gi, '/');
 
   return queryString ? `${basePath}?${queryString}` : basePath;
 }

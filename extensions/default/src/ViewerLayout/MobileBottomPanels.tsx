@@ -56,14 +56,13 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
     <div
       className="bg-black flex flex-col"
       style={{
-        height: isExpanded
-          ? 'calc(45vh + env(safe-area-inset-bottom, 0px))'
-          : 'calc(44px + env(safe-area-inset-bottom, 0px))',
+        // Size to the panel content (one row of thumbnails is far shorter than
+        // the cap), so the viewport above keeps the rest of the screen.
         minHeight: 'calc(44px + env(safe-area-inset-bottom, 0px))',
         maxHeight: isExpanded
-          ? 'calc(55vh + env(safe-area-inset-bottom, 0px))'
+          ? 'calc(45vh + env(safe-area-inset-bottom, 0px))'
           : 'calc(44px + env(safe-area-inset-bottom, 0px))',
-        transition: 'height 0.25s ease-in-out, max-height 0.25s ease-in-out',
+        transition: 'max-height 0.25s ease-in-out',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >

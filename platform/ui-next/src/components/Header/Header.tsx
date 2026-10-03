@@ -59,14 +59,18 @@ function Header({
 
   // Each slot is followed by a separator; `empty:hidden` drops the slot and its
   // separator when the item renders nothing (e.g. `showPatientInfo: 'disabled'`).
-  const rightSideItems = RightSide.map((item, index) => (
-    <div
-      key={index}
-      className="after:border-primary-dark flex min-w-0 items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']"
-    >
-      {item}
-    </div>
-  ));
+  const renderRightSideItems = (slotClassName: string) =>
+    RightSide.map((item, index) => (
+      <div
+        key={index}
+        className={classNames(
+          "after:border-primary-dark flex items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']",
+          slotClassName
+        )}
+      >
+        {item}
+      </div>
+    ));
 
   const settingsMenu = (
     <DropdownMenu>
@@ -125,8 +129,9 @@ function Header({
             </div>
           </div>
           <div className="flex flex-shrink-0 select-none items-center">
-            {rightSideItems}
-            {settingsMenu}
+            {renderRightSideItems('flex-shrink-0')}
+            {/* HSRL: settings menu hidden, as in production */}
+            <div className="hidden">{settingsMenu}</div>
           </div>
         </div>
 
@@ -135,8 +140,9 @@ function Header({
           <div className="flex h-[40px] items-center justify-between gap-1 px-1">
             <div className="flex-shrink-0">{logo}</div>
             <div className="flex min-w-0 flex-1 select-none items-center justify-end overflow-hidden">
-              {rightSideItems}
-              <div className="flex-shrink-0">{settingsMenu}</div>
+              {renderRightSideItems('min-w-0')}
+              {/* HSRL: settings menu hidden, as in production */}
+            <div className="hidden">{settingsMenu}</div>
             </div>
           </div>
           <div className="border-primary-dark ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1">

@@ -103,7 +103,7 @@ window.config = {
     },
   ],
 
-  showPatientInfo: 'visibleCollapsed',
+  showPatientInfo: 'visible',
   httpErrorHandler: error => {
     console.warn(`HTTP Error (${error.status})`, error);
     if (window.__hsrlNotify) {

@@ -8,8 +8,6 @@ import SidePanelWithServices from '../Components/SidePanelWithServices';
 import { Onboarding, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@ohif/ui-next';
 import useResizablePanels from './ResizablePanelsHook';
 import MobileBottomPanels from './MobileBottomPanels';
-import MobileNavTabs, { MobileTab } from './MobileNavTabs';
-import PanelInterpretations from '../Panels/PanelInterpretations';
 
 const resizableHandleClassName = 'mt-[1px] bg-background';
 
@@ -65,7 +63,6 @@ function ViewerLayout({
   // Mobile: get panel tabs directly for bottom panel rendering
   const [leftPanelTabs, setLeftPanelTabs] = useState(() => panelService.getPanels('left'));
   const [rightPanelTabs, setRightPanelTabs] = useState(() => panelService.getPanels('right'));
-  const [mobileTab, setMobileTab] = useState<MobileTab>('images');
 
   const [
     leftPanelProps,
@@ -174,10 +171,6 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
-  // Study browser tab: first left panel (PanelStudyBrowser)
-  const studiesPanelTab = leftPanelTabs[0];
-  // Bottom series panel: right tabs excluding interpretations (it lives in its own top tab)
-  const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
 
   const loadingIndicator = showLoadingIndicator && (
     <LoadingIndicatorProgress
@@ -198,27 +191,8 @@ function ViewerLayout({
         />
         {loadingIndicator}
 
-        {/* Top navigation tabs: Estudios | Imágenes | Interpretación */}
-        <MobileNavTabs
-          activeTab={mobileTab}
-          onTabChange={setMobileTab}
-        />
-
-        {/* Estudios tab — study browser panel */}
-        {mobileTab === 'studies' && (
-          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
-            {studiesPanelTab ? (
-              <studiesPanelTab.content />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Sin estudios disponibles
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Imágenes tab — viewport always mounted (hidden when inactive to avoid reload) */}
-        <div className={mobileTab === 'images' ? 'flex flex-1 flex-col overflow-hidden' : 'hidden'}>
+        {/* Mobile layout: viewport + bottom panels (interpretations, segmentations, measurements) */}
+        <div className="flex flex-1 flex-col overflow-hidden">
           <div
             className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
             onMouseEnter={handleMouseEnter}
@@ -231,17 +205,10 @@ function ViewerLayout({
           </div>
           <MobileBottomPanels
             leftPanelTabs={leftPanelTabs}
-            rightPanelTabs={bottomRightTabs}
+            rightPanelTabs={rightPanelTabs}
             servicesManager={servicesManager}
           />
         </div>
-
-        {/* Interpretaciones tab */}
-        {mobileTab === 'interpretations' && (
-          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
-            <PanelInterpretations />
-          </div>
-        )}
 
         <Onboarding tours={customizationService.getCustomization('ohif.tours')} />
         <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />

@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Header, useModal } from '@ohif/ui-next';
 import { useSystem } from '@ohif/core';
 import { Toolbar } from '../Toolbar/Toolbar';
+import HeaderViewStudyButton from './HeaderViewStudyButton';
+import HeaderDownloadButton from './HeaderDownloadButton';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
 
@@ -108,7 +110,14 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       isReturnEnabled={!!appConfig.showStudyList}
       onClickReturnButton={onClickReturnButton}
       WhiteLabeling={appConfig.whiteLabeling}
-      Secondary={<Toolbar buttonSection="secondary" />}
+      Secondary={
+        <div className="flex items-center gap-1">
+          <Toolbar buttonSection="secondary" />
+          <div className="border-primary-dark mx-1 h-[25px] border-r" />
+          <HeaderViewStudyButton />
+          <HeaderDownloadButton />
+        </div>
+      }
       RightSide={rightSideItems.map((Item, index) => (
         // The list is static per configuration, so the index is a stable key.
         <Item key={index} />

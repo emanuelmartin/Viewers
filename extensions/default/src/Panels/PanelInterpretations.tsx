@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 // ---------------------------------------------------------------------------
 
 export interface InterpretationsPanelSchema {
+  /** Explicitly enable/disable the interpretations panel (default: true) */
+  showInterpretationsPanel?: boolean;
   /** Parse Server base URL (no trailing slash) */
   parseUrl: string;
   /** Parse Application ID */
@@ -27,17 +29,24 @@ export interface InterpretationsPanelSchema {
   interpretationsSignedField: string;
   /** Date field for when the report was signed (default: 'signedAt') */
   interpretationsSignedAtField: string;
+  /** Field containing Pointer to user/physician (default: 'user') */
+  interpretationsUserField: string;
+  /** Parse class name for user/physician (default: '_User') */
+  userClass: string;
+  /** Field in user object that contains the user's full name (default: 'fullName') */
+  userNameField: string;
   /** Orthanc base URL used to download DICOM archives (e.g. 'https://orthanc.example.com') */
   orthancBaseUrl?: string;
   /** Field in studiesClass that stores the Orthanc study UUID (default: 'orthancUUID') */
   orthancUuidField: string;
   /** Field in interpretationsClass that stores the pre-generated PDF URL (default: 'pdfUrl') */
   interpretationsPdfUrlField: string;
-  /** Parse Cloud function name that generates the interpretation PDF (default: 'interpretationPDF') */
+  /** Parse Cloud function name that generates the interpretation PDF (default: 'generateInterpretationReport') */
   interpretationsPdfCloudFunction: string;
 }
 
 const DEFAULT_SCHEMA: InterpretationsPanelSchema = {
+  showInterpretationsPanel: true,
   parseUrl: '',
   appId: '',
   jsKey: undefined,
@@ -49,10 +58,14 @@ const DEFAULT_SCHEMA: InterpretationsPanelSchema = {
   interpretationsContentField: 'content',
   interpretationsSignedField: 'signed',
   interpretationsSignedAtField: 'signedAt',
+  interpretationsUserField: 'user',
+  userClass: '_User',
+  userNameField: 'fullName',
   orthancBaseUrl: undefined,
   orthancUuidField: 'orthancUUID',
   interpretationsPdfUrlField: 'pdfUrl',
-  interpretationsPdfCloudFunction: 'interpretationPDF',
+  interpretationsPdfCloudFunction: 'generateInterpretationReport',
+  studyViewerBaseUrl: undefined,
 };
 
 function getSchema(): InterpretationsPanelSchema {
@@ -130,8 +143,9 @@ async function fetchInterpretationsByStudies(
   const where = encodeURIComponent(
     JSON.stringify({ [schema.interpretationsStudyField]: { $in: pointers } })
   );
+  const include = encodeURIComponent(`${schema.interpretationsUserField},${schema.interpretationsStudyField}`);
   const res = await fetch(
-    `${schema.parseUrl}/classes/${schema.interpretationsClass}?where=${where}&order=-createdAt&limit=20`,
+    `${schema.parseUrl}/classes/${schema.interpretationsClass}?where=${where}&include=${include}&order=-createdAt&limit=20`,
     { headers: buildHeaders(schema) }
   );
   if (!res.ok) {
@@ -145,40 +159,60 @@ async function downloadInterpretationPdf(
   interp: any,
   schema: InterpretationsPanelSchema
 ): Promise<void> {
-  const pdfUrl: string | undefined = interp[schema.interpretationsPdfUrlField];
-  const now = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const fileName = `Interpretacion - ${now}.pdf`;
-
-  const headers = buildHeaders(schema);
-  // Parse Cloud REST endpoint: POST /functions/<functionName>
-  const endpoint = `${schema.parseUrl}/functions/${schema.interpretationsPdfCloudFunction}`;
-
-  let pdfDataUrl: string | undefined;
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ pdfUrl, fileName }),
-    });
-    if (!res.ok) throw new Error(`Cloud function responded ${res.status}`);
-    const data = await res.json();
-    pdfDataUrl = data?.result?.pdf ?? data?.result;
+    console.log('[PanelInterpretations] Calling Cloud Function:', schema.interpretationsPdfCloudFunction);
+    const res = await fetch(
+      `${schema.parseUrl}/functions/${schema.interpretationsPdfCloudFunction}`,
+      {
+        method: 'POST',
+        headers: buildHeaders(schema),
+        body: JSON.stringify({ interpretationId: interp.objectId }),
+      }
+    );
+    if (!res.ok) {
+      throw new Error(`Cloud function failed: ${res.status}`);
+    }
+    const json = await res.json();
+    // Parse REST wraps the result in { result: ... }
+    const result: any = json?.result ?? json;
+    console.log('[PanelInterpretations] Cloud function response:', result);
+
+    const pdfBase64 = result?.pdf;
+    const pdfUrl = result?.pdfUrl;
+
+    if (!pdfBase64 && !pdfUrl) {
+      throw new Error('Cloud function did not return PDF data');
+    }
+
+    // Prefer base64 for direct download, fallback to URL
+    if (pdfBase64) {
+      try {
+        const link = document.createElement('a');
+        link.href = pdfBase64;
+        link.download = `Interpretacion.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        // Fallback: open base64 in new tab
+        window.open(pdfBase64, '_blank');
+      }
+    } else if (pdfUrl) {
+      try {
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = `Interpretacion.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        // Fallback: open URL in new tab
+        window.open(pdfUrl, '_blank');
+      }
+    }
   } catch (err) {
-    console.error('[PanelInterpretations] downloadInterpretationPdf error', err);
-  }
-
-  if (!pdfDataUrl) return;
-
-  // Attempt download first; if popup is blocked fall back to new tab
-  try {
-    const link = document.createElement('a');
-    link.href = pdfDataUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch {
-    window.open(pdfDataUrl);
+    console.error('[PanelInterpretations] downloadInterpretationPdf error:', err);
+    alert(`Error al descargar PDF: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 
@@ -196,14 +230,10 @@ function formatDateTime(iso?: string): string {
 }
 
 /**
- * Loads the studies in the URL and their interpretations. Kept outside the
+ * Loads the interpretations of the studies in the URL. Kept outside the
  * component: the React Compiler cannot lower try/catch/finally inside one.
  */
-async function loadInterpretations(): Promise<{
-  studies: any[];
-  interpretations: any[];
-  error: string | null;
-}> {
+async function loadInterpretations(): Promise<{ interpretations: any[]; error: string | null }> {
   try {
     const schema = getSchema();
     if (!schema.parseUrl || !schema.appId) {
@@ -212,21 +242,22 @@ async function loadInterpretations(): Promise<{
     const uids = getStudyInstanceUIDs();
     const studies = await fetchStudiesByUIDs(uids, schema);
     const interpretations = await fetchInterpretationsByStudies(studies, schema);
-    return { studies, interpretations, error: null };
+    return { interpretations, error: null };
   } catch (err) {
     console.error('[PanelInterpretations]', err);
-    return { studies: [], interpretations: [], error: 'No se pudieron cargar las interpretaciones.' };
+    return { interpretations: [], error: 'No se pudieron cargar las interpretaciones.' };
   }
 }
 
 const PanelInterpretations: React.FC = () => {
-  const [studies, setStudies] = useState<any[]>([]);
   const [interpretations, setInterpretations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
-  const [downloadNotice, setDownloadNotice] = useState(false);
   const [pdfBusy, setPdfBusy] = useState<Record<string, boolean>>({});
+
+  const schema = getSchema();
+  const isConfigured = !!(schema.showInterpretationsPanel !== false && schema.parseUrl && schema.appId);
+  const [loading, setLoading] = useState(isConfigured);
 
   // Inject Quill output CSS once
   useEffect(() => {
@@ -242,41 +273,25 @@ const PanelInterpretations: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
 
-    loadInterpretations().then(result => {
-      if (cancelled) {
-        return;
-      }
-      setStudies(result.studies);
-      setInterpretations(result.interpretations);
-      setError(result.error);
-      setLoading(false);
-    });
+    if (isConfigured) {
+      loadInterpretations().then(result => {
+        if (cancelled) {
+          return;
+        }
+        setInterpretations(result.interpretations);
+        setError(result.error);
+        setLoading(false);
+      });
+    }
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isConfigured]);
 
-  const schema = getSchema();
-
-  const handleDownload = () => {
-    if (!schema.orthancBaseUrl) {
-      console.warn('[PanelInterpretations] orthancBaseUrl no está configurado en interpretationsPanel');
-      return;
-    }
-    const uuids = studies
-      .map(s => s[schema.orthancUuidField])
-      .filter(Boolean) as string[];
-    const uniqueUUIDs = [...new Set(uuids)];
-    if (!uniqueUUIDs.length) {
-      console.warn('[PanelInterpretations] No se encontraron UUIDs de Orthanc para descargar');
-      return;
-    }
-    setDownloadNotice(true);
-    setTimeout(() => setDownloadNotice(false), 4000);
-    uniqueUUIDs.forEach(uuid => {
-      window.open(`${schema.orthancBaseUrl}/studies/${uuid}/archive`);
-    });
-  };
+  // If interpretationsPanel is not configured, render nothing
+  if (!isConfigured) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -308,55 +323,28 @@ const PanelInterpretations: React.FC = () => {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-border flex items-center justify-between border-b px-3 py-2">
+      <div className="border-border border-b px-3 py-2">
         <p className="text-foreground text-[11px] font-semibold uppercase tracking-wider opacity-70">
           Interpretaciones
           <span className="bg-primary ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] text-white">
             {interpretations.length}
           </span>
         </p>
-        {schema.orthancBaseUrl && (
-          <button
-            title="Descargar imágenes DICOM (ZIP)"
-            onClick={handleDownload}
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 flex items-center gap-1 rounded px-2 py-1 text-[11px] transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Descargar
-          </button>
-        )}
       </div>
-
-      {downloadNotice && (
-        <div className="bg-primary/10 border-primary/30 text-primary mx-3 mt-2 rounded border px-3 py-2 text-[11px]">
-          Generando archivo ZIP con las imágenes DICOM…
-        </div>
-      )}
 
       {interpretations.map((interp, index) => {
         const isOpen = expandedIndex === index;
-        const interpPdfUrl: string | undefined = interp[schema.interpretationsPdfUrlField];
-        const hasPdf = !!interpPdfUrl && !!schema.parseUrl;
         const signedAtRaw = interp[schema.interpretationsSignedAtField];
+        const userObj: any = interp[schema.interpretationsUserField];
+        const userName: string = userObj?.[schema.userNameField] ?? userObj?.username ?? 'Sin identificar';
         const dateStr = formatDateTime(
           typeof signedAtRaw === 'object' ? signedAtRaw?.iso : signedAtRaw || interp.createdAt
         );
         const isSigned: boolean = !!interp[schema.interpretationsSignedField];
         const content: string = interp[schema.interpretationsContentField] ?? '';
+        
+        // Ensure PDF button condition is evaluated at render time
+        const hasPdfCloudFunction = !!(schema.parseUrl && schema.interpretationsPdfCloudFunction);
 
         return (
           <div
@@ -380,9 +368,13 @@ const PanelInterpretations: React.FC = () => {
                     <span className="text-yellow-400">Borrador</span>
                   )}
                 </div>
+                <div className="text-muted-foreground mt-1 text-[10px]">
+                  {userName}
+                </div>
               </div>
               <div className="ml-2 flex flex-shrink-0 items-center gap-1">
-                {hasPdf && (
+                {/* PDF download button if Cloud Function is configured */}
+                {hasPdfCloudFunction && (
                   <button
                     title="Descargar PDF"
                     disabled={!!pdfBusy[interp.objectId]}
@@ -395,7 +387,7 @@ const PanelInterpretations: React.FC = () => {
                     }}
                     className="text-muted-foreground hover:text-foreground flex items-center rounded p-1 transition-colors disabled:opacity-40"
                   >
-                    {pdfBusy[interp.objectId] ? (
+                    {pdfBusy[interp.objectId] ? (  
                       <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />

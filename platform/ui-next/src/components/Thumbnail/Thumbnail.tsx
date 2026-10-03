@@ -194,11 +194,14 @@ const Thumbnail = ({
             </div>
             {/* bottom right */}
             <div className="absolute bottom-0 right-0 flex items-center gap-[4px] p-[4px]">
-              <ThumbnailMenuItems
-                displaySetInstanceUID={displaySetInstanceUID}
-                canReject={canReject}
-                onReject={onReject}
-              />
+              {/* null when the menu customization has no items */}
+              {ThumbnailMenuItems && (
+                <ThumbnailMenuItems
+                  displaySetInstanceUID={displaySetInstanceUID}
+                  canReject={canReject}
+                  onReject={onReject}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -292,11 +295,13 @@ const Thumbnail = ({
               </TooltipContent>
             </Tooltip>
           )}
-          <ThumbnailMenuItems
-            displaySetInstanceUID={displaySetInstanceUID}
-            canReject={canReject}
-            onReject={onReject}
-          />
+          {ThumbnailMenuItems && (
+            <ThumbnailMenuItems
+              displaySetInstanceUID={displaySetInstanceUID}
+              canReject={canReject}
+              onReject={onReject}
+            />
+          )}
         </div>
       </div>
     );
