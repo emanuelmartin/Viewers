@@ -8,8 +8,7 @@
  */
 
 // iPhone/iPad (iPadOS reports itself as a Mac with touch) and other phones.
-// iOS WebGL renders 8-bit grayscale stacks (XA cine) black, and Safari kills
-// tabs that hold more than ~1 GB, so mobile gets CPU rendering and a smaller
+// Safari kills tabs that hold more than ~1 GB, so mobile gets a smaller
 // cache/prefetch budget.
 const HSRL_IS_IOS =
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -24,7 +23,6 @@ window.config = {
   showStudyList: false,
   simplifiedUI: true,
   maxNumberOfWebWorkers: HSRL_IS_MOBILE ? 2 : 6,
-  useCPURendering: HSRL_IS_IOS,
   showLoadingIndicator: true,
   showWarningMessageForCrossOrigin: false,
   showCPUFallbackMessage: false,
