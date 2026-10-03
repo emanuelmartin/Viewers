@@ -115,8 +115,8 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
                 className={classnames(
                   'flex h-[28px] items-center gap-1 rounded px-2 text-xs whitespace-nowrap transition-colors',
                   {
-                    // Pixos: active tab in brand navy with an orange underline
-                    'bg-brand text-white shadow-[inset_0_-2px_0_hsl(var(--brand-orange))]': isActive,
+                    // Pixos RIS: active tab raised (#1e3a5f) with a blue underline
+                    'bg-secondary text-foreground shadow-[inset_0_-2px_0_hsl(var(--brand-accent))]': isActive,
                     'text-primary hover:bg-brand/50': !isActive && !tab.disabled,
                     'text-muted-foreground cursor-not-allowed opacity-50': tab.disabled,
                   }

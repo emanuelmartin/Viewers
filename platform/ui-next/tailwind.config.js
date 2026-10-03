@@ -46,7 +46,7 @@ module.exports = {
         highlight: 'hsl(var(--highlight))',
         brand: {
           DEFAULT: 'hsl(var(--brand-navy))',
-          accent: 'hsl(var(--brand-orange))',
+          accent: 'hsl(var(--brand-accent))',
         },
         neutral: 'hsl(var(--neutral))',
         'neutral-light': 'hsl(var(--neutral-light))',

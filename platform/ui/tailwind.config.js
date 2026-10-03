@@ -30,8 +30,8 @@ module.exports = {
 
       primary: {
         light: '#b3d4fc',
-        main: '#05385c',
-        dark: '#03192a',
+        main: '#1e3a5f',
+        dark: '#0f2942',
         active: '#e3f2fd',
       },
       inputfield: {
@@ -49,7 +49,7 @@ module.exports = {
       },
 
       indigo: {
-        dark: '#03192a',
+        dark: '#0f2942',
       },
 
       common: {
@@ -79,16 +79,16 @@ module.exports = {
       },
 
       customblue: {
-        // Pixos navy scale (logo #05385c at 30)
-        10: '#021827',
-        20: '#032a45',
-        30: '#05385c',
-        40: '#074a78',
-        50: '#0a5c94',
-        80: '#1778bf',
-        100: '#c4e6ff',
-        200: '#5fb4ec',
-        300: '#0b2236',
+        // Pixos RIS blues
+        10: '#071318',
+        20: '#0f2942',
+        30: '#132f4c',
+        40: '#1e3a5f',
+        50: '#2563eb',
+        80: '#5aa1ff',
+        100: '#e3f2fd',
+        200: '#b8d4f1',
+        300: '#173a5e',
         400: '#8fa9bf',
       },
 

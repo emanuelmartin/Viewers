@@ -125,8 +125,8 @@ const getTabStyle = (numTabs: number) => {
 
 const getTabIconClassNames = (numTabs: number, isActiveTab: boolean) => {
   return classnames('h-full w-full flex items-center justify-center', {
-    // Pixos: active tab in brand navy with an orange underline
-    'bg-brand text-brand-accent shadow-[inset_0_-2px_0_hsl(var(--brand-orange))]': isActiveTab,
+    // Pixos RIS: active tab raised (#1e3a5f) with a blue underline
+    'bg-secondary text-brand-accent shadow-[inset_0_-2px_0_hsl(var(--brand-accent))]': isActiveTab,
     rounded: isActiveTab,
   });
 };

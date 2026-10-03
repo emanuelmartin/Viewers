@@ -78,10 +78,7 @@ window.config = {
         qidoUnsafeCharsAsWildcard: true,
         supportsReject: true,
         dicomUploadEnabled: true,
-        // Whole instance once (WADO-URI) instead of frame by frame: Orthanc
-        // reads the full file for every frame request, so a 224-frame XA cine
-        // took ~34 s per series frame by frame vs ~6 s as one object.
-        imageRendering: 'wadouri',
+        imageRendering: 'wadors',
         thumbnailRendering: 'rendered',
         thumbnailRequestStrategy: 'fetch',
         enableStudyLazyLoad: false,
