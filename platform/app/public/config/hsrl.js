@@ -89,7 +89,10 @@ window.config = {
         supportsReject: true,
         dicomUploadEnabled: true,
         imageRendering: 'wadors',
-        thumbnailRendering: 'rendered',
+        // Phones build thumbnails from the first frame, as the previous viewer
+        // did; server-rendered thumbnails make Orthanc open every instance,
+        // which on a busy server left the mobile panel empty for a long time.
+        thumbnailRendering: HSRL_IS_MOBILE ? 'wadors' : 'rendered',
         thumbnailRequestStrategy: 'fetch',
         enableStudyLazyLoad: false,
         supportsFuzzyMatching: true,
