@@ -195,6 +195,30 @@ function formatDateTime(iso?: string): string {
   });
 }
 
+/**
+ * Loads the studies in the URL and their interpretations. Kept outside the
+ * component: the React Compiler cannot lower try/catch/finally inside one.
+ */
+async function loadInterpretations(): Promise<{
+  studies: any[];
+  interpretations: any[];
+  error: string | null;
+}> {
+  try {
+    const schema = getSchema();
+    if (!schema.parseUrl || !schema.appId) {
+      throw new Error('interpretationsPanel.parseUrl y appId son requeridos en window.config');
+    }
+    const uids = getStudyInstanceUIDs();
+    const studies = await fetchStudiesByUIDs(uids, schema);
+    const interpretations = await fetchInterpretationsByStudies(studies, schema);
+    return { studies, interpretations, error: null };
+  } catch (err) {
+    console.error('[PanelInterpretations]', err);
+    return { studies: [], interpretations: [], error: 'No se pudieron cargar las interpretaciones.' };
+  }
+}
+
 const PanelInterpretations: React.FC = () => {
   const [studies, setStudies] = useState<any[]>([]);
   const [interpretations, setInterpretations] = useState<any[]>([]);
@@ -218,34 +242,15 @@ const PanelInterpretations: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const schema = getSchema();
-        if (!schema.parseUrl || !schema.appId) {
-          throw new Error('interpretationsPanel.parseUrl y appId son requeridos en window.config');
-        }
-        const uids = getStudyInstanceUIDs();
-        const fetchedStudies = await fetchStudiesByUIDs(uids, schema);
-        const interps = await fetchInterpretationsByStudies(fetchedStudies, schema);
-        if (!cancelled) {
-          setStudies(fetchedStudies);
-          setInterpretations(interps);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error('[PanelInterpretations]', err);
-          setError('No se pudieron cargar las interpretaciones.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+    loadInterpretations().then(result => {
+      if (cancelled) {
+        return;
       }
-    };
-
-    load();
+      setStudies(result.studies);
+      setInterpretations(result.interpretations);
+      setError(result.error);
+      setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
@@ -381,14 +386,12 @@ const PanelInterpretations: React.FC = () => {
                   <button
                     title="Descargar PDF"
                     disabled={!!pdfBusy[interp.objectId]}
-                    onClick={async e => {
+                    onClick={e => {
                       e.stopPropagation();
                       setPdfBusy(prev => ({ ...prev, [interp.objectId]: true }));
-                      try {
-                        await downloadInterpretationPdf(interp, schema);
-                      } finally {
-                        setPdfBusy(prev => ({ ...prev, [interp.objectId]: false }));
-                      }
+                      downloadInterpretationPdf(interp, schema).finally(() =>
+                        setPdfBusy(prev => ({ ...prev, [interp.objectId]: false }))
+                      );
                     }}
                     className="text-muted-foreground hover:text-foreground flex items-center rounded p-1 transition-colors disabled:opacity-40"
                   >
@@ -424,7 +427,6 @@ const PanelInterpretations: React.FC = () => {
                 }}
                 // Content is written by authenticated radiologists in our own Parse DB.
                 // No user-supplied arbitrary HTML enters this field.
-                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{ __html: content }}
               />
             )}

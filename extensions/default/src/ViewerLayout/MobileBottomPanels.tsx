@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import classnames from 'classnames';
 import { Icons } from '@ohif/ui-next';
 
@@ -30,24 +30,21 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  const toggleExpand = useCallback(() => {
+  const toggleExpand = () => {
     setIsExpanded(prev => !prev);
-  }, []);
+  };
 
-  const handleTabClick = useCallback(
-    (index: number) => {
-      if (allTabs[index]?.disabled) {
-        return;
-      }
-      if (activeTabIndex === index && isExpanded) {
-        setIsExpanded(false);
-      } else {
-        setActiveTabIndex(index);
-        setIsExpanded(true);
-      }
-    },
-    [activeTabIndex, isExpanded, allTabs]
-  );
+  const handleTabClick = (index: number) => {
+    if (allTabs[index]?.disabled) {
+      return;
+    }
+    if (activeTabIndex === index && isExpanded) {
+      setIsExpanded(false);
+    } else {
+      setActiveTabIndex(index);
+      setIsExpanded(true);
+    }
+  };
 
   if (allTabs.length === 0) {
     return null;

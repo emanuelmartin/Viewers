@@ -179,6 +179,13 @@ function ViewerLayout({
   // Bottom series panel: right tabs excluding interpretations (it lives in its own top tab)
   const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
 
+  const loadingIndicator = showLoadingIndicator && (
+    <LoadingIndicatorProgress
+      className="bg-background h-full w-full"
+      logo={appConfig?.ui?.whiteLabeling?.logo}
+    />
+  );
+
   // Mobile layout: header + top nav tabs + content area
   if (isMobile) {
     return (
@@ -189,12 +196,7 @@ function ViewerLayout({
           servicesManager={servicesManager}
           appConfig={appConfig}
         />
-        {showLoadingIndicator && (
-          <LoadingIndicatorProgress
-            className="h-full w-full bg-background"
-            logo={appConfig?.ui?.whiteLabeling?.logo}
-          />
-        )}
+        {loadingIndicator}
 
         {/* Top navigation tabs: Estudios | Imágenes | Interpretación */}
         <MobileNavTabs
@@ -261,7 +263,7 @@ function ViewerLayout({
         style={{ height: 'calc(100vh - 52px)' }}
       >
         <React.Fragment>
-          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-background" logo={appConfig?.ui?.whiteLabeling?.logo} />}
+          {loadingIndicator}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
             {/* LEFT SIDEPANELS */}
             {hasLeftPanels ? (
