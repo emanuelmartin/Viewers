@@ -5,8 +5,9 @@
 #
 # - builds with hidden source maps (no sourceMappingURL in the shipped JS)
 # - archives every *.map into release/<tag>-sourcemaps.tar.gz
-# - rsyncs dist/ to the server WITHOUT the maps and installs it (asks for the
-#   remote sudo password; nothing is stored in this script)
+# - rsyncs dist/ to the server WITHOUT the maps and installs it as pixos
+#   (the viewer directories belong to pixos: no sudo), keeping the previous
+#   build in <dir>.prev for a quick rollback
 # - with --release: tags the commit and publishes a GitHub release on the
 #   fork with the source-map archive attached
 set -euo pipefail
@@ -56,12 +57,17 @@ echo "==> Uploading (without *.map)"
 rsync -az --delete --exclude '*.map' -e "ssh -i ~/.ssh/pixos_access_key -p 42895" \
   "$DIST/" "pixos@imagen.hospitalrealsanlucas.com.mx:${REMOTE_TMP}/"
 
-echo "==> Installing on the server (sudo)"
-INSTALL="rm -rf ${REMOTE_DIR}/*; cp -a ${REMOTE_TMP}/* ${REMOTE_DIR}/; chown -R pixos:pixos ${REMOTE_DIR}"
+echo "==> Installing on the server"
+INSTALL="set -e"
 if [[ "$ENV" == staging ]]; then
-  INSTALL="${INSTALL}; sed -i '/routerBasename/s|/images/|/viewers2/|' ${REMOTE_DIR}/app-config.js"
+  INSTALL="${INSTALL}; sed -i '/routerBasename/s|/images/|/viewers2/|' ${REMOTE_TMP}/app-config.js"
 fi
-ssh -t pixos-hrsl "sudo bash -c \"${INSTALL}\""
+# Previous build kept for rollback: rsync -a --delete ${REMOTE_DIR}.prev/ ${REMOTE_DIR}/
+INSTALL="${INSTALL}; rsync -a --delete ${REMOTE_DIR}/ ${REMOTE_DIR}.prev/"
+# index.html last, so no client loads it before the chunks it references exist
+INSTALL="${INSTALL}; rsync -a --exclude index.html ${REMOTE_TMP}/ ${REMOTE_DIR}/"
+INSTALL="${INSTALL}; rsync -a --delete ${REMOTE_TMP}/ ${REMOTE_DIR}/"
+ssh pixos-hrsl "${INSTALL}"
 
 if [[ "$RELEASE" == "--release" ]]; then
   echo "==> Tagging and publishing GitHub release ${TAG}"
