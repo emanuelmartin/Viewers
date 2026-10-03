@@ -82,7 +82,8 @@ function ViewerLayout({
     leftPanelInitialExpandedWidth,
     rightPanelInitialExpandedWidth,
     leftPanelMinimumExpandedWidth,
-    rightPanelMinimumExpandedWidth
+    rightPanelMinimumExpandedWidth,
+    isMobile
   );
 
   const handleMouseEnter = () => {

@@ -27,7 +27,9 @@ const MobileBottomPanels: React.FC<MobileBottomPanelsProps> = ({
     ...rightPanelTabs.map(t => ({ ...t, source: 'right' })),
   ];
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  // Landscape phones are short: start collapsed there so the viewport keeps
+  // most of the height; the tab bar still opens the panel on demand.
+  const [isExpanded, setIsExpanded] = useState(() => window.innerHeight >= window.innerWidth);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const toggleExpand = () => {

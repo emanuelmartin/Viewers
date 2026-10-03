@@ -9,5 +9,8 @@
     "@ohif/core": "workspace:*",
     "@ohif/ui-next": "workspace:*",
     "react": "19.2.7"
+  },
+  "dependencies": {
+    "moment": "2.30.1"
   }
 }

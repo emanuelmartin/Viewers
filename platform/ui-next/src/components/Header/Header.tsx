@@ -59,13 +59,15 @@ function Header({
 
   // Each slot is followed by a separator; `empty:hidden` drops the slot and its
   // separator when the item renders nothing (e.g. `showPatientInfo: 'disabled'`).
-  const renderRightSideItems = (slotClassName: string) =>
+  // `lastSlotClassName` lets the mobile header shrink only the last slot
+  // (patient info) while the controls before it keep their size.
+  const renderRightSideItems = (slotClassName: string, lastSlotClassName = slotClassName) =>
     RightSide.map((item, index) => (
       <div
         key={index}
         className={classNames(
           "after:border-primary-dark flex items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']",
-          slotClassName
+          index === RightSide.length - 1 ? lastSlotClassName : slotClassName
         )}
       >
         {item}
@@ -140,7 +142,10 @@ function Header({
           <div className="flex h-[40px] items-center justify-between gap-1 px-1">
             <div className="flex-shrink-0">{logo}</div>
             <div className="flex min-w-0 flex-1 select-none items-center justify-end overflow-hidden">
-              {renderRightSideItems('min-w-0')}
+              {renderRightSideItems(
+                'flex-shrink-0',
+                'min-w-0 overflow-hidden [&_*]:whitespace-nowrap'
+              )}
               {/* HSRL: settings menu hidden, as in production */}
             <div className="hidden">{settingsMenu}</div>
             </div>

@@ -958,6 +958,9 @@ importers:
       '@ohif/ui-next':
         specifier: workspace:*
         version: link:../../platform/ui-next
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
       react:
         specifier: 19.2.7
         version: 19.2.7

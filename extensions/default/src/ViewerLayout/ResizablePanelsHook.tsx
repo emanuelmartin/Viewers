@@ -34,7 +34,8 @@ const useResizablePanels = (
   leftPanelInitialExpandedWidth,
   rightPanelInitialExpandedWidth,
   leftPanelMinimumExpandedWidth,
-  rightPanelMinimumExpandedWidth
+  rightPanelMinimumExpandedWidth,
+  isMobile = false
 ) => {
   const [panelGroupDefinition] = useState(
     getPanelGroupDefinition({
@@ -138,7 +139,9 @@ const useResizablePanels = (
       resizableRightPanelAPIRef?.current?.expand(rightResizablePanelExpandedSize);
       setMinMaxWidth(rightPanelElem, panelGroupDefinition.right.initialExpandedOffsetWidth);
     }
-  }, []); // no dependencies because this useLayoutEffect is only needed on the very first render
+    // Re-run when leaving the mobile layout: the panel group is not rendered on
+    // mobile, so it mounts fresh and its elements and sizes must be grabbed again.
+  }, [isMobile]);
 
   // This useLayoutEffect follows the pattern prescribed by the react-resizable-panels
   // readme for converting between pixel values and percentages. An example of
