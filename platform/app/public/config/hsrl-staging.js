@@ -7,6 +7,15 @@
  * Deploy: ~/imagelink/viewer/viewers2/
  */
 
+// iPhone/iPad (iPadOS reports itself as a Mac with touch) and other phones.
+// iOS WebGL renders 8-bit grayscale stacks (XA cine) black, and Safari kills
+// tabs that hold more than ~1 GB, so mobile gets CPU rendering and a smaller
+// cache/prefetch budget.
+const HSRL_IS_IOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const HSRL_IS_MOBILE = HSRL_IS_IOS || /Android|Mobi/i.test(navigator.userAgent);
+
 /** @type {AppTypes.Config} */
 window.config = {
   routerBasename: '/viewers2/',
@@ -14,7 +23,8 @@ window.config = {
   modes: [],
   showStudyList: false,
   simplifiedUI: true,
-  maxNumberOfWebWorkers: 6,
+  maxNumberOfWebWorkers: HSRL_IS_MOBILE ? 2 : 6,
+  useCPURendering: HSRL_IS_IOS,
   showLoadingIndicator: true,
   showWarningMessageForCrossOrigin: false,
   showCPUFallbackMessage: false,
@@ -29,12 +39,12 @@ window.config = {
     thumbnail: 10,
     prefetch: 10,
   },
-  maxCacheSize: 2 * 1024 * 1024 * 1024,
+  maxCacheSize: (HSRL_IS_MOBILE ? 512 : 2048) * 1024 * 1024,
   studyPrefetcher: {
     enabled: true,
     // Production values: with HTTP/1.1 (6 connections per host) a larger
     // prefetch starves the series being viewed.
-    displaySetsCount: 2,
+    displaySetsCount: HSRL_IS_MOBILE ? 1 : 2,
     maxNumPrefetchRequests: 10,
     order: 'closest',
   },
