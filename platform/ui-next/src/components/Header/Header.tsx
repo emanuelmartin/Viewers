@@ -55,6 +55,52 @@ function Header({
     }
   };
 
+  const logo = WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />;
+
+  // Each slot is followed by a separator; `empty:hidden` drops the slot and its
+  // separator when the item renders nothing (e.g. `showPatientInfo: 'disabled'`).
+  const rightSideItems = RightSide.map((item, index) => (
+    <div
+      key={index}
+      className="after:border-primary-dark flex min-w-0 items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']"
+    >
+      {item}
+    </div>
+  ));
+
+  const settingsMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary hover:bg-primary-dark h-full w-full"
+        >
+          <Icons.GearSettings />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {menuOptions.map((option, index) => {
+          const IconComponent = option.icon ? Icons[option.icon as keyof typeof Icons] : null;
+          return (
+            <DropdownMenuItem
+              key={index}
+              onSelect={option.onClick}
+              className="flex items-center gap-2 py-2"
+            >
+              {IconComponent && (
+                <span className="flex h-4 w-4 items-center justify-center">
+                  <Icons.ByName name={option.icon} />
+                </span>
+              )}
+              <span className="flex-1">{option.title}</span>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <IconPresentationProvider
       size="large"
@@ -64,71 +110,37 @@ function Header({
         isSticky={isSticky}
         {...props}
       >
-        <div className="flex h-[48px] items-center justify-between gap-2 px-2">
-          <div className="flex items-center flex-shrink-0">
-            <div
-              className={classNames(
-                'mr-3 inline-flex items-center',
-                isSticky && 'py-6'
-              )}
-            >
+        {/* Desktop (>= 1024px): logo | toolbar | right-side slots + settings */}
+        <div className="hidden h-[48px] items-center justify-between gap-2 px-2 lg:flex">
+          <div className="flex flex-shrink-0 items-center">
+            <div className={classNames('mr-3 inline-flex items-center', isSticky && 'py-6')}>
               {isSticky && <Button onClick={onClickReturn}>{<Icons.ArrowLeftBold />}</Button>}
-              <div className="ml-2">
-                {WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />}
-              </div>
+              <div className="ml-2">{logo}</div>
             </div>
             {Secondary && <div className="ml-2">{Secondary}</div>}
           </div>
-          <div className="flex-1 flex justify-center min-w-0 px-2">
-            <div className="flex items-center justify-center space-x-2 overflow-x-auto overflow-y-hidden ohif-scrollbar-toolbar w-full">
+          <div className="flex min-w-0 flex-1 justify-center px-2">
+            <div className="ohif-scrollbar-toolbar flex w-full items-center justify-center space-x-2 overflow-x-auto overflow-y-hidden">
               {children}
             </div>
           </div>
+          <div className="flex flex-shrink-0 select-none items-center">
+            {rightSideItems}
+            {settingsMenu}
+          </div>
+        </div>
 
-          <div className="flex items-center flex-shrink-0 select-none">
-            {RightSide.map((item, index) => (
-              // The separator is an `::after` so that `empty:hidden` can drop
-              // the whole slot — separator included — when the item rendered
-              // nothing (e.g. patient info with `showPatientInfo: 'disabled'`).
-              <div
-                key={index}
-                className="after:border-primary-dark flex items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']"
-              >
-                {item}
-              </div>
-            ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-primary hover:bg-primary-dark h-full w-full"
-                >
-                  <Icons.GearSettings />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {menuOptions.map((option, index) => {
-                  const IconComponent = option.icon
-                    ? Icons[option.icon as keyof typeof Icons]
-                    : null;
-                  return (
-                    <DropdownMenuItem
-                      key={index}
-                      onSelect={option.onClick}
-                      className="flex items-center gap-2 py-2"
-                    >
-                      {IconComponent && (
-                        <span className="flex h-4 w-4 items-center justify-center">
-                          <Icons.ByName name={option.icon} />
-                        </span>
-                      )}
-                      <span className="flex-1">{option.title}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+        {/* Mobile/tablet (< 1024px): logo + right-side slots, then a scrollable toolbar row */}
+        <div className="flex flex-col lg:hidden">
+          <div className="flex h-[40px] items-center justify-between gap-1 px-1">
+            <div className="flex-shrink-0">{logo}</div>
+            <div className="flex min-w-0 flex-1 select-none items-center justify-end overflow-hidden">
+              {rightSideItems}
+              <div className="flex-shrink-0">{settingsMenu}</div>
+            </div>
+          </div>
+          <div className="border-primary-dark ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1">
+            <div className="mx-auto flex items-center gap-1">{children}</div>
           </div>
         </div>
       </NavBar>

@@ -1,5 +1,6 @@
 import HeaderUndoRedo from '../ViewerLayout/HeaderUndoRedo';
 import HeaderPatientInfo from '../ViewerLayout/HeaderPatientInfo';
+import HeaderDownloadButton from '../ViewerLayout/HeaderDownloadButton';
 
 /**
  * The right side of the viewer header's menu bar, ahead of the settings menu.
@@ -14,6 +15,6 @@ import HeaderPatientInfo from '../ViewerLayout/HeaderPatientInfo';
  */
 export default {
   'ohif.headerRightSide': {
-    items: [HeaderUndoRedo, HeaderPatientInfo],
+    items: [HeaderUndoRedo, HeaderDownloadButton, HeaderPatientInfo],
   },
 };

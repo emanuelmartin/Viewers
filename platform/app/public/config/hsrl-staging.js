@@ -51,6 +51,13 @@ window.config = {
     createStudyListFetcher: () => null,
   },
 
+  // Logo del indicador de carga
+  ui: {
+    whiteLabeling: {
+      logo: '/viewers2/assets/logo-hsrl.png',
+    },
+  },
+
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',

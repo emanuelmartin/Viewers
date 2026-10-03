@@ -109,3 +109,19 @@
 .ohif-scrollbar-toolbar::-webkit-scrollbar-thumb:hover {
   background-color: #173239;
 }
+
+/* LOADING INDICATOR ANIMATION */
+@keyframes loading-bounce {
+  0%, 80%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 0.5;
+    transform: translateY(-8px);
+  }
+}
+
+.loading-dot {
+  animation: loading-bounce 1.4s infinite ease-in-out;
+}

@@ -7,6 +7,9 @@ import ViewerHeader from './ViewerHeader';
 import SidePanelWithServices from '../Components/SidePanelWithServices';
 import { Onboarding, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@ohif/ui-next';
 import useResizablePanels from './ResizablePanelsHook';
+import MobileBottomPanels from './MobileBottomPanels';
+import MobileNavTabs, { MobileTab } from './MobileNavTabs';
+import PanelInterpretations from '../Panels/PanelInterpretations';
 
 const resizableHandleClassName = 'mt-[1px] bg-background';
 
@@ -33,6 +36,22 @@ function ViewerLayout({
   const { panelService, hangingProtocolService, customizationService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
 
+  // Reactive mobile detection
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const initialRightPanelClosed = isMobile ? true : rightPanelClosed;
+  const initialLeftPanelClosed = isMobile ? true : leftPanelClosed;
+
   const hasPanels = useCallback(
     (side): boolean => !!panelService.getPanels(side).length,
     [panelService]
@@ -40,8 +59,13 @@ function ViewerLayout({
 
   const [hasRightPanels, setHasRightPanels] = useState(hasPanels('right'));
   const [hasLeftPanels, setHasLeftPanels] = useState(hasPanels('left'));
-  const [leftPanelClosedState, setLeftPanelClosed] = useState(leftPanelClosed);
-  const [rightPanelClosedState, setRightPanelClosed] = useState(rightPanelClosed);
+  const [leftPanelClosedState, setLeftPanelClosed] = useState(initialLeftPanelClosed);
+  const [rightPanelClosedState, setRightPanelClosed] = useState(initialRightPanelClosed);
+
+  // Mobile: get panel tabs directly for bottom panel rendering
+  const [leftPanelTabs, setLeftPanelTabs] = useState(() => panelService.getPanels('left'));
+  const [rightPanelTabs, setRightPanelTabs] = useState(() => panelService.getPanels('right'));
+  const [mobileTab, setMobileTab] = useState<MobileTab>('images');
 
   const [
     leftPanelProps,
@@ -132,6 +156,8 @@ function ViewerLayout({
       ({ options }) => {
         setHasLeftPanels(hasPanels('left'));
         setHasRightPanels(hasPanels('right'));
+        setLeftPanelTabs(panelService.getPanels('left'));
+        setRightPanelTabs(panelService.getPanels('right'));
         if (options?.leftPanelClosed !== undefined) {
           setLeftPanelClosed(options.leftPanelClosed);
         }
@@ -148,6 +174,80 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
+  // Study browser tab: first left panel (PanelStudyBrowser)
+  const studiesPanelTab = leftPanelTabs[0];
+  // Bottom series panel: right tabs excluding interpretations (it lives in its own top tab)
+  const bottomRightTabs = rightPanelTabs.filter(t => t.name !== 'panelInterpretations');
+
+  // Mobile layout: header + top nav tabs + content area
+  if (isMobile) {
+    return (
+      <div className="flex h-screen flex-col overflow-hidden">
+        <ViewerHeader
+          hotkeysManager={hotkeysManager}
+          extensionManager={extensionManager}
+          servicesManager={servicesManager}
+          appConfig={appConfig}
+        />
+        {showLoadingIndicator && (
+          <LoadingIndicatorProgress
+            className="h-full w-full bg-background"
+            logo={appConfig?.ui?.whiteLabeling?.logo}
+          />
+        )}
+
+        {/* Top navigation tabs: Estudios | Imágenes | Interpretación */}
+        <MobileNavTabs
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+        />
+
+        {/* Estudios tab — study browser panel */}
+        {mobileTab === 'studies' && (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
+            {studiesPanelTab ? (
+              <studiesPanelTab.content />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Sin estudios disponibles
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Imágenes tab — viewport always mounted (hidden when inactive to avoid reload) */}
+        <div className={mobileTab === 'images' ? 'flex flex-1 flex-col overflow-hidden' : 'hidden'}>
+          <div
+            className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
+            onMouseEnter={handleMouseEnter}
+          >
+            <ViewportGridComp
+              servicesManager={servicesManager}
+              viewportComponents={viewportComponents}
+              commandsManager={commandsManager}
+            />
+          </div>
+          <MobileBottomPanels
+            leftPanelTabs={leftPanelTabs}
+            rightPanelTabs={bottomRightTabs}
+            servicesManager={servicesManager}
+          />
+        </div>
+
+        {/* Interpretaciones tab */}
+        {mobileTab === 'interpretations' && (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black">
+            <PanelInterpretations />
+          </div>
+        )}
+
+        <Onboarding tours={customizationService.getCustomization('ohif.tours')} />
+        <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
+      </div>
+    );
+  }
+
+  // Desktop layout: left panels | viewport | right panels
   return (
     <div>
       <ViewerHeader
@@ -161,7 +261,7 @@ function ViewerLayout({
         style={{ height: 'calc(100vh - 52px)' }}
       >
         <React.Fragment>
-          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-background" />}
+          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-background" logo={appConfig?.ui?.whiteLabeling?.logo} />}
           <ResizablePanelGroup {...resizablePanelGroupProps}>
             {/* LEFT SIDEPANELS */}
             {hasLeftPanels ? (

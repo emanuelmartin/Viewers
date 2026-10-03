@@ -71,8 +71,12 @@ const useResizablePanels = (
    * Note that the width attributed to the handles must be taken into account.
    */
   const getPercentageSize = pixelSize => {
-    const { width: panelGroupWidth } = resizablePanelGroupElemRef.current?.getBoundingClientRect();
-    return (pixelSize / (panelGroupWidth - resizableHandlesWidth.current)) * 100;
+    // On mobile the ResizablePanelGroup is not rendered.
+    const rect = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return 0;
+    }
+    return (pixelSize / (rect.width - resizableHandlesWidth.current)) * 100;
   };
 
   /**
@@ -80,9 +84,12 @@ const useResizablePanels = (
    * Note that the width attributed to the handles must be taken into account.
    */
   const getExpandedPixelWidth = percentageSize => {
-    const { width: panelGroupWidth } = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    const rect = resizablePanelGroupElemRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return 0;
+    }
     const expandedWidth =
-      (percentageSize / 100) * (panelGroupWidth - resizableHandlesWidth.current) -
+      (percentageSize / 100) * (rect.width - resizableHandlesWidth.current) -
       panelGroupDefinition.shared.expandedInsideBorderSize;
     return expandedWidth;
   };
@@ -93,6 +100,10 @@ const useResizablePanels = (
   // - Expand those panels that are initially expanded.
   useLayoutEffect(() => {
     const panelGroupElem = getPanelGroupElement(panelGroupDefinition.groupId);
+    if (!panelGroupElem) {
+      // On mobile the ResizablePanelGroup is not rendered.
+      return;
+    }
     resizablePanelGroupElemRef.current = panelGroupElem;
 
     const leftPanelElem = getPanelElement(panelGroupDefinition.left.panelId);
@@ -139,6 +150,11 @@ const useResizablePanels = (
   //   values whenever the resizable panel group is resized (e.g. whenever the
   //   browser window is resized).
   useLayoutEffect(() => {
+    // On mobile the ResizablePanelGroup is not rendered.
+    if (!resizablePanelGroupElemRef.current) {
+      return;
+    }
+
     // Ensure the side panels' percentage size is in synch with the pixel width of the
     // expanded side panels. In general the two get out-of-sync during a browser
     // window resize. Note that this code is here and NOT in the ResizeObserver

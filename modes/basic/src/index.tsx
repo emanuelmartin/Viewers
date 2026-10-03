@@ -24,6 +24,7 @@ export const ohif = {
   layout: '@ohif/extension-default.layoutTemplateModule.viewerLayout',
   sopClassHandler: '@ohif/extension-default.sopClassHandlerModule.stack',
   thumbnailList: '@ohif/extension-default.panelModule.seriesList',
+  interpretations: '@ohif/extension-default.panelModule.panelInterpretations',
   hangingProtocol: '@ohif/extension-default.hangingProtocolModule.default',
   wsiSopClassHandler:
     '@ohif/extension-cornerstone.sopClassHandlerModule.DicomMicroscopySopClassHandler',
@@ -267,8 +268,13 @@ export const basicLayout = {
     // before the sidebars resolve.
     leftPanels: [ohif.thumbnailList],
     leftPanelResizable: true,
-    rightPanels: [pixos.pixos, cornerstone.segmentation, cornerstone.measurements],
-    rightPanelClosed: true,
+    rightPanels: [
+      ohif.interpretations,
+      pixos.pixos,
+      cornerstone.segmentation,
+      cornerstone.measurements,
+    ],
+    rightPanelClosed: false,
     rightPanelResizable: true,
     viewports: [
       {
