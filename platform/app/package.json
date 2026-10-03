@@ -31,6 +31,7 @@
     "analyze": "cross-env RSDOCTOR=true pnpm run build",
     "clean": "shx rm -rf dist",
     "clean:deep": "pnpm run clean && shx rm -rf node_modules",
+    "dev:hsrl": "cross-env PUBLIC_URL=/images/ APP_CONFIG=config/hsrl.js PROXY_TARGET=/dicom-web,/wado PROXY_DOMAIN=https://imagen.hospitalrealsanlucas.com.mx pnpm run dev:fast",
     "dev:fast": "cross-env NODE_OPTIONS=--max-old-space-size=16384 rsbuild dev --config ../../rsbuild.config.ts --config-loader jiti",
     "dev": "cross-env NODE_ENV=development rspack serve --config .webpack/webpack.pwa.js",
     "dev:no:cache": "cross-env NODE_ENV=development rspack serve --config .webpack/webpack.pwa.js",

@@ -27,13 +27,15 @@ window.config = {
   maxNumRequests: {
     interaction: 100,
     thumbnail: 10,
-    prefetch: 25,
+    prefetch: 10,
   },
   maxCacheSize: 2 * 1024 * 1024 * 1024,
   studyPrefetcher: {
     enabled: true,
-    displaySetsCount: 3,
-    maxNumPrefetchRequests: 15,
+    // Production values: with HTTP/1.1 (6 connections per host) a larger
+    // prefetch starves the series being viewed.
+    displaySetsCount: 2,
+    maxNumPrefetchRequests: 10,
     order: 'closest',
   },
   defaultDataSourceName: 'hsrl',
@@ -65,15 +67,21 @@ window.config = {
       configuration: {
         friendlyName: 'HSRL Orthanc DICOM Server',
         name: 'HSRL',
-        wadoUriRoot: 'https://imagen.hospitalrealsanlucas.com.mx/wado',
-        qidoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
-        wadoRoot: 'https://imagen.hospitalrealsanlucas.com.mx/dicom-web',
+        // Same origin as the viewer: on imagen.hospitalrealsanlucas.com.mx this is
+        // the same URL as always; on localhost it goes through the dev server's
+        // proxy (pnpm dev:hsrl), avoiding a CORS preflight on every frame.
+        wadoUriRoot: `${window.location.origin}/wado`,
+        qidoRoot: `${window.location.origin}/dicom-web`,
+        wadoRoot: `${window.location.origin}/dicom-web`,
         qidoSupportsIncludeField: true,
         // Orthanc no decodifica %2F en QIDO: PatientID como "380/26" se manda como "380*26"
         qidoUnsafeCharsAsWildcard: true,
         supportsReject: true,
         dicomUploadEnabled: true,
-        imageRendering: 'wadors',
+        // Whole instance once (WADO-URI) instead of frame by frame: Orthanc
+        // reads the full file for every frame request, so a 224-frame XA cine
+        // took ~34 s per series frame by frame vs ~6 s as one object.
+        imageRendering: 'wadouri',
         thumbnailRendering: 'rendered',
         thumbnailRequestStrategy: 'fetch',
         enableStudyLazyLoad: false,

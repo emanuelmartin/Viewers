@@ -340,16 +340,25 @@ export default defineConfig(({ env }) => {
           target: 'http://localhost:5000',
         },
         // Add conditional proxy based on env vars
+        // PROXY_TARGET may list several paths separated by commas
+        // (e.g. "/dicom-web,/wado"); the rewrite applies where it matches.
         ...(PROXY_TARGET && PROXY_DOMAIN
-          ? {
-              [PROXY_TARGET]: {
-                target: PROXY_DOMAIN,
-                changeOrigin: true,
-                pathRewrite: {
-                  [`^${PROXY_PATH_REWRITE_FROM}`]: PROXY_PATH_REWRITE_TO,
+          ? Object.fromEntries(
+              PROXY_TARGET.split(',').map(target => [
+                target.trim(),
+                {
+                  target: PROXY_DOMAIN,
+                  changeOrigin: true,
+                  ...(PROXY_PATH_REWRITE_FROM
+                    ? {
+                        pathRewrite: {
+                          [`^${PROXY_PATH_REWRITE_FROM}`]: PROXY_PATH_REWRITE_TO,
+                        },
+                      }
+                    : {}),
                 },
-              },
-            }
+              ])
+            )
           : {}),
       },
       // Configure history API fallback
