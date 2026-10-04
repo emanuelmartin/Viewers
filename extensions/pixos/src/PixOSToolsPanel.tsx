@@ -55,8 +55,10 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
   }, [measurementService, servicesManager]);
 
   const activeStudyUID = (): string => {
+    // Also called while rendering, before any viewport has a display set
     const viewport = viewportGridService.getState().viewports.get(viewportGridService.getActiveViewportId());
-    const ds = displaySetService.getDisplaySetByUID(viewport?.displaySetInstanceUIDs?.[0]);
+    const uid = viewport?.displaySetInstanceUIDs?.[0];
+    const ds = uid ? displaySetService.getDisplaySetByUID(uid) : null;
     return ds?.StudyInstanceUID || studyInstanceUIDs()[0];
   };
 
