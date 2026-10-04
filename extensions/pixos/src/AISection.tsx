@@ -14,8 +14,12 @@ const STATUS: Record<string, string> = {
 type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
 type AIState = { plan: PlanItem[]; analysis: any; quant: any[]; description?: string };
 
-/** MONAI boxes are in RAS millimetres; Cornerstone works in LPS. */
-const rasToLps = (p: number[]): [number, number, number] => [-p[0], -p[1], p[2]];
+/**
+ * The lung nodule bundle reads the volume with ITK and saves boxes in its
+ * patient coordinates, LPS millimetres like Cornerstone (checked on an HRSL
+ * study: a reported right posterior subpleural nodule lands there).
+ */
+const toWorld = (p: number[]): [number, number, number] => [p[0], p[1], p[2]];
 
 /**
  * Moves the active viewport to a world point (LPS mm) and rings it for a few
@@ -202,11 +206,12 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                 <div key={i} className="mt-1 flex items-center justify-between gap-2">
                   <span>{i + 1}. {n.diameter_mm} mm · confianza {Math.round(n.score * 100)}%</span>
                   <button className={btn} onClick={() => {
-                    showOnSeries(servicesManager, commandsManager, n.seriesUID, rasToLps(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`)
+                    showOnSeries(servicesManager, commandsManager, n.seriesUID, toWorld(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`)
                       .then(problem => {
                         setMessage(problem ? '' : `Nódulo ${i + 1} en la vista activa${n.series ? ` (serie ${n.series})` : ''}: anillo amarillo.`);
                         setError(problem || '');
-                      });
+                      })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar el nódulo: ${e?.message || e}`); });
                   }}>Ver en imagen</button>
                 </div>
               ))}
