@@ -3,6 +3,7 @@ import { callCloud } from './ris';
 import { SLABS, applySlab, createSegmentation } from './tools';
 import { FOLLOW_UP_MODULE, SCENARIO_MODULES, WORKFLOWS, type Step } from './workflows';
 import PriorsSection, { openCompare, type Prior } from './PriorsSection';
+import { GraftSection, XASection } from './ClinicalSection';
 
 const title = 'mb-1 text-[13px] font-semibold text-white';
 const muted = 'text-[12px] text-white/60';
@@ -109,6 +110,10 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
       case 'send':
         scrollTo('pixos-send');
         break;
+      case 'section':
+        scrollTo(step.target);
+        text = `${step.label}${step.hint ? `: ${step.hint}` : ''}`;
+        break;
       case 'compare':
         if (prior) openCompare(studyUID, prior);
         else problem = 'No hay un estudio previo con imágenes de esta región';
@@ -173,6 +178,16 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
         );
       })}
       {note && <div className="mt-2 rounded bg-white/5 px-2 py-1 text-[12px]">{note}</div>}
+      {info.workflowId === 'xa_angio' && (
+        <div className="mt-3">
+          <XASection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={studyUID} canSave={canSave} />
+        </div>
+      )}
+      {(info.workflowId === 'us_transplant' || info.scenarios?.includes('trasplante')) && (
+        <div className="mt-3">
+          <GraftSection servicesManager={servicesManager} studyUID={studyUID} priors={info.priors || []} canSave={canSave} />
+        </div>
+      )}
       {info.priors && (
         <div className="mt-3">
           <PriorsSection servicesManager={servicesManager} priors={info.priors} studyUID={studyUID}

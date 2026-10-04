@@ -13,6 +13,7 @@
  *   calc     calculator of the panel on the marked measurements
  *   guide    reminder for the report (scale, classification)
  *   send     send measurements and results to the report
+ *   section  scrolls to a section of the panel (target = element id)
  */
 
 export type Step =
@@ -25,6 +26,7 @@ export type Step =
   | { kind: 'calc'; label: string; calcId: string; hint?: string }
   | { kind: 'guide'; label: string; hint: string }
   | { kind: 'send'; label: string }
+  | { kind: 'section'; label: string; target: string; hint?: string }
   | { kind: 'compare'; label: string }
   | { kind: 'priors'; label: string }
   | { kind: 'followup'; label: string; calc: 'recist' | 'growth' | 'ri'; hint?: string };
@@ -180,7 +182,35 @@ export const WORKFLOWS: Record<string, Workflow> = {
   },
   us_msk: { title: 'Ultrasonido musculoesquelético', steps: [length(), send] },
   mg_breast: { title: 'Mastografía', steps: [length(), { kind: 'guide', label: 'BI-RADS', hint: 'Categoría BI-RADS y densidad' }, send] },
-  xa_angio: { title: 'Hemodinamia', steps: [length('Calibre y longitud de estenosis'), { kind: 'tool', label: 'Calibración', toolName: 'CalibrationLine' }, send] },
+  us_transplant: {
+    title: 'Doppler de injerto renal',
+    steps: [
+      length('Injerto: longitudinal, transverso y anteroposterior'),
+      { kind: 'section', label: 'Volumen del injerto', target: 'pixos-graft', hint: '«De 3 longitudes» (elipsoide)' },
+      { kind: 'guide', label: 'Escala de grises', hint: 'Diferenciación corticomedular, ecogenicidad cortical, hidronefrosis (grado y pelvis AP), colecciones perinjerto (linfocele, urinoma, hematoma) con volumen' },
+      { kind: 'tool', label: 'Sonda (velocidades)', toolName: 'Probe' },
+      { kind: 'guide', label: 'Doppler arterial', hint: 'IR en arterias segmentarias/interlobares de polo superior, medio e inferior (mediana); VPS en la anastomosis y en la iliaca externa; tiempo de aceleración; morfología parvus tardus' },
+      { kind: 'guide', label: 'Doppler venoso', hint: 'Vena renal permeable con flujo fásico; diástole arterial invertida + sin flujo venoso = trombosis' },
+      { kind: 'section', label: 'Interpretación y evolución', target: 'pixos-graft', hint: 'Estenosis: VPS > 200–250 cm/s, relación > 1.8–3, TA > 0.1 s; IR ≥ 0.80 inespecífico' },
+      { kind: 'compare', label: 'Comparar con el previo' },
+      send,
+    ],
+  },
+  xa_angio: {
+    title: 'Coronariografía / hemodinamia',
+    steps: [
+      { kind: 'section', label: 'Adquisiciones, proyecciones y dosis', target: 'pixos-xa', hint: 'Clic en una adquisición para verla; «Técnica y dosis al informe»' },
+      { kind: 'guide', label: 'Dominancia', hint: 'Arteria que da la descendente posterior: derecha, izquierda o codominante' },
+      { kind: 'guide', label: 'Revisión por segmentos', hint: 'TCI; DA proximal/media/distal y diagonales; CX y marginales; CD proximal/media/distal, DP y PL; puentes y colaterales (Rentrop)' },
+      { kind: 'tool', label: 'Calibración (catéter)', toolName: 'CalibrationLine', hint: 'Sobre el catéter: 5 Fr = 1.67 mm, 6 Fr = 2.0 mm, 7 Fr = 2.33 mm' },
+      length('Diámetro de referencia y luminal mínimo; longitud de la lesión'),
+      { kind: 'section', label: 'QCA (% de estenosis)', target: 'pixos-qca', hint: '«De las longitudes»; 50–69% intermedia: FFR/iFR' },
+      { kind: 'section', label: 'TIMI frame count', target: 'pixos-tfc', hint: 'Cuadro inicial y final de la arteria culpable' },
+      { kind: 'guide', label: 'Bifurcaciones y complejidad', hint: 'Medina (rama principal proximal, distal, lateral: 1,1,1…); oclusión crónica (J-CTO); SYNTAX en multivaso o TCI' },
+      { kind: 'guide', label: 'Flujo y conclusión', hint: 'TIMI 0–3 por vaso; número de vasos con lesión ≥ 70% (≥ 50% en TCI); FEVI si hubo ventriculografía' },
+      send,
+    ],
+  },
   generic: { title: 'Estudio', steps: [length(), roi(), send] },
 };
 
@@ -209,8 +239,9 @@ export const SCENARIO_MODULES: Record<string, Module> = {
     title: 'Trasplante',
     steps: [
       length('Tamaño del injerto'),
-      { kind: 'followup', label: 'Índice de resistencia', calc: 'ri', hint: 'VPS y VFD del Doppler: IR normal < 0.8' },
-      { kind: 'guide', label: 'Revisión del injerto', hint: 'Hidronefrosis, colecciones perinjerto, flujo arterial y venoso, anastomosis' },
+      { kind: 'followup', label: 'Índice de resistencia', calc: 'ri', hint: 'VPS y VFD del Doppler: IR normal 0.5–0.79' },
+      { kind: 'guide', label: 'Revisión del injerto', hint: 'Hidronefrosis, colecciones perinjerto (volumen y evolución), perfusión, anastomosis arterial y vena renal' },
+      { kind: 'guide', label: 'En TC/RM', hint: 'Colecciones, hidronefrosis, permeabilidad de la anastomosis (angio), lesiones del injerto y de los riñones nativos (cáncer renal adquirido)' },
     ],
   },
   infeccion: {

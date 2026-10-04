@@ -12,6 +12,7 @@ export type Prior = {
   sameModality: boolean; daysBefore: number; conclusion: string | null;
   quant: { task: string; text: string; data: any }[];
   measurements: { kind: string; label: string; text: string; values: Record<string, any> }[];
+  values?: Record<string, number> | null; // graft Doppler values read from the report
 };
 
 const fmtDate = (d: any) => (d ? new Date(d.iso || d).toLocaleDateString('es-MX') : '');
