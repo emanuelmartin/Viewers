@@ -152,7 +152,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
   return (
     <div className="mb-4 border-b border-white/10 pb-3">
-      <div className={title}>IA (BOFH)</div>
+      <div className={title}>IA</div>
       {error && <div className="mb-2 rounded bg-red-800/60 px-2 py-1 text-[12px]">{error}</div>}
       {message && <div className="mb-2 rounded bg-green-800/50 px-2 py-1 text-[12px]">{message}</div>}
 

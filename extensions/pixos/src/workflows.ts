@@ -24,9 +24,13 @@ export type Step =
   | { kind: 'ai'; label: string; hint?: string }
   | { kind: 'calc'; label: string; calcId: string; hint?: string }
   | { kind: 'guide'; label: string; hint: string }
-  | { kind: 'send'; label: string };
+  | { kind: 'send'; label: string }
+  | { kind: 'compare'; label: string }
+  | { kind: 'priors'; label: string }
+  | { kind: 'followup'; label: string; calc: 'recist' | 'growth' | 'ri'; hint?: string };
 
 export type Workflow = { title: string; steps: Step[] };
+export type Module = { title: string; steps: Step[] };
 
 // W/L presets as [lower, upper]
 const W = {
@@ -169,4 +173,75 @@ export const WORKFLOWS: Record<string, Workflow> = {
   mg_breast: { title: 'Mastografía', steps: [length(), { kind: 'guide', label: 'BI-RADS', hint: 'Categoría BI-RADS y densidad' }, send] },
   xa_angio: { title: 'Hemodinamia', steps: [length('Calibre y longitud de estenosis'), { kind: 'tool', label: 'Calibración', toolName: 'CalibrationLine' }, send] },
   generic: { title: 'Estudio', steps: [length(), roi(), send] },
+};
+
+
+/** Extra steps per clinical scenario (from the order's reason, report and tags). */
+export const SCENARIO_MODULES: Record<string, Module> = {
+  trauma: {
+    title: 'Trauma',
+    steps: [
+      { kind: 'window', label: 'Ventana ósea (fracturas)', voi: W.bone },
+      { kind: 'layout', label: 'Reconstrucción 3D', protocolId: 'only3D' },
+      { kind: 'guide', label: 'Revisión sistemática', hint: 'Fracturas, hemorragia, neumotórax, lesión de órgano sólido, líquido libre, columna' },
+      { kind: 'guide', label: 'Hallazgo crítico', hint: 'Si hay hemorragia, neumotórax o lesión inestable: «Hallazgo crítico» en el informe' },
+    ],
+  },
+  oncologia: {
+    title: 'Oncología',
+    steps: [
+      bidir('Lesiones diana: hasta 5 (2 por órgano); ganglios por eje corto'),
+      { kind: 'followup', label: 'RECIST 1.1 contra el basal', calc: 'recist', hint: 'Suma de diámetros actual contra la del estudio basal' },
+      { kind: 'guide', label: 'Lesiones nuevas', hint: 'Una lesión nueva inequívoca es progresión aunque la suma no cambie' },
+    ],
+  },
+  trasplante: {
+    title: 'Trasplante',
+    steps: [
+      length('Tamaño del injerto'),
+      { kind: 'followup', label: 'Índice de resistencia', calc: 'ri', hint: 'VPS y VFD del Doppler: IR normal < 0.8' },
+      { kind: 'guide', label: 'Revisión del injerto', hint: 'Hidronefrosis, colecciones perinjerto, flujo arterial y venoso, anastomosis' },
+    ],
+  },
+  infeccion: {
+    title: 'Infección',
+    steps: [roi('Densidad de colección (UH)'), { kind: 'segment', label: 'Volumen de colección o absceso' },
+      { kind: 'guide', label: 'Complicaciones', hint: 'Colecciones, gas, trombosis, extensión' }],
+  },
+  vascular_evc: {
+    title: 'Vascular / EVC',
+    steps: [{ kind: 'window', label: 'Ventana cerebro', voi: W.brain },
+      { kind: 'calc', label: 'Volumen de hematoma (ABC/2)', calcId: 'abc2', hint: '3 diámetros' },
+      { kind: 'guide', label: 'ASPECTS / territorio', hint: 'Isquemia: ASPECTS; hemorragia: volumen y extensión ventricular' }],
+  },
+  litiasis: {
+    title: 'Litiasis',
+    steps: [{ kind: 'tool', label: 'Sonda (UH del lito)', toolName: 'Probe' }, length('Diámetro mayor del lito'),
+      { kind: 'guide', label: 'Obstrucción', hint: 'Hidronefrosis, ubicación (cáliz, pelvis, uréter, UUV) y tamaño' }],
+  },
+  nodulo_seguimiento: {
+    title: 'Nódulo en seguimiento',
+    steps: [bidir('Diámetros del nódulo'),
+      { kind: 'followup', label: 'Tiempo de duplicación', calc: 'growth', hint: 'Diámetro previo y actual' }],
+  },
+  postquirurgico: {
+    title: 'Posquirúrgico',
+    steps: [{ kind: 'window', label: 'Ventana ósea (material)', voi: W.bone },
+      { kind: 'guide', label: 'Control posquirúrgico', hint: 'Material, colecciones, complicaciones; comparar con el prequirúrgico' }],
+  },
+  obstetrico: { title: 'Obstétrico', steps: [length('Biometría fetal'), { kind: 'guide', label: 'Biometría', hint: 'DBP, CC, CA, LF; líquido amniótico; placenta' }] },
+  degenerativo: { title: 'Degenerativo', steps: [length(), { kind: 'tool', label: 'Ángulo', toolName: 'Angle' }] },
+  tamizaje: { title: 'Tamizaje', steps: [{ kind: 'guide', label: 'Clasificación', hint: 'Use la escala de tamizaje (Lung-RADS, BI-RADS)' }] },
+  dolor_agudo: { title: 'Dolor agudo', steps: [{ kind: 'guide', label: 'Urgencias', hint: 'Apendicitis, colecistitis, obstrucción, perforación, litiasis, isquemia' }] },
+};
+
+/** Follow-up (control) studies: compare with the prior and quantify change. */
+export const FOLLOW_UP_MODULE: Module = {
+  title: 'Control / evolución',
+  steps: [
+    { kind: 'compare', label: 'Comparar lado a lado con el previo' },
+    { kind: 'priors', label: 'Conclusión y medidas del previo' },
+    { kind: 'followup', label: 'Cambio de tamaño (duplicación / RECIST)', calc: 'growth' },
+    { kind: 'guide', label: 'Describir evolución', hint: 'Nuevo, resuelto, estable, aumento o disminución, con ambas medidas' },
+  ],
 };

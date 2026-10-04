@@ -102,7 +102,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
         <div className={`mb-3 rounded px-2 py-1 text-[12px] ${notice.type === 'ok' ? 'bg-green-800/60' : 'bg-red-800/60'}`}>{notice.text}</div>
       )}
 
-      <WorkflowSection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={activeStudyUID()} ai={access.ai} />
+      <WorkflowSection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={activeStudyUID()} ai={access.ai} canSave={access.canSave} />
 
       <div className={section}>
         <div className={title}>Reconstrucciones</div>

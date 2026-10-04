@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { SLABS, applySlab, createSegmentation } from './tools';
-import { WORKFLOWS, type Step } from './workflows';
+import { FOLLOW_UP_MODULE, SCENARIO_MODULES, WORKFLOWS, type Step } from './workflows';
+import PriorsSection, { openCompare, type Prior } from './PriorsSection';
 
 const title = 'mb-1 text-[13px] font-semibold text-white';
 const muted = 'text-[12px] text-white/60';
@@ -16,6 +17,12 @@ type Info = {
   workflowId: string; regions: string[]; studyType: string; contrast: boolean | null; laterality: string | null; source: string;
   reason?: string | null; probableDx?: string[]; dxSource?: string | null; fromReport?: boolean;
   orderReason?: string | null; reasonSource?: string | null; dicomComments?: string[];
+  scenarios?: string[]; episode?: string; priors?: Prior[];
+};
+const SCENARIO_LABELS: Record<string, string> = {
+  trauma: 'trauma', oncologia: 'oncología', trasplante: 'trasplante', infeccion: 'infección', vascular_evc: 'vascular / EVC',
+  litiasis: 'litiasis', nodulo_seguimiento: 'nódulo en seguimiento', obstetrico: 'obstétrico', postquirurgico: 'posquirúrgico',
+  degenerativo: 'degenerativo', tamizaje: 'tamizaje', dolor_agudo: 'dolor agudo',
 };
 
 const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -34,8 +41,8 @@ function applyWindow(servicesManager, voi: [number, number]): string | null {
  * diagnoses for AI roles) and the steps for this kind of study, each one a
  * click that sets up the viewer.
  */
-function WorkflowSection({ servicesManager, commandsManager, studyUID, ai }: {
-  servicesManager: any; commandsManager: any; studyUID: string; ai: boolean;
+function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSave }: {
+  servicesManager: any; commandsManager: any; studyUID: string; ai: boolean; canSave: boolean;
 }) {
   const [info, setInfo] = useState<Info | null>(null);
   const [error, setError] = useState('');
@@ -54,7 +61,14 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai }: {
   if (!info) return <div className={`mb-4 ${muted}`}>Cargando flujo de trabajo…</div>;
 
   const workflow = WORKFLOWS[info.workflowId] || WORKFLOWS.generic;
-  const steps = workflow.steps.filter(s => s.kind !== 'ai' || ai);
+  // Base workflow + clinical scenario modules + follow-up module; numbered as one list
+  const groups = [
+    { title: workflow.title, steps: workflow.steps },
+    ...(info.scenarios || []).map(sc => SCENARIO_MODULES[sc]).filter(Boolean),
+    ...(info.episode === 'control' ? [FOLLOW_UP_MODULE] : []),
+  ].map(g => ({ ...g, steps: g.steps.filter(st => st.kind !== 'ai' || ai) }));
+  const steps = groups.flatMap(g => g.steps);
+  const prior = (info.priors || []).find(p => p.instanceUUID && p.sameModality) || (info.priors || []).find(p => p.instanceUUID);
 
   const run = (step: Step, index: number) => {
     let problem: string | null = null;
@@ -95,6 +109,17 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai }: {
       case 'send':
         scrollTo('pixos-send');
         break;
+      case 'compare':
+        if (prior) openCompare(studyUID, prior);
+        else problem = 'No hay un estudio previo con imágenes de esta región';
+        break;
+      case 'priors':
+        scrollTo('pixos-priors');
+        break;
+      case 'followup':
+        scrollTo('pixos-followup');
+        text = `${step.label}${step.hint ? `: ${step.hint}` : ''}`;
+        break;
     }
     setNote(problem || text);
     if (!problem) setDone(d => (d.includes(index) ? d : [...d, index]));
@@ -120,17 +145,40 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai }: {
           {!!info.dicomComments?.length && <div className="text-white/60">DICOM: {info.dicomComments.join(' · ')}</div>}
         </div>
       ) : null}
-      <div className="mt-2 flex flex-col gap-1">
-        {steps.map((step, i) => (
-          <button key={i} title={'hint' in step ? step.hint : undefined}
-            className="flex items-center justify-between rounded border border-white/15 px-2 py-1 text-left text-[12px] text-white hover:bg-white/10"
-            onClick={() => run(step, i)}>
-            <span>{i + 1}. {step.label}{step.kind === 'ai' ? ' · IA' : ''}</span>
-            <span className={done.includes(i) ? 'text-green-400' : 'text-white/30'}>{done.includes(i) ? '✓' : '›'}</span>
-          </button>
-        ))}
-      </div>
+      {(!!info.scenarios?.length || info.episode === 'control') && (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {info.episode === 'control' && <span className="rounded bg-amber-700/50 px-1.5 text-[11px]">control</span>}
+          {(info.scenarios || []).map(sc => <span key={sc} className="rounded bg-white/10 px-1.5 text-[11px]">{SCENARIO_LABELS[sc] || sc}</span>)}
+        </div>
+      )}
+      {groups.map((g, gi) => {
+        const offset = groups.slice(0, gi).reduce((a, x) => a + x.steps.length, 0);
+        return (
+          <div key={gi} className="mt-2">
+            {gi > 0 && <div className="mb-1 text-[12px] font-semibold text-white/80">{g.title}</div>}
+            <div className="flex flex-col gap-1">
+              {g.steps.map((step, k) => {
+                const i = offset + k;
+                return (
+                  <button key={i} title={'hint' in step ? step.hint : undefined}
+                    className="flex items-center justify-between rounded border border-white/15 px-2 py-1 text-left text-[12px] text-white hover:bg-white/10"
+                    onClick={() => run(step, i)}>
+                    <span>{i + 1}. {step.label}{step.kind === 'ai' ? ' · IA' : ''}</span>
+                    <span className={done.includes(i) ? 'text-green-400' : 'text-white/30'}>{done.includes(i) ? '✓' : '›'}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
       {note && <div className="mt-2 rounded bg-white/5 px-2 py-1 text-[12px]">{note}</div>}
+      {info.priors && (
+        <div className="mt-3">
+          <PriorsSection servicesManager={servicesManager} priors={info.priors} studyUID={studyUID}
+            episode={info.episode || 'nuevo'} canSave={canSave} />
+        </div>
+      )}
     </div>
   );
 }
