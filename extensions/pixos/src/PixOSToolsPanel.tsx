@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAccess, subscribeAccess, callCloud, loadAccess, type ViewerAccess } from './ris';
 import AISection from './AISection';
+import WorkflowSection from './WorkflowSection';
 import {
   CALCULATORS,
   LAYOUTS,
@@ -101,6 +102,8 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
         <div className={`mb-3 rounded px-2 py-1 text-[12px] ${notice.type === 'ok' ? 'bg-green-800/60' : 'bg-red-800/60'}`}>{notice.text}</div>
       )}
 
+      <WorkflowSection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={activeStudyUID()} ai={access.ai} />
+
       <div className={section}>
         <div className={title}>Reconstrucciones</div>
         <div className="flex flex-wrap gap-1">
@@ -170,7 +173,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
             <span>{i.text}{i.series ? <span className={muted}> · {i.series}</span> : null}</span>
           </label>
         ))}
-        <div className={`mt-2 ${title}`}>Calculadoras (con las medidas marcadas, en orden)</div>
+        <div id="pixos-calc" className={`mt-2 ${title}`}>Calculadoras (con las medidas marcadas, en orden)</div>
         <div className="flex flex-col gap-1">
           {CALCULATORS.map(c => (
             <button key={c.id} className={`${btn} text-left`} title={c.hint} onClick={() => {
@@ -188,7 +191,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
       </div>
 
       <div className={section}>
-        <div className={title}>Enviar al informe ({toSend.length})</div>
+        <div id="pixos-send" className={title}>Enviar al informe ({toSend.length})</div>
         {results.map(r => (
           <div key={r.key} className="mb-1 flex items-start justify-between gap-2 text-[12px]">
             <span>{r.text}</span>
@@ -210,6 +213,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
         )}
       </div>
 
+      {access.ai && <div id="pixos-ai" />}
       {access.ai && <AISection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={activeStudyUID()} />}
     </div>
   );
