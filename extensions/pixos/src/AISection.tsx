@@ -26,7 +26,7 @@ const toWorld = (p: number[]): [number, number, number] => [p[0], p[1], p[2]];
  * seconds: volume viewports (MPR) centre the point on its slice; stack
  * viewports go to the closest image.
  */
-function showPoint(servicesManager, world: [number, number, number], label: string): string | null {
+function showPoint(servicesManager, world: [number, number, number], label: string, lungWindow = false): string | null {
   const { viewportGridService, cornerstoneViewportService } = servicesManager.services;
   const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
   if (!viewport) {
@@ -44,6 +44,11 @@ function showPoint(servicesManager, world: [number, number, number], label: stri
       focalPoint: world,
       position: [world[0] + position[0] - focalPoint[0], world[1] + position[1] - focalPoint[1], world[2] + position[2] - focalPoint[2]],
     });
+    viewport.render();
+  }
+  if (lungWindow && typeof viewport.setProperties === 'function') {
+    // Lung window (W 1500 / L -600): nodules are hard to see in soft tissue
+    viewport.setProperties({ voiRange: { lower: -1350, upper: 150 } });
     viewport.render();
   }
   // Ring on top of the canvas at the point, removed after 6 s
@@ -99,7 +104,7 @@ async function showOnSeries(servicesManager, commandsManager, seriesUID: string 
       await new Promise(r => setTimeout(r, 500));
     }
   }
-  return showPoint(servicesManager, world, label);
+  return showPoint(servicesManager, world, label, true);
 }
 
 /**
