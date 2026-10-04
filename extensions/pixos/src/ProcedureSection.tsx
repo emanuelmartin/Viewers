@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
-import { DEF, EVENT_DEFS, dicomTime, narrativeOf, readingOf, sentenceOf, type ProcEvent } from './procedure';
+import { DEF, EVENT_DEFS, dicomTime, narrativeOf, sentenceOf, type ProcEvent } from './procedure';
 
 const title = 'mb-1 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
 const muted = 'text-[12px] text-white/60';
 const field = 'w-full rounded border border-white/20 bg-black px-1 py-0.5 text-[12px] text-white';
-const FLAG_STYLE = { '': 'border-white/15', importante: 'border-amber-400', complicacion: 'border-red-500' };
+// Inline colours: the app's Tailwind build does not scan this extension for arbitrary border colours
+const FLAG_COLOR = { '': 'rgba(255,255,255,0.15)', importante: '#fbbf24', complicacion: '#ef4444' };
 
 export type Run = { time: string | null; projection: string; frames: number; seriesInstanceUID: string; sopInstanceUID?: string };
 
@@ -61,7 +62,6 @@ function goTo(servicesManager: any, commandsManager: any, ref: NonNullable<ProcE
 }
 
 const newId = () => Math.random().toString(36).slice(2, 10);
-const now = () => new Date().toTimeString().slice(0, 8);
 
 /**
  * Procedure log: timed events (access, lesions, FFR/iFR, IVUS/OCT, balloons,
@@ -104,7 +104,9 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
   const start = (type: string, mark: boolean) => {
     const pos = mark ? currentPosition(servicesManager, runs) : null;
     if (mark && !pos) return setMsg('No hay una imagen en la vista activa');
-    setEditing({ id: newId(), type, time: pos?.time || now(), flag: '', fields: {}, note: '', ref: pos?.ref || null });
+    // Without an image: right after the latest event (documenting afterwards, the clock time would be wrong)
+    const last = events.map(e => e.time).filter(Boolean).sort().pop() || '';
+    setEditing({ id: newId(), type, time: pos?.time || last, flag: '', fields: {}, note: '', ref: pos?.ref || null });
   };
   const save = () => {
     if (!editing) return;
@@ -193,9 +195,10 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
       )}
       <div className="mt-1 flex flex-col gap-1">
         {rows.map(row => row.event ? (
-          <div key={row.key} className={`rounded border-l-4 bg-white/5 px-2 py-1 text-[12px] ${FLAG_STYLE[row.event.flag || '']}`}>
+          <div key={row.key} className="rounded bg-white/5 px-2 py-1 text-[12px]"
+            style={{ borderLeft: `4px solid ${FLAG_COLOR[row.event.flag || '']}` }}>
             <div className="flex items-start justify-between gap-1">
-              <span><b>{row.time ? row.time.slice(0, 5) : '—'}</b> · {DEF[row.event.type]?.label || row.event.type}</span>
+              <span><b>{row.time ? row.time.slice(0, 5) : '—'}</b> · {DEF[row.event.type]?.label || row.event.type}{row.event.flag ? ` · ${row.event.flag === 'complicacion' ? 'complicación' : 'importante'}` : ''}</span>
               <span className="flex gap-1">
                 {row.event.ref && (
                   <button className={btn} title={row.event.ref.label}
@@ -206,7 +209,6 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
               </span>
             </div>
             <div className="text-white/80">{sentenceOf(row.event)}</div>
-            {readingOf(row.event) && row.event.type !== 'nota' && <div className="text-amber-300/90">{readingOf(row.event)}</div>}
           </div>
         ) : (
           <div key={row.key} className={`cursor-pointer px-2 text-[11px] text-white/50 hover:text-white`}
