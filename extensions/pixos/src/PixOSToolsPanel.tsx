@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getAccess, subscribeAccess, callCloud, loadAccess, type ViewerAccess } from './ris';
+import AISection from './AISection';
 import {
   CALCULATORS,
   LAYOUTS,
@@ -37,7 +38,6 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
   const [volumes, setVolumes] = useState<SegmentVolume[] | null>(null);
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState<Notice>(null);
-  const [aiFindings, setAiFindings] = useState<any>(null);
 
   useEffect(() => subscribeAccess(setAccess), []);
 
@@ -208,42 +208,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
         )}
       </div>
 
-      {access.ai && (
-        <div className={section}>
-          <div className={title}>IA (BOFH)</div>
-          <div className="flex flex-wrap gap-1">
-            <button className={btn} disabled={!!busy} onClick={() => run('ai', async () => {
-              await callCloud('viewerRequestAIAnalysis', { StudyInstanceUID: activeStudyUID() });
-              return 'Análisis solicitado: en unos segundos consulte los hallazgos';
-            })}>Analizar con IA</button>
-            <button className={btn} disabled={!!busy} onClick={() => run('ai-f', async () => {
-              const uid = activeStudyUID();
-              const [findings, quant] = await Promise.all([
-                callCloud('viewerAIFindings', { StudyInstanceUID: uid }),
-                callCloud('getQuantitativeFindings', { StudyInstanceUID: uid }).catch(() => null),
-              ]);
-              setAiFindings({ ...findings, quant });
-            })}>Ver hallazgos IA</button>
-          </div>
-          {aiFindings && (
-            <div className="mt-2 text-[12px]">
-              {aiFindings.analysis ? (
-                <>
-                  <div><b>{aiFindings.analysis.isNormal ? 'Sin hallazgos marcados' : 'Hallazgos a revisar'}</b> <span className={muted}>({aiFindings.analysis.model}, {aiFindings.analysis.frames} imágenes; orientativo)</span></div>
-                  <div className="mt-1">{aiFindings.analysis.impression}</div>
-                  {(aiFindings.analysis.abnormalities || []).map((a, n) => <div key={n}>• {a.finding} {a.location ? `(${a.location})` : ''}</div>)}
-                </>
-              ) : <div className={muted}>{aiFindings.job ? `Análisis ${aiFindings.job.status}` : 'Sin análisis todavía'}</div>}
-              {(aiFindings.quant?.results || []).map((q, n) => (
-                <div key={`q${n}`} className="mt-2">
-                  <b>Cuantitativo{aiFindings.quant.validation ? ' (validación)' : ''}:</b> {q.text}
-                  {(q.flags || []).map((f, m) => <div key={m}>• {f}</div>)}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {access.ai && <AISection servicesManager={servicesManager} studyUID={activeStudyUID()} />}
     </div>
   );
 }

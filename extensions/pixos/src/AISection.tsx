@@ -1,0 +1,194 @@
+import React, { useEffect, useState } from 'react';
+import { utilities as csUtils } from '@cornerstonejs/core';
+import { callCloud } from './ris';
+
+const title = 'mb-2 text-[13px] font-semibold text-white';
+const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
+const primaryBtn = 'rounded bg-primary px-2 py-1 text-[12px] text-white hover:opacity-90 disabled:opacity-40';
+const muted = 'text-[12px] text-white/60';
+
+const STATUS: Record<string, string> = {
+  queued: 'en cola', running: 'procesando', done: 'listo', failed: 'falló', skipped: 'no aplica',
+};
+
+type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
+type AIState = { plan: PlanItem[]; analysis: any; quant: any[]; description?: string };
+
+/** MONAI boxes are in RAS millimetres; Cornerstone works in LPS. */
+const rasToLps = (p: number[]): [number, number, number] => [-p[0], -p[1], p[2]];
+
+/**
+ * Moves the active viewport to a world point (LPS mm) and rings it for a few
+ * seconds: volume viewports (MPR) centre the point on its slice; stack
+ * viewports go to the closest image.
+ */
+function showPoint(servicesManager, world: [number, number, number], label: string): string | null {
+  const { viewportGridService, cornerstoneViewportService } = servicesManager.services;
+  const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
+  if (!viewport) {
+    return 'No hay una vista activa';
+  }
+  if (typeof viewport.setImageIdIndex === 'function') {
+    const index = csUtils.getClosestStackImageIndexForPoint(world, viewport);
+    if (index == null) {
+      return 'El punto no está en esta serie: cargue la serie analizada o use MPR';
+    }
+    viewport.setImageIdIndex(index);
+  } else {
+    const { focalPoint, position } = viewport.getCamera();
+    viewport.setCamera({
+      focalPoint: world,
+      position: [world[0] + position[0] - focalPoint[0], world[1] + position[1] - focalPoint[1], world[2] + position[2] - focalPoint[2]],
+    });
+    viewport.render();
+  }
+  // Ring on top of the canvas at the point, removed after 6 s
+  window.setTimeout(() => {
+    const [x, y] = viewport.worldToCanvas(world);
+    const host: HTMLElement = viewport.element;
+    if (!host || !Number.isFinite(x)) return;
+    const ring = document.createElement('div');
+    ring.title = label;
+    Object.assign(ring.style, {
+      position: 'absolute', left: `${x - 22}px`, top: `${y - 22}px`, width: '44px', height: '44px', borderRadius: '50%',
+      border: '2px solid #facc15', boxShadow: '0 0 0 2px rgba(0,0,0,.6)', pointerEvents: 'none', zIndex: '20',
+    });
+    const tag = document.createElement('div');
+    tag.textContent = label;
+    Object.assign(tag.style, {
+      position: 'absolute', left: `${x + 26}px`, top: `${y - 10}px`, color: '#facc15', font: '12px system-ui',
+      textShadow: '0 0 3px #000', pointerEvents: 'none', zIndex: '20', whiteSpace: 'nowrap',
+    });
+    host.style.position = host.style.position || 'relative';
+    host.appendChild(ring);
+    host.appendChild(tag);
+    window.setTimeout(() => { ring.remove(); tag.remove(); }, 6000);
+  }, 150);
+  return null;
+}
+
+const fetchState = (uid: string, request = false, redo = false) =>
+  callCloud<AIState>(request ? 'viewerRequestAIAnalysis' : 'viewerAIFindings', { StudyInstanceUID: uid, redo });
+
+/**
+ * AI for BOFH: what can run on this study, live progress, results, and
+ * candidate nodules placed on the image.
+ */
+function AISection({ servicesManager, studyUID }: { servicesManager: any; studyUID: string }) {
+  const [state, setState] = useState<AIState | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const load = (request: boolean, redo = false) => {
+    setError('');
+    setBusy(true);
+    fetchState(studyUID, request, redo)
+      .then(r => {
+        setState(r);
+        if (request) setMessage('Análisis solicitados: el avance se actualiza solo.');
+      })
+      .catch(e => setError(e?.message || String(e)))
+      .then(() => setBusy(false));
+  };
+
+  // Results so far when the study opens
+  useEffect(() => {
+    let alive = true;
+    fetchState(studyUID).then(r => alive && setState(r)).catch(e => alive && setError(e?.message || String(e)));
+    return () => { alive = false; };
+  }, [studyUID]);
+
+  // Live progress while something is queued or running
+  const pending = !!state?.plan.some(p => p.job && ['queued', 'running'].includes(p.job.status));
+  useEffect(() => {
+    if (!pending) return undefined;
+    const timer = window.setInterval(() => {
+      fetchState(studyUID).then(setState).catch(() => {});
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [pending, studyUID]);
+
+  const nodules = (state?.quant || []).flatMap(q => (q.task === 'ct_lung_nodules' ? q.data?.nodules || [] : []));
+  const organs = (state?.quant || []).find(q => q.task === 'ct_organs')?.data?.organs;
+
+  return (
+    <div className="mb-4 border-b border-white/10 pb-3">
+      <div className={title}>IA (BOFH)</div>
+      {error && <div className="mb-2 rounded bg-red-800/60 px-2 py-1 text-[12px]">{error}</div>}
+      {message && <div className="mb-2 rounded bg-green-800/50 px-2 py-1 text-[12px]">{message}</div>}
+
+      {!state && !error && <div className={muted}>Consultando análisis…</div>}
+      {state && (
+        <>
+          <div className={`mb-1 ${muted}`}>Análisis que aplican a {state.description || 'este estudio'}:</div>
+          {state.plan.map(p => (
+            <div key={p.type} className="mb-1 text-[12px]">
+              <div className="flex justify-between gap-2">
+                <span>{p.label}</span>
+                <span className={p.job?.status === 'failed' ? 'text-red-400' : p.job?.status === 'done' ? 'text-green-400' : 'text-white/70'}>
+                  {p.job ? `${STATUS[p.job.status] || p.job.status}${p.job.remote && p.job.status !== 'done' ? ` (${p.job.remote})` : ''}` : 'sin ejecutar'}
+                </span>
+              </div>
+              <div className={muted}>{p.note} Tiempo {p.eta}.</div>
+              {p.job?.error && <div className="text-[11px] text-red-300">{p.job.error}</div>}
+            </div>
+          ))}
+          <div className="mt-2 flex flex-wrap gap-1">
+            <button className={primaryBtn} disabled={busy || pending} onClick={() => load(true)}>
+              {pending ? 'Procesando…' : 'Analizar con IA'}
+            </button>
+            <button className={btn} disabled={busy || pending} onClick={() => load(true, true)}>Repetir análisis</button>
+            <button className={btn} disabled={busy} onClick={() => load(false)}>Actualizar</button>
+          </div>
+          <div className={`mt-1 ${muted}`}>
+            Pasos: 1) Analizar con IA · 2) esperar a «listo» · 3) para ubicar nódulos, cargue la serie axial (o MPR) y use «Ver en imagen».
+          </div>
+
+          {state.analysis && (
+            <div className="mt-3 text-[12px]">
+              <b>Revisión visual:</b> {state.analysis.isNormal ? 'sin hallazgos marcados' : 'hallazgos a revisar'} · {state.analysis.impression}
+              {(state.analysis.abnormalities || []).map((a, n) => <div key={n}>• {a.finding}{a.location ? ` (${a.location})` : ''}</div>)}
+              <div className={muted}>Orientativa ({state.analysis.model}, {state.analysis.frames} imágenes).</div>
+            </div>
+          )}
+
+          {organs && (
+            <div className="mt-3 text-[12px]">
+              <b>Volumetría:</b>
+              {Object.values(organs).map((o: any) => (
+                <div key={o.label} className="flex justify-between">
+                  <span>{o.label}{o.partial ? ' (parcial)' : ''}</span>
+                  <span>{o.volume_ml} ml · {o.mean_hu} UH</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(state.quant || []).some(q => q.task === 'ct_lung_nodules') && (
+            <div className="mt-3 text-[12px]">
+              <b>Nódulos candidatos ({nodules.length}):</b>
+              {!nodules.length && <div className={muted}>Sin candidatos por encima del umbral.</div>}
+              {nodules.map((n, i) => (
+                <div key={i} className="mt-1 flex items-center justify-between gap-2">
+                  <span>{i + 1}. {n.diameter_mm} mm · confianza {Math.round(n.score * 100)}%</span>
+                  <button className={btn} onClick={() => {
+                    const problem = showPoint(servicesManager, rasToLps(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`);
+                    setMessage(problem ? '' : `Nódulo ${i + 1} marcado en la vista activa (anillo amarillo).`);
+                    setError(problem || '');
+                  }}>Ver en imagen</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(state.quant || []).filter(q => q.task === 'cxr').map((q, i) => (
+            <div key={i} className="mt-3 text-[12px]"><b>Clasificador de tórax (validación):</b> {q.text}</div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default AISection;
