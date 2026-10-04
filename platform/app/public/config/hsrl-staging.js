@@ -136,9 +136,19 @@ window.config = {
     }
   },
   investigationalUseDialog: { option: 'never' },
+  // Phase-tagged: `global` applies once; `mode['*']` on every mode entry
+  // (the PixOS tools panel goes first on the right; it shows its tools only
+  // to physicians with a RIS session).
   customizationService: {
-    'studyBrowser.thumbnailMenuItems': [],
-    'panelSegmentation.hideByDefault': true,
+    global: {
+      'studyBrowser.thumbnailMenuItems': { $set: [] },
+      'panelSegmentation.hideByDefault': { $set: true },
+    },
+    mode: {
+      '*': {
+        rightPanels: { $unshift: ['@ohif/extension-pixos.panelModule.pixos'] },
+      },
+    },
   },
 
   // ---------------------------------------------------------------------------
