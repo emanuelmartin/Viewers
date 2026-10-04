@@ -200,6 +200,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
     title: 'Coronariografía / hemodinamia',
     steps: [
       { kind: 'section', label: 'Adquisiciones, proyecciones y dosis', target: 'pixos-xa', hint: 'Clic en una adquisición para verla; «Técnica y dosis al informe»' },
+      { kind: 'section', label: 'Bitácora del procedimiento', target: 'pixos-procedure', hint: 'Marque momentos sobre la imagen: acceso, lesiones, FFR/iFR, IVUS/OCT, balones, stents, marcapasos, fármacos, complicaciones; «Relato al informe»' },
       { kind: 'guide', label: 'Dominancia', hint: 'Arteria que da la descendente posterior: derecha, izquierda o codominante' },
       { kind: 'guide', label: 'Revisión por segmentos', hint: 'TCI; DA proximal/media/distal y diagonales; CX y marginales; CD proximal/media/distal, DP y PL; puentes y colaterales (Rentrop)' },
       { kind: 'tool', label: 'Calibración (catéter)', toolName: 'CalibrationLine', hint: 'Sobre el catéter: 5 Fr = 1.67 mm, 6 Fr = 2.0 mm, 7 Fr = 2.33 mm' },
@@ -208,6 +209,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
       { kind: 'section', label: 'TIMI frame count', target: 'pixos-tfc', hint: 'Cuadro inicial y final de la arteria culpable' },
       { kind: 'guide', label: 'Bifurcaciones y complejidad', hint: 'Medina (rama principal proximal, distal, lateral: 1,1,1…); oclusión crónica (J-CTO); SYNTAX en multivaso o TCI' },
       { kind: 'guide', label: 'Flujo y conclusión', hint: 'TIMI 0–3 por vaso; número de vasos con lesión ≥ 70% (≥ 50% en TCI); FEVI si hubo ventriculografía' },
+      { kind: 'section', label: 'Relato del procedimiento', target: 'pixos-procedure', hint: 'Revise el relato generado y envíelo al informe' },
       send,
     ],
   },

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { readMeasurements } from './tools';
 import type { Prior } from './PriorsSection';
+import { ProcedureSection } from './ProcedureSection';
 
 const title = 'mb-1 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -128,6 +129,10 @@ export function XASection({ servicesManager, commandsManager, studyUID, canSave 
         {tfc && <div className="mt-1">{tfc} {canSave && <button className={btn} onClick={() => doSend('TFC', tfc)}>Al informe</button>}</div>}
       </div>
       {msg && <div className={`mt-1 ${muted}`}>{msg}</div>}
+      {(xa || error) && (
+        <ProcedureSection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={studyUID} canSave={canSave}
+          runs={xa?.runs || []} acquisitions={xa?.text || null} />
+      )}
     </div>
   );
 }
