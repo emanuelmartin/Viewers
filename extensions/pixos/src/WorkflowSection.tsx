@@ -62,10 +62,12 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
   if (!info) return <div className={`mb-4 ${muted}`}>Cargando flujo de trabajo…</div>;
 
   const workflow = WORKFLOWS[info.workflowId] || WORKFLOWS.generic;
+  // In coronary angiography «vascular» is the study itself, not the stroke module
+  const scenarios = (info.scenarios || []).filter(sc => !(info.workflowId === 'xa_angio' && sc === 'vascular_evc'));
   // Base workflow + clinical scenario modules + follow-up module; numbered as one list
   const groups = [
     { title: workflow.title, steps: workflow.steps },
-    ...(info.scenarios || []).map(sc => SCENARIO_MODULES[sc]).filter(Boolean),
+    ...scenarios.map(sc => SCENARIO_MODULES[sc]).filter(Boolean),
     ...(info.episode === 'control' ? [FOLLOW_UP_MODULE] : []),
   ].map(g => ({ ...g, steps: g.steps.filter(st => st.kind !== 'ai' || ai) }));
   const steps = groups.flatMap(g => g.steps);
@@ -150,10 +152,10 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
           {!!info.dicomComments?.length && <div className="text-white/60">DICOM: {info.dicomComments.join(' · ')}</div>}
         </div>
       ) : null}
-      {(!!info.scenarios?.length || info.episode === 'control') && (
+      {(!!scenarios.length || info.episode === 'control') && (
         <div className="mt-1 flex flex-wrap gap-1">
           {info.episode === 'control' && <span className="rounded bg-amber-700/50 px-1.5 text-[11px]">control</span>}
-          {(info.scenarios || []).map(sc => <span key={sc} className="rounded bg-white/10 px-1.5 text-[11px]">{SCENARIO_LABELS[sc] || sc}</span>)}
+          {scenarios.map(sc => <span key={sc} className="rounded bg-white/10 px-1.5 text-[11px]">{SCENARIO_LABELS[sc] || sc}</span>)}
         </div>
       )}
       {groups.map((g, gi) => {
