@@ -203,6 +203,17 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             </div>
           )}
 
+          {(state.quant || []).filter(q => q.task === 'mr_brain_volumes').map((q, i) => (
+            <div key={`b${i}`} className="mt-3 text-[12px]">
+              <b>Volumetría cerebral:</b>
+              {Object.entries(q.data?.volumes_ml || {}).map(([k, v]: [string, any]) => (
+                <div key={k} className="flex justify-between"><span>{k.replace(/_/g, ' ')}</span><span>{v} ml</span></div>
+              ))}
+              {q.data?.hippocampal_asymmetry_pct != null && <div>Asimetría hipocampal: {q.data.hippocampal_asymmetry_pct}%</div>}
+              <div className={muted}>FastSurfer sobre {q.series || 'T1 3D'}; sin normalizar por volumen intracraneal.</div>
+            </div>
+          ))}
+
           {(state.quant || []).some(q => q.task === 'ct_lung_nodules') && (
             <div className="mt-3 text-[12px]">
               <b>Nódulos candidatos ({nodules.length}):</b>

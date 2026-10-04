@@ -126,7 +126,8 @@ export const WORKFLOWS: Record<string, Workflow> = {
   },
   mr_brain: {
     title: 'RM de encéfalo',
-    steps: [mpr, length(), roi('Señal de una lesión'), { kind: 'segment', label: 'Volumen de lesión por segmentación' },
+    steps: [mpr, { kind: 'ai', label: 'Volumetría cerebral (GPU)', hint: 'Hipocampos, ventrículos, sustancia gris y blanca (T1 3D)' },
+      length(), roi('Señal de una lesión'), { kind: 'segment', label: 'Volumen de lesión por segmentación' },
       { kind: 'calc', label: 'Índice de Evans', calcId: 'ratio', hint: 'Astas frontales y diámetro interno del cráneo' },
       { kind: 'guide', label: 'Fazekas', hint: 'Lesiones de sustancia blanca: Fazekas en la calculadora del informe' }, send],
   },

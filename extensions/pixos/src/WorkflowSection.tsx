@@ -15,6 +15,7 @@ const REGION_LABELS: Record<string, string> = {
 type Info = {
   workflowId: string; regions: string[]; studyType: string; contrast: boolean | null; laterality: string | null; source: string;
   reason?: string | null; probableDx?: string[]; dxSource?: string | null; fromReport?: boolean;
+  orderReason?: string | null; reasonSource?: string | null; dicomComments?: string[];
 };
 
 const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -107,12 +108,16 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai }: {
         {regions || 'región sin determinar'} · {info.studyType}{info.contrast ? ' · con contraste' : ''}
         {info.laterality ? ` · ${info.laterality}` : ''} · {info.source === 'ia' ? 'etiquetado por IA' : 'por reglas'}
       </div>
+      {info.orderReason && (
+        <div className="mt-1 rounded bg-blue-900/40 px-2 py-1 text-[12px]"><b>Motivo (orden):</b> {info.orderReason}</div>
+      )}
       {ai && (info.reason || info.probableDx?.length) ? (
         <div className="mt-1 rounded bg-white/5 px-2 py-1 text-[12px]">
-          {info.reason && <div><b>Motivo:</b> {info.reason}</div>}
+          {info.reason && info.reason !== info.orderReason && <div><b>Motivo{info.reasonSource ? ` (${info.reasonSource})` : ''}:</b> {info.reason}</div>}
           {!!info.probableDx?.length && (
             <div><b>Diagnóstico{info.fromReport ? ' (del informe)' : ' probable'}:</b> {info.probableDx.join('; ')}</div>
           )}
+          {!!info.dicomComments?.length && <div className="text-white/60">DICOM: {info.dicomComments.join(' · ')}</div>}
         </div>
       ) : null}
       <div className="mt-2 flex flex-col gap-1">
