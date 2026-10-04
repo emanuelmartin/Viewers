@@ -71,10 +71,38 @@ const fetchState = (uid: string, request = false, redo = false) =>
   callCloud<AIState>(request ? 'viewerRequestAIAnalysis' : 'viewerAIFindings', { StudyInstanceUID: uid, redo });
 
 /**
+ * Puts the analysed series in the active viewport (if it is not there yet),
+ * waits for it to load and then shows the point.
+ */
+async function showOnSeries(servicesManager, commandsManager, seriesUID: string | null, world: [number, number, number], label: string) {
+  const { viewportGridService, displaySetService, cornerstoneViewportService } = servicesManager.services;
+  const viewportId = viewportGridService.getActiveViewportId();
+  const current = viewportGridService.getState().viewports.get(viewportId)?.displaySetInstanceUIDs || [];
+  if (seriesUID) {
+    const target = (displaySetService.getActiveDisplaySets() || [])
+      .filter(ds => ds.SeriesInstanceUID === seriesUID)
+      .sort((a, b) => (b.numImageFrames || b.instances?.length || 0) - (a.numImageFrames || a.instances?.length || 0))[0];
+    if (target && !current.includes(target.displaySetInstanceUID)) {
+      commandsManager.runCommand('setDisplaySetsForViewports', {
+        viewportsToUpdate: [{ viewportId, displaySetInstanceUIDs: [target.displaySetInstanceUID] }],
+      });
+      // Wait for the new series to be in the viewport
+      for (let i = 0; i < 40; i++) {
+        await new Promise(r => setTimeout(r, 250));
+        const vp: any = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+        if (vp?.getImageIds?.().length || vp?.getActors?.().length) break;
+      }
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  return showPoint(servicesManager, world, label);
+}
+
+/**
  * AI for BOFH: what can run on this study, live progress, results, and
  * candidate nodules placed on the image.
  */
-function AISection({ servicesManager, studyUID }: { servicesManager: any; studyUID: string }) {
+function AISection({ servicesManager, commandsManager, studyUID }: { servicesManager: any; commandsManager: any; studyUID: string }) {
   const [state, setState] = useState<AIState | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -109,7 +137,8 @@ function AISection({ servicesManager, studyUID }: { servicesManager: any; studyU
     return () => window.clearInterval(timer);
   }, [pending, studyUID]);
 
-  const nodules = (state?.quant || []).flatMap(q => (q.task === 'ct_lung_nodules' ? q.data?.nodules || [] : []));
+  const nodules = (state?.quant || []).flatMap(q => (q.task === 'ct_lung_nodules'
+    ? (q.data?.nodules || []).map(n => ({ ...n, seriesUID: q.seriesInstanceUID || null, series: q.series })) : []));
   const organs = (state?.quant || []).find(q => q.task === 'ct_organs')?.data?.organs;
 
   return (
@@ -142,7 +171,7 @@ function AISection({ servicesManager, studyUID }: { servicesManager: any; studyU
             <button className={btn} disabled={busy} onClick={() => load(false)}>Actualizar</button>
           </div>
           <div className={`mt-1 ${muted}`}>
-            Pasos: 1) Analizar con IA · 2) esperar a «listo» · 3) para ubicar nódulos, cargue la serie axial (o MPR) y use «Ver en imagen».
+            Pasos: 1) Analizar con IA · 2) esperar a «listo» · 3) «Ver en imagen» carga la serie analizada y marca el nódulo.
           </div>
 
           {state.analysis && (
@@ -173,9 +202,11 @@ function AISection({ servicesManager, studyUID }: { servicesManager: any; studyU
                 <div key={i} className="mt-1 flex items-center justify-between gap-2">
                   <span>{i + 1}. {n.diameter_mm} mm · confianza {Math.round(n.score * 100)}%</span>
                   <button className={btn} onClick={() => {
-                    const problem = showPoint(servicesManager, rasToLps(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`);
-                    setMessage(problem ? '' : `Nódulo ${i + 1} marcado en la vista activa (anillo amarillo).`);
-                    setError(problem || '');
+                    showOnSeries(servicesManager, commandsManager, n.seriesUID, rasToLps(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`)
+                      .then(problem => {
+                        setMessage(problem ? '' : `Nódulo ${i + 1} en la vista activa${n.series ? ` (serie ${n.series})` : ''}: anillo amarillo.`);
+                        setError(problem || '');
+                      });
                   }}>Ver en imagen</button>
                 </div>
               ))}

@@ -210,7 +210,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
         )}
       </div>
 
-      {access.ai && <AISection servicesManager={servicesManager} studyUID={activeStudyUID()} />}
+      {access.ai && <AISection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={activeStudyUID()} />}
     </div>
   );
 }
