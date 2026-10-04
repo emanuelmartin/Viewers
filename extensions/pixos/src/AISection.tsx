@@ -26,7 +26,7 @@ const toWorld = (p: number[]): [number, number, number] => [p[0], p[1], p[2]];
  * seconds: volume viewports (MPR) centre the point on its slice; stack
  * viewports go to the closest image.
  */
-function showPoint(servicesManager, world: [number, number, number], label: string, lungWindow = false): string | null {
+function showPoint(servicesManager, world: [number, number, number], label: string, voi: [number, number] | null = null): string | null {
   const { viewportGridService, cornerstoneViewportService } = servicesManager.services;
   const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
   if (!viewport) {
@@ -46,9 +46,9 @@ function showPoint(servicesManager, world: [number, number, number], label: stri
     });
     viewport.render();
   }
-  if (lungWindow && typeof viewport.setProperties === 'function') {
-    // Lung window (W 1500 / L -600): nodules are hard to see in soft tissue
-    viewport.setProperties({ voiRange: { lower: -1350, upper: 150 } });
+  if (voi && typeof viewport.setProperties === 'function') {
+    // Window for the finding: lung (W 1500 / L -600) for nodules, liver for focal lesions
+    viewport.setProperties({ voiRange: { lower: voi[0], upper: voi[1] } });
     viewport.render();
   }
   // Ring on top of the canvas at the point, removed after 6 s
@@ -83,7 +83,11 @@ const fetchState = (uid: string, request = false, redo = false) =>
  * Puts the analysed series in the active viewport (if it is not there yet),
  * waits for it to load and then shows the point.
  */
-async function showOnSeries(servicesManager, commandsManager, seriesUID: string | null, world: [number, number, number], label: string) {
+const LUNG: [number, number] = [-1350, 150];
+const LIVER: [number, number] = [-25, 175];
+
+async function showOnSeries(servicesManager, commandsManager, seriesUID: string | null, world: [number, number, number], label: string,
+  voi: [number, number] = LUNG) {
   const { viewportGridService, displaySetService, cornerstoneViewportService } = servicesManager.services;
   const viewportId = viewportGridService.getActiveViewportId();
   const current = viewportGridService.getState().viewports.get(viewportId)?.displaySetInstanceUIDs || [];
@@ -104,7 +108,7 @@ async function showOnSeries(servicesManager, commandsManager, seriesUID: string 
       await new Promise(r => setTimeout(r, 500));
     }
   }
-  return showPoint(servicesManager, world, label, true);
+  return showPoint(servicesManager, world, label, voi);
 }
 
 /**
@@ -202,6 +206,30 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
               ))}
             </div>
           )}
+
+          {(state.quant || []).filter(q => q.task === 'ct_organs' || q.task === 'mr_prostate').map((q, i) => (
+            <div key={`f${i}`} className="mt-2 text-[12px]">
+              {q.task === 'mr_prostate' && <div>{q.text}</div>}
+              {(q.flags || []).map((f: string, k: number) => <div key={k} className="text-amber-300">• {f}</div>)}
+              {(q.data?.liver_lesions || []).length > 0 && (
+                <div className="mt-1">
+                  <b>Lesiones hepáticas candidatas ({q.data.liver_lesions.length}):</b>
+                  {q.data.liver_lesions.map((l: any, k: number) => (
+                    <div key={k} className="mt-1 flex items-center justify-between gap-2">
+                      <span>{k + 1}. {l.diameter_mm} mm · {l.mean_hu} UH</span>
+                      {l.world_lps && (
+                        <button className={btn} onClick={() => {
+                          showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(l.world_lps), `${k + 1}: ${l.diameter_mm} mm`, LIVER)
+                            .then(problem => { setMessage(problem ? '' : `Lesión ${k + 1} en la vista activa: anillo amarillo.`); setError(problem || ''); })
+                            .catch(e => { setMessage(''); setError(`No se pudo ubicar la lesión: ${e?.message || e}`); });
+                        }}>Ver en imagen</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_volumes').map((q, i) => (
             <div key={`b${i}`} className="mt-3 text-[12px]">
