@@ -217,7 +217,12 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
               return 'Análisis solicitado: en unos segundos consulte los hallazgos';
             })}>Analizar con IA</button>
             <button className={btn} disabled={!!busy} onClick={() => run('ai-f', async () => {
-              setAiFindings(await callCloud('viewerAIFindings', { StudyInstanceUID: activeStudyUID() }));
+              const uid = activeStudyUID();
+              const [findings, quant] = await Promise.all([
+                callCloud('viewerAIFindings', { StudyInstanceUID: uid }),
+                callCloud('getQuantitativeFindings', { StudyInstanceUID: uid }).catch(() => null),
+              ]);
+              setAiFindings({ ...findings, quant });
             })}>Ver hallazgos IA</button>
           </div>
           {aiFindings && (
@@ -229,6 +234,12 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
                   {(aiFindings.analysis.abnormalities || []).map((a, n) => <div key={n}>• {a.finding} {a.location ? `(${a.location})` : ''}</div>)}
                 </>
               ) : <div className={muted}>{aiFindings.job ? `Análisis ${aiFindings.job.status}` : 'Sin análisis todavía'}</div>}
+              {(aiFindings.quant?.results || []).map((q, n) => (
+                <div key={`q${n}`} className="mt-2">
+                  <b>Cuantitativo{aiFindings.quant.validation ? ' (validación)' : ''}:</b> {q.text}
+                  {(q.flags || []).map((f, m) => <div key={m}>• {f}</div>)}
+                </div>
+              ))}
             </div>
           )}
         </div>
