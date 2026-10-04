@@ -66,7 +66,7 @@ export const CALCULATORS: { id: string; name: string; hint: string; run: (items:
       const r = round(a / b, 2);
       return {
         title: `Índice ${r}`,
-        text: `Índice ${round(a)} / ${round(b)} mm = ${r}. ICT normal ≤ 0.5; índice de Evans > 0.3 sugiere ventriculomegalia.`,
+        text: `Índice ${round(a)} / ${round(b)} mm = ${r}. ICT normal ≤ 0.5; índice de Evans mayor de 0.3 sugiere ventriculomegalia.`,
       };
     },
   },
