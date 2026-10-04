@@ -96,7 +96,9 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
 
   const persist = (next: ProcEvent[]) => {
     setBusy(true);
-    return callCloud<{ version: string }>('saveProcedureLog', { StudyInstanceUID: studyUID, events: next, version })
+    return callCloud<{ version: string }>('saveProcedureLog', {
+      StudyInstanceUID: studyUID, events: next, version, narrative: next.length ? narrativeOf(next, acquisitions) : [],
+    })
       .then(r => { setEvents(next); setVersion(r.version); setMsg('Bitácora guardada.'); setBusy(false); return true; })
       .catch(e => { setMsg(e?.message || String(e)); setBusy(false); return false; });
   };
