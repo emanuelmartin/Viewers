@@ -277,3 +277,72 @@ export function stackSegmentStats(segmentationId: string, segmentIndex: number):
   }
   return { ml: Math.round(count * voxelMl * 100) / 100, mean: sampled ? Math.round((sum / sampled) * 10) / 10 : null };
 }
+
+// ── VISTA3D click (evaluation) ───────────────────────────────────────────────
+type Vista3dResult = {
+  found: boolean; volume_ml?: number; mean?: number; diameter_mm?: number; extent_mm?: number[];
+  rows?: number; cols?: number; slices?: { sop: string; rle: number[] }[]; seconds?: number;
+};
+
+/** Paints a VISTA3D mask (per SOP Instance UID, run-length encoded) into the active segment. */
+function paintMask(viewport: any, segmentationId: string, segmentIndex: number, r: Vista3dResult): number {
+  const bySop = new Map<string, string>();
+  for (const id of viewport.getImageIds?.() || []) {
+    const sop = (metaData.get('sopCommonModule', id) as any)?.sopInstanceUID || (metaData.get('generalImageModule', id) as any)?.sopInstanceUID;
+    if (sop) bySop.set(sop, id);
+  }
+  let painted = 0;
+  for (const sl of r.slices || []) {
+    const imageId = bySop.get(sl.sop);
+    const lmId = imageId && csSegmentation.getLabelmapImageIdsForImageId?.(imageId, segmentationId)?.[0];
+    const lm = lmId && cache.getImage(lmId)?.voxelManager;
+    if (!lm) continue;
+    for (let j = 0; j < sl.rle.length; j += 2) {
+      for (let i = sl.rle[j]; i < sl.rle[j] + sl.rle[j + 1]; i++) lm.setAtIndex(i, segmentIndex);
+      painted += sl.rle[j + 1];
+    }
+  }
+  csSegmentation.triggerSegmentationEvents.triggerSegmentationDataModified(segmentationId);
+  viewport.render?.();
+  return painted;
+}
+
+/**
+ * Arms one click for VISTA3D: the click's patient coordinates go to the GPU service with the lesion class;
+ * the returned mask is painted into the active segment.
+ */
+export function armVista3d(servicesManager: any, studyUID: string, lesion: string, callCloud: (fn: string, params: any) => Promise<any>,
+  onMessage: (message: string) => void): () => void {
+  const { viewportGridService, cornerstoneViewportService, displaySetService } = servicesManager.services;
+  const viewportId = viewportGridService.getActiveViewportId();
+  const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+  const element: HTMLElement | undefined = viewport?.element;
+  if (!element) {
+    onMessage('No hay una vista activa');
+    return () => undefined;
+  }
+  const previousCursor = element.style.cursor;
+  element.style.cursor = 'crosshair';
+  const handler = (evt: MouseEvent) => {
+    element.style.cursor = previousCursor;
+    const rect = element.getBoundingClientRect();
+    const world = viewport.canvasToWorld([evt.clientX - rect.left, evt.clientY - rect.top]);
+    const dsUID = viewportGridService.getState().viewports.get(viewportId)?.displaySetInstanceUIDs?.[0];
+    const seriesUID = dsUID && displaySetService.getDisplaySetByUID(dsUID)?.SeriesInstanceUID;
+    const seg = csSegmentation.activeSegmentation.getActiveSegmentation(viewport.id);
+    if (!seg || !seriesUID) return onMessage('No hay una segmentación activa en esta serie');
+    const index = csSegmentation.segmentIndex.getActiveSegmentIndex(seg.segmentationId) || 1;
+    onMessage('VISTA3D procesando en la GPU (≈30 s)…');
+    callCloud('viewerVista3d', { StudyInstanceUID: studyUID, SeriesInstanceUID: seriesUID, world: Array.from(world), lesion })
+      .then((r: Vista3dResult) => {
+        if (!r?.found) return onMessage('VISTA3D no segmentó una lesión en ese punto; intente más al centro o use «Volumen de lesión con un clic».');
+        const n = paintMask(viewport, seg.segmentationId, index, r);
+        onMessage(n
+          ? `VISTA3D (evaluación): ${r.volume_ml} ml, diámetro equivalente ${r.diameter_mm} mm, media ${r.mean}. Revise el contorno y corrija con el pincel.`
+          : 'VISTA3D respondió, pero sus cortes no coinciden con la serie de la vista.');
+      })
+      .catch((e: any) => onMessage(`VISTA3D: ${e?.message || e}`));
+  };
+  element.addEventListener('click', handler, { once: true });
+  return () => { element.removeEventListener('click', handler); element.style.cursor = previousCursor; };
+}

@@ -10,6 +10,7 @@
  *   tool     activates a measurement tool (toolName of the cornerstone tool group)
  *   segment  new segmentation (volumes in the panel)
  *   clicksegment  one-click region segmentation of a lesion (+ brush to correct), then volumes
+ *   vista3d  one click → MONAI VISTA3D lesion mask (GPU; evaluation licence; AI roles only)
  *   ai       GPU / AI analysis (BOFH only, for now)
  *   calc     calculator of the panel on the marked measurements
  *   guide    reminder for the report (scale, classification)
@@ -24,6 +25,7 @@ export type Step =
   | { kind: 'tool'; label: string; toolName: string; hint?: string }
   | { kind: 'segment'; label: string; hint?: string }
   | { kind: 'clicksegment'; label: string; hint?: string }
+  | { kind: 'vista3d'; label: string; lesion: string; hint?: string }
   | { kind: 'ai'; label: string; hint?: string }
   | { kind: 'calc'; label: string; calcId: string; hint?: string }
   | { kind: 'guide'; label: string; hint: string }
@@ -55,6 +57,7 @@ const bidir = (hint?: string): Step => ({ kind: 'tool', label: 'Bidireccional', 
 const mpr: Step = { kind: 'layout', label: 'MPR', protocolId: 'mpr' };
 // One-click lesion volume: region growing from the clicked point, brush to correct, then «Calcular volúmenes»
 const clickSeg = (label: string, hint?: string): Step => ({ kind: 'clicksegment', label, hint });
+const vista = (label: string, lesion: string, hint?: string): Step => ({ kind: 'vista3d', label: `${label} con IA (VISTA3D, evaluación)`, lesion, hint });
 const brush: Step = { kind: 'tool', label: 'Pincel (corregir segmentación)', toolName: 'CircularBrush', hint: 'Arrastre para añadir; use el borrador del panel de segmentación para quitar' };
 
 export const WORKFLOWS: Record<string, Workflow> = {
@@ -83,6 +86,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
       { kind: 'slab', label: 'MIP 10 mm (nódulos)', slabId: 'mip10' },
       { kind: 'ai', label: 'Detectar nódulos (GPU)', hint: 'Candidatos con diámetro; «Ver en imagen» los ubica' },
       bidir('Diámetros del nódulo o lesión'),
+      vista('Tumor pulmonar', 'pulmon', 'Clic en el centro de la masa o nódulo sólido: volumen 3D'),
       { kind: 'guide', label: 'Fleischner / Lung-RADS', hint: 'Nódulo incidental: Fleischner; tamizaje: Lung-RADS (calculadora del informe)' },
       send,
     ],
@@ -98,6 +102,9 @@ export const WORKFLOWS: Record<string, Workflow> = {
       bidir('Diámetros de lesiones'),
       { kind: 'calc', label: 'Lavado suprarrenal', calcId: 'washout', hint: 'ROIs en fase simple, venosa y tardía, en ese orden' },
       clickSeg('Volumen de lesión con un clic', 'Clic dentro de la lesión (quiste, masa, colección); corrija con el pincel'),
+      vista('Lesión hepática', 'higado', 'Clic en el centro de la lesión hepática'),
+      vista('Lesión pancreática', 'pancreas', 'Clic en el centro de la lesión'),
+      vista('Lesión ósea', 'hueso', 'Clic en la lesión lítica o blástica'),
       brush,
       { kind: 'guide', label: 'Bosniak / LI-RADS', hint: 'Quiste renal complejo: Bosniak; hígado cirrótico: LI-RADS' },
       { kind: 'guide', label: 'Incidentalomas (ACR)', hint: 'Suprarrenal, hepático, quiste pancreático, aorta: calculadora «Incidentalomas» del informe' },
@@ -242,6 +249,7 @@ export const SCENARIO_MODULES: Record<string, Module> = {
       bidir('Lesiones diana: hasta 5 (2 por órgano); ganglios por eje corto'),
       { kind: 'followup', label: 'RECIST 1.1 contra el basal', calc: 'recist', hint: 'Suma de diámetros actual contra la del estudio basal' },
       clickSeg('Volumen de lesión diana con un clic', 'Volumen 3D complementario al diámetro; compare con el previo'),
+      vista('Lesión diana', 'higado', 'VISTA3D para lesión hepática; para pulmón use el paso de TC de tórax'),
       { kind: 'guide', label: 'Lesiones nuevas', hint: 'Una lesión nueva inequívoca es progresión aunque la suma no cambie' },
     ],
   },
