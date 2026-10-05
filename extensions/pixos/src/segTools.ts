@@ -104,23 +104,46 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
     }
     return m;
   };
-  // 3×3 binary opening, then the component that holds the seed (cuts thin bridges to neighbours)
-  const open2d = (m: Uint8Array, keep: number[]): Uint8Array => {
-    const er = new Uint8Array(N), out = new Uint8Array(N);
+  // Binary opening of radius r (cuts thin bridges and speckle), holes filled, then the component that holds
+  // the seeds
+  const erode = (m: Uint8Array): Uint8Array => {
+    const er = new Uint8Array(N);
     for (let y = 1; y < rows - 1; y++) for (let x = 1; x < cols - 1; x++) {
       const i = y * cols + x;
       if (m[i] && m[i - 1] && m[i + 1] && m[i - cols] && m[i + cols]) er[i] = 1;
     }
-    for (let y = 1; y < rows - 1; y++) for (let x = 1; x < cols - 1; x++) {
-      const i = y * cols + x;
-      if (er[i] || er[i - 1] || er[i + 1] || er[i - cols] || er[i + cols]) out[i] = m[i];
+    return er;
+  };
+  const fillHoles = (m: Uint8Array): Uint8Array => {
+    const outside = new Uint8Array(N), q: number[] = [];
+    for (let x = 0; x < cols; x++) for (const i of [x, (rows - 1) * cols + x]) if (!m[i] && !outside[i]) { outside[i] = 1; q.push(i); }
+    for (let y = 0; y < rows; y++) for (const i of [y * cols, y * cols + cols - 1]) if (!m[i] && !outside[i]) { outside[i] = 1; q.push(i); }
+    while (q.length) {
+      const i = q.pop() as number, x = i % cols, y = (i / cols) | 0;
+      for (const j of [x + 1 < cols ? i + 1 : -1, x > 0 ? i - 1 : -1, y + 1 < rows ? i + cols : -1, y > 0 ? i - cols : -1]) {
+        if (j >= 0 && !m[j] && !outside[j]) { outside[j] = 1; q.push(j); }
+      }
     }
-    const comp = new Uint8Array(N), q = keep.filter(i => out[i]);
+    const out = new Uint8Array(N);
+    for (let i = 0; i < N; i++) out[i] = outside[i] ? 0 : 1;
+    return out;
+  };
+  const open2d = (m: Uint8Array, keep: number[], r = 1): Uint8Array => {
+    const filled = fillHoles(m);
+    let cur = filled;
+    for (let it = 0; it < r; it++) cur = erode(cur);
+    const opened = dilate(cur, r);
+    for (let i = 0; i < N; i++) opened[i] = opened[i] && filled[i] ? 1 : 0;
+    const comp = new Uint8Array(N), q = keep.filter(i => opened[i]);
+    if (!q.length) {
+      // the seed fell in a removed spur: keep the largest remaining component near it instead
+      for (let i = 0; i < N; i++) if (opened[i]) { q.push(i); break; }
+    }
     q.forEach(i => { comp[i] = 1; });
     while (q.length) {
       const i = q.pop() as number, x = i % cols, y = (i / cols) | 0;
       for (const j of [x + 1 < cols ? i + 1 : -1, x > 0 ? i - 1 : -1, y + 1 < rows ? i + cols : -1, y > 0 ? i - cols : -1]) {
-        if (j >= 0 && out[j] && !comp[j]) { comp[j] = 1; q.push(j); }
+        if (j >= 0 && opened[j] && !comp[j]) { comp[j] = 1; q.push(j); }
       }
     }
     return comp;
@@ -160,12 +183,12 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
   if (best < 0) return { error: fills.length ? 'No se encontró una región homogénea en el punto' : 'La región se extiende más de 6 cm (sale de la lesión). Haga clic más al centro o use el pincel.' };
   let first: Uint8Array = fills[best].m;
   const tol = fills[best].t;
-  first = open2d(first, [seedIdx]);
+  first = open2d(first, [seedIdx], fills[best].a > 400 ? 2 : 1);
   if (area(first) < 4) return { error: 'No se encontró una región homogénea en el punto' };
   const lo = mean - tol, hi = mean + tol;
-  const grow = Math.max(1, Math.round(3 / Math.min(colSp, rowSp)));
+  const grow = Math.max(1, Math.round(1.5 / Math.min(colSp, rowSp)));
   const visited = new Map<number, Uint8Array>([[k0, first]]);
-  // Propagate slice by slice inside the previous contour dilated 3 mm; stop when it vanishes or balloons
+  // Propagate slice by slice inside the previous contour dilated 1.5 mm; stop when it vanishes or balloons
   for (const dir of [1, -1]) {
     let prev = first, prevArea = area(first);
     for (let k = k0 + dir; k >= 0 && k < imageIds.length && Math.abs(k - k0) * sliceSp <= MAX_RADIUS_MM; k += dir) {
@@ -176,9 +199,9 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
       for (let i = 0; i < N; i++) if (prev[i]) seeds.push(i);
       const m0 = fill2d(d, seeds, lo, hi, allowed);
       if (!m0) break;
-      const m = open2d(m0, seeds);
+      const m = open2d(m0, seeds, prevArea > 400 ? 2 : 1);
       const a = area(m);
-      if (a < Math.max(4, 0.15 * prevArea) || a > 1.8 * prevArea + 20) break;
+      if (a < Math.max(4, 0.15 * prevArea) || a > 1.3 * prevArea + 20) break;
       visited.set(k, m);
       prev = m;
       prevArea = a;
