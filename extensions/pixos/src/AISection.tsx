@@ -87,7 +87,7 @@ const LUNG: [number, number] = [-1350, 150];
 const LIVER: [number, number] = [-25, 175];
 
 async function showOnSeries(servicesManager, commandsManager, seriesUID: string | null, world: [number, number, number], label: string,
-  voi: [number, number] = LUNG) {
+  voi: [number, number] | null = LUNG) {
   const { viewportGridService, displaySetService, cornerstoneViewportService } = servicesManager.services;
   const viewportId = viewportGridService.getActiveViewportId();
   const current = viewportGridService.getState().viewports.get(viewportId)?.displaySetInstanceUIDs || [];
@@ -229,6 +229,22 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   ))}
                 </div>
               )}
+            </div>
+          ))}
+
+          {(state.quant || []).filter(q => q.task === 'mr_brain_tumor').map((q, i) => (
+            <div key={`t${i}`} className="mt-3 text-[12px]">
+              <b>Tumor cerebral (BraTS, en validación):</b> {q.text}
+              {q.data?.tumor?.world_lps && (
+                <div className="mt-1">
+                  <button className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(q.data.tumor.world_lps), 'tumor', null)
+                      .then(problem => { setMessage(problem ? '' : 'Tumor en la vista activa (T1 con contraste): anillo amarillo.'); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>Ver en imagen</button>
+                </div>
+              )}
+              <div className={muted}>Solo para validación: en HRSL marcó el cerebelo en cerebros normales. Verificar siempre.</div>
             </div>
           ))}
 

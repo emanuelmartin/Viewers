@@ -8,6 +8,7 @@ import getCustomizationModule from './getCustomizationModule';
 import getCommandsModule from './getCommandsModule';
 import { loadAccess, watchRisSession } from './ris';
 import { installToolbarGate } from './toolbarGate';
+import { installSegmentationTools } from './segTools';
 
 let cleanup: Array<() => void> = [];
 
@@ -16,9 +17,9 @@ let cleanup: Array<() => void> = [];
  * session) and checks the RIS session; physicians get the full toolbar and
  * the PixOS tools panel once the server confirms it.
  */
-function onModeEnter({ servicesManager }: withAppTypes) {
+function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
   cleanup.forEach(fn => fn());
-  cleanup = [installToolbarGate(servicesManager), watchRisSession()];
+  cleanup = [installToolbarGate(servicesManager), watchRisSession(), installSegmentationTools(servicesManager, extensionManager)];
   loadAccess();
 }
 

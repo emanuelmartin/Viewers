@@ -9,6 +9,7 @@
  *   slab     MIP / MinIP / average slab (volume viewports)
  *   tool     activates a measurement tool (toolName of the cornerstone tool group)
  *   segment  new segmentation (volumes in the panel)
+ *   clicksegment  one-click region segmentation of a lesion (+ brush to correct), then volumes
  *   ai       GPU / AI analysis (BOFH only, for now)
  *   calc     calculator of the panel on the marked measurements
  *   guide    reminder for the report (scale, classification)
@@ -22,6 +23,7 @@ export type Step =
   | { kind: 'slab'; label: string; slabId: string }
   | { kind: 'tool'; label: string; toolName: string; hint?: string }
   | { kind: 'segment'; label: string; hint?: string }
+  | { kind: 'clicksegment'; label: string; hint?: string }
   | { kind: 'ai'; label: string; hint?: string }
   | { kind: 'calc'; label: string; calcId: string; hint?: string }
   | { kind: 'guide'; label: string; hint: string }
@@ -51,6 +53,9 @@ const length = (hint?: string): Step => ({ kind: 'tool', label: 'Longitud', tool
 const roi = (hint?: string): Step => ({ kind: 'tool', label: 'ROI (densidad/señal)', toolName: 'EllipticalROI', hint });
 const bidir = (hint?: string): Step => ({ kind: 'tool', label: 'Bidireccional', toolName: 'Bidirectional', hint });
 const mpr: Step = { kind: 'layout', label: 'MPR', protocolId: 'mpr' };
+// One-click lesion volume: region growing from the clicked point, brush to correct, then «Calcular volúmenes»
+const clickSeg = (label: string, hint?: string): Step => ({ kind: 'clicksegment', label, hint });
+const brush: Step = { kind: 'tool', label: 'Pincel (corregir segmentación)', toolName: 'CircularBrush', hint: 'Arrastre para añadir; use el borrador del panel de segmentación para quitar' };
 
 export const WORKFLOWS: Record<string, Workflow> = {
   ct_head: {
@@ -64,6 +69,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
       length('Desviación de la línea media / espesor de colección'),
       roi('Densidad de una lesión (UH)'),
       { kind: 'calc', label: 'Volumen de hematoma (ABC/2)', calcId: 'abc2', hint: 'Marque 3 diámetros del hematoma' },
+      clickSeg('Volumen de hematoma con un clic', 'Clic dentro del hematoma; el volumen exacto complementa al ABC/2'),
       { kind: 'guide', label: 'ASPECTS', hint: 'Si hay isquemia aguda: ASPECTS en la calculadora del informe' },
       send,
     ],
@@ -91,7 +97,8 @@ export const WORKFLOWS: Record<string, Workflow> = {
       roi('Densidad de lesión, hígado o bazo (UH)'),
       bidir('Diámetros de lesiones'),
       { kind: 'calc', label: 'Lavado suprarrenal', calcId: 'washout', hint: 'ROIs en fase simple, venosa y tardía, en ese orden' },
-      { kind: 'segment', label: 'Volumen de lesión por segmentación', hint: 'Pinte o use umbral; luego «Calcular volúmenes»' },
+      clickSeg('Volumen de lesión con un clic', 'Clic dentro de la lesión (quiste, masa, colección); corrija con el pincel'),
+      brush,
       { kind: 'guide', label: 'Bosniak / LI-RADS', hint: 'Quiste renal complejo: Bosniak; hígado cirrótico: LI-RADS' },
       { kind: 'guide', label: 'Incidentalomas (ACR)', hint: 'Suprarrenal, hepático, quiste pancreático, aorta: calculadora «Incidentalomas» del informe' },
       { kind: 'guide', label: 'Hallazgos oportunistas', hint: 'L1 ≤ 110 UH sugiere osteoporosis; aorta ≥ 30 mm aneurisma (volumetría GPU)' },
@@ -137,7 +144,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
   mr_brain: {
     title: 'RM de encéfalo',
     steps: [mpr, { kind: 'ai', label: 'Volumetría cerebral (GPU)', hint: 'Hipocampos, ventrículos, sustancia gris y blanca (T1 3D)' },
-      length(), roi('Señal de una lesión'), { kind: 'segment', label: 'Volumen de lesión por segmentación' },
+      length(), roi('Señal de una lesión'), clickSeg('Volumen de lesión con un clic', 'Clic dentro de la lesión en la secuencia donde mejor se delimita'), brush,
       { kind: 'calc', label: 'Índice de Evans', calcId: 'ratio', hint: 'Astas frontales y diámetro interno del cráneo' },
       { kind: 'guide', label: 'Fazekas', hint: 'Lesiones de sustancia blanca: Fazekas en la calculadora del informe' }, send],
   },
@@ -234,6 +241,7 @@ export const SCENARIO_MODULES: Record<string, Module> = {
     steps: [
       bidir('Lesiones diana: hasta 5 (2 por órgano); ganglios por eje corto'),
       { kind: 'followup', label: 'RECIST 1.1 contra el basal', calc: 'recist', hint: 'Suma de diámetros actual contra la del estudio basal' },
+      clickSeg('Volumen de lesión diana con un clic', 'Volumen 3D complementario al diámetro; compare con el previo'),
       { kind: 'guide', label: 'Lesiones nuevas', hint: 'Una lesión nueva inequívoca es progresión aunque la suma no cambie' },
     ],
   },
@@ -248,7 +256,7 @@ export const SCENARIO_MODULES: Record<string, Module> = {
   },
   infeccion: {
     title: 'Infección',
-    steps: [roi('Densidad de colección (UH)'), { kind: 'segment', label: 'Volumen de colección o absceso' },
+    steps: [roi('Densidad de colección (UH)'), clickSeg('Volumen de colección o absceso con un clic'),
       { kind: 'guide', label: 'Complicaciones', hint: 'Colecciones, gas, trombosis, extensión' }],
   },
   vascular_evc: {

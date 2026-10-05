@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { SLABS, applySlab, createSegmentation } from './tools';
+import { SEG_TOOL_NAMES } from './segTools';
 import { FOLLOW_UP_MODULE, SCENARIO_MODULES, WORKFLOWS, type Step } from './workflows';
 import PriorsSection, { openCompare, type Prior } from './PriorsSection';
 import { GraftSection, XASection } from './ClinicalSection';
@@ -114,6 +115,19 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
           .then(() => setNote(step.hint || 'Segmentación creada; use el panel de segmentación y «Calcular volúmenes»'))
           .catch(e => setNote(`No se pudo crear la segmentación: ${e?.message || e}`));
         break;
+      case 'clicksegment': {
+        // A labelmap must exist before the click tool can fill it
+        const { segmentationService, viewportGridService } = servicesManager.services;
+        const viewportId = viewportGridService.getActiveViewportId();
+        const has = (segmentationService.getSegmentationRepresentations?.(viewportId) || []).length > 0;
+        (has ? Promise.resolve() : createSegmentation(servicesManager, commandsManager))
+          .then(() => {
+            commandsManager.runCommand('setToolActiveToolbar', { toolName: SEG_TOOL_NAMES.click });
+            setNote(`${step.label}: ${step.hint || 'clic dentro de la lesión'}. Luego «Calcular volúmenes» en «Volúmenes por segmentación».`);
+          })
+          .catch(e => setNote(`No se pudo preparar la segmentación: ${e?.message || e}`));
+        break;
+      }
       case 'ai':
         callCloud('viewerRequestAIAnalysis', { StudyInstanceUID: studyUID }).catch(() => {});
         scrollTo('pixos-ai');
