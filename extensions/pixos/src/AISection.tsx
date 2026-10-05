@@ -217,7 +217,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   <b>Lesiones hepáticas candidatas ({q.data.liver_lesions.length}):</b>
                   {q.data.liver_lesions.map((l: any, k: number) => (
                     <div key={k} className="mt-1 flex items-center justify-between gap-2">
-                      <span>{k + 1}. {l.diameter_mm} mm · {l.mean_hu} UH</span>
+                      <span>{k + 1}. {l.diameter_mm} mm · {l.mean_hu} UH{l.segment ? ` · segmento ${l.segment}` : ''}</span>
                       {l.world_lps && (
                         <button className={btn} onClick={() => {
                           showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(l.world_lps), `${k + 1}: ${l.diameter_mm} mm`, LIVER)
