@@ -84,39 +84,96 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
   const mean = vals.reduce((a, v) => a + v, 0) / vals.length;
   const sd = Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length);
   const isCT = (metaData.get('generalSeriesModule', imageIds[k0]) as any)?.modality === 'CT';
-  const rx = Math.ceil(MAX_RADIUS_MM / colSp), ry = Math.ceil(MAX_RADIUS_MM / rowSp), rk = Math.ceil(MAX_RADIUS_MM / sliceSp);
-  // A region that leaks gets two more tries with a narrower band
-  let tol = isCT ? Math.min(40, Math.max(8, 2.5 * sd)) : Math.max(0.08 * Math.abs(mean), 2.5 * sd);
-  let visited = new Map<number, Uint8Array>();
-  let count = 0, sum = 0, leaked = true;
-  for (let attempt = 0; attempt < 3 && leaked; attempt++, tol *= 0.65) {
-    const lo = mean - tol, hi = mean + tol;
-    visited = new Map<number, Uint8Array>();
-    const mark = (k: number) => { let m = visited.get(k); if (!m) { m = new Uint8Array(cols * rows); visited.set(k, m); } return m; };
-    const stack: number[] = [sx, sy, k0];
-    mark(k0)[sy * cols + sx] = 1;
-    count = 0; sum = 0; leaked = false;
-    while (stack.length && !leaked) {
-      const k = stack.pop() as number, y = stack.pop() as number, x = stack.pop() as number;
-      count++;
-      sum += Number(src(k)![y * cols + x]);
-      for (const [nx, ny, nk] of [[x + 1, y, k], [x - 1, y, k], [x, y + 1, k], [x, y - 1, k], [x, y, k + 1], [x, y, k - 1]]) {
-        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || nk < 0 || nk >= imageIds.length) continue;
-        if (Math.abs(nx - sx) > rx || Math.abs(ny - sy) > ry || Math.abs(nk - k0) > rk) { leaked = true; break; }
-        const m = mark(nk);
-        const i = ny * cols + nx;
-        if (m[i]) continue;
-        const d = src(nk);
-        if (!d) continue; // slice not loaded yet: boundary
-        const v = val(d, nx, ny);
+  const rIn = Math.ceil(MAX_RADIUS_MM / Math.min(colSp, rowSp));
+  const N = cols * rows;
+  // 2D fill on one slice within [lo, hi], optionally restricted to an allowed mask; null if it leaks
+  const fill2d = (d: ArrayLike<number>, seeds: number[], lo: number, hi: number, allowed: Uint8Array | null): Uint8Array | null => {
+    const m = new Uint8Array(N);
+    const q: number[] = [];
+    for (const i of seeds) if (!m[i] && (!allowed || allowed[i])) { const v = val(d, i % cols, (i / cols) | 0); if (v >= lo && v <= hi) { m[i] = 1; q.push(i); } }
+    while (q.length) {
+      const i = q.pop() as number, x = i % cols, y = (i / cols) | 0;
+      if (Math.abs(x - sx) > rIn || Math.abs(y - sy) > rIn) return null;
+      for (const j of [x + 1 < cols ? i + 1 : -1, x > 0 ? i - 1 : -1, y + 1 < rows ? i + cols : -1, y > 0 ? i - cols : -1]) {
+        if (j < 0 || m[j] || (allowed && !allowed[j])) continue;
+        const v = val(d, j % cols, (j / cols) | 0);
         if (v < lo || v > hi) continue;
-        m[i] = 1;
-        stack.push(nx, ny, nk);
+        m[j] = 1;
+        q.push(j);
       }
     }
+    return m;
+  };
+  // 3×3 binary opening, then the component that holds the seed (cuts thin bridges to neighbours)
+  const open2d = (m: Uint8Array, keep: number[]): Uint8Array => {
+    const er = new Uint8Array(N), out = new Uint8Array(N);
+    for (let y = 1; y < rows - 1; y++) for (let x = 1; x < cols - 1; x++) {
+      const i = y * cols + x;
+      if (m[i] && m[i - 1] && m[i + 1] && m[i - cols] && m[i + cols]) er[i] = 1;
+    }
+    for (let y = 1; y < rows - 1; y++) for (let x = 1; x < cols - 1; x++) {
+      const i = y * cols + x;
+      if (er[i] || er[i - 1] || er[i + 1] || er[i - cols] || er[i + cols]) out[i] = m[i];
+    }
+    const comp = new Uint8Array(N), q = keep.filter(i => out[i]);
+    q.forEach(i => { comp[i] = 1; });
+    while (q.length) {
+      const i = q.pop() as number, x = i % cols, y = (i / cols) | 0;
+      for (const j of [x + 1 < cols ? i + 1 : -1, x > 0 ? i - 1 : -1, y + 1 < rows ? i + cols : -1, y > 0 ? i - cols : -1]) {
+        if (j >= 0 && out[j] && !comp[j]) { comp[j] = 1; q.push(j); }
+      }
+    }
+    return comp;
+  };
+  const dilate = (m: Uint8Array, r: number): Uint8Array => {
+    let cur = m;
+    for (let it = 0; it < r; it++) {
+      const nx = cur.slice();
+      for (let i = 0; i < N; i++) if (cur[i]) {
+        const x = i % cols;
+        if (x + 1 < cols) nx[i + 1] = 1; if (x > 0) nx[i - 1] = 1; if (i + cols < N) nx[i + cols] = 1; if (i - cols >= 0) nx[i - cols] = 1;
+      }
+      cur = nx;
+    }
+    return cur;
+  };
+  const area = (m: Uint8Array) => { let c = 0; for (let i = 0; i < N; i++) c += m[i]; return c; };
+  // Seed slice: narrow the band until the fill stays inside 6 cm
+  const seedIdx = sy * cols + sx;
+  let tol = isCT ? Math.min(40, Math.max(8, 2.5 * sd)) : Math.max(0.08 * Math.abs(mean), 2.5 * sd);
+  let first: Uint8Array | null = null;
+  for (let attempt = 0; attempt < 4 && !first; attempt++, tol *= 0.7) first = fill2d(s0, [seedIdx], mean - tol, mean + tol, null);
+  if (!first) return { error: 'La región se extiende más de 6 cm (sale de la lesión). Haga clic más al centro o use el pincel.' };
+  tol /= 0.7;
+  first = open2d(first, [seedIdx]);
+  if (area(first) < 4) return { error: 'No se encontró una región homogénea en el punto' };
+  const lo = mean - tol, hi = mean + tol;
+  const grow = Math.max(1, Math.round(3 / Math.min(colSp, rowSp)));
+  const visited = new Map<number, Uint8Array>([[k0, first]]);
+  // Propagate slice by slice inside the previous contour dilated 3 mm; stop when it vanishes or balloons
+  for (const dir of [1, -1]) {
+    let prev = first, prevArea = area(first);
+    for (let k = k0 + dir; k >= 0 && k < imageIds.length && Math.abs(k - k0) * sliceSp <= MAX_RADIUS_MM; k += dir) {
+      const d = src(k);
+      if (!d) break;
+      const allowed = dilate(prev, grow);
+      const seeds: number[] = [];
+      for (let i = 0; i < N; i++) if (prev[i]) seeds.push(i);
+      const m0 = fill2d(d, seeds, lo, hi, allowed);
+      if (!m0) break;
+      const m = open2d(m0, seeds);
+      const a = area(m);
+      if (a < Math.max(4, 0.15 * prevArea) || a > 1.8 * prevArea + 20) break;
+      visited.set(k, m);
+      prev = m;
+      prevArea = a;
+    }
   }
-  if (leaked) return { error: 'La región se extiende más de 6 cm (sale de la lesión). Haga clic más al centro o use el pincel.' };
-  if (count < 5) return { error: 'No se encontró una región homogénea en el punto' };
+  let count = 0, sum = 0;
+  for (const [k, m] of visited) {
+    const d = src(k)!;
+    for (let i = 0; i < N; i++) if (m[i]) { count++; sum += Number(d[i]); }
+  }
   // Write the region into the labelmap of each slice
   for (const [k, m] of visited) {
     const lmId = csSegmentation.getLabelmapImageIdsForImageId?.(imageIds[k], segmentationId)?.[0];
