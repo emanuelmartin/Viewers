@@ -96,6 +96,7 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <li>Plantillas estructuradas (columna por nivel, Doppler venoso, injerto renal, coronariografía, ICP…).</li>
           <li>Escalas y calculadoras: BI-RADS, TI-RADS, Bosniak, Fleischner, RECIST, QCA, Mehran, J-CTO y otras.</li>
           <li>Revisión antes de firmar: lateralidad, niveles de la conclusión sin describir, escalas faltantes, informe vacío.</li>
+          <li>Volumen de una lesión con un clic: la región crece desde el punto y se corrige con el pincel.</li>
         </ul>
       </div>
       <div class="layer">
@@ -152,6 +153,8 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>TC cráneo</td><td>Volumen de hemorragia intraparenquimatosa</td><td><span class="chip warn">En validación</span></td><td>Ventanas cerebro/subdural/ósea, ASPECTS, ABC/2</td></tr>
           <tr><td>RM próstata</td><td>Volumen glandular, zonas transicional y periférica, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>PI-RADS</td></tr>
           <tr><td>RM encéfalo (T1 3D)</td><td>Volúmenes de hipocampos, ventrículos y cerebro</td><td><span class="chip warn">Referencia</span></td><td>Fazekas, índice de Evans</td></tr>
+          <tr><td>RM encéfalo con tumor</td><td>Volumen de tumor, núcleo y realce (MONAI BraTS)</td><td><span class="chip warn">En validación</span></td><td>Correcto en tumores grandes con realce; marcó el cerebelo en cerebros normales. Solo auditoría</td></tr>
+          <tr><td>Cualquier TC o RM</td><td>Volumen de lesión con un clic y pincel para corregir</td><td><span class="chip none">Sin IA</span></td><td>Paso «Volumen de lesión con un clic» en abdomen, cráneo, encéfalo, oncología e infección</td></tr>
           <tr><td>RM columna</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Plantilla por nivel; revisión de niveles y grados de estenosis</td></tr>
           <tr><td>US Doppler injerto renal</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Evolución de IR, VPS y volumen entre estudios; criterios de estenosis</td></tr>
           <tr><td>Hemodinamia</td><td>Adquisiciones y dosis por corrida (PDA y kerma), leídas del DICOM y del protocolo del equipo</td><td><span class="chip none">Sin IA</span></td><td>Bitácora con momentos sobre la imagen, QCA, TIMI frame count, FFR/iFR, relato al informe</td></tr>
@@ -186,6 +189,7 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
       <li><div><b>Seguir los pasos del flujo.</b> Cada paso prepara la vista: ventana, reconstrucción, herramienta o calculadora.</div></li>
       <li><div><b>Revisar la sección IA.</b> Si el análisis aún no existe, «Analizar con IA» lo solicita; tarda alrededor de un minuto.</div></li>
       <li><div><b>Verificar en la imagen.</b> «Ver en imagen» lleva la vista al hallazgo y lo marca con un anillo.</div></li>
+      <li><div><b>Medir el volumen si hace falta.</b> «Volumen de lesión con un clic»: un clic al centro de la lesión, revisar el contorno, corregir con el pincel y «Calcular volúmenes».</div></li>
       <li><div><b>Enviar al informe lo que se confirme.</b> Las medidas aparecen en el editor del RIS en «Medidas del visor», listas para insertar.</div></li>
       <li><div><b>Firmar.</b> Antes de firmar, PixOS avisa de inconsistencias; ninguna bloquea la firma, solo pide confirmar.</div></li>
     </ol>
