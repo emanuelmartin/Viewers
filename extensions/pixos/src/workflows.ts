@@ -67,7 +67,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
       { kind: 'window', label: 'Ventana cerebro', voi: W.brain },
       { kind: 'window', label: 'Ventana subdural', voi: W.subdural },
       { kind: 'window', label: 'Ventana ósea', voi: W.bone },
-      { kind: 'ai', label: 'Detección de hemorragia (GPU)', hint: 'Volumen de hemorragia intracraneal; verificar siempre' },
+      { kind: 'ai', label: 'Hemorragia intraparenquimatosa (en validación)', hint: 'Solo auditoría: no detecta subdural ni subaracnoidea; nunca descarta hemorragia' },
       mpr,
       length('Desviación de la línea media / espesor de colección'),
       roi('Densidad de una lesión (UH)'),

@@ -105,7 +105,7 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <li>Volumen y densidad de órganos abdominales.</li>
           <li>Hallazgos oportunistas: densidad de L1, aorta abdominal, esteatosis, músculo en L3.</li>
           <li>Volumen prostático en RM y densidad de APE.</li>
-          <li>Candidatos a nódulo pulmonar y hemorragia intracraneal, ubicables en la imagen (en validación ampliada).</li>
+          <li>Candidatos a nódulo pulmonar ubicables en la imagen; niveles vertebrales en RM de columna.</li>
         </ul>
       </div>
       <div class="layer">
@@ -150,12 +150,15 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>TC abdomen: lesiones hepáticas</td><td>Lesiones focales con «Ver en imagen»</td><td><span class="chip warn">En validación</span></td><td>Solo visible para auditoría mientras se reducen falsos positivos</td></tr>
           <tr><td>TC abdomen: quistes renales</td><td>Quistes ≥ 5 mm</td><td><span class="chip warn">En validación</span></td><td>Falla en quistes casi isodensos en fase simple</td></tr>
           <tr><td>TC tórax</td><td>Candidatos a nódulo con diámetro y confianza; volumen de derrame</td><td><span class="chip warn">En validación</span></td><td>Fleischner, Lung-RADS, relación VD/VI</td></tr>
-          <tr><td>TC cráneo</td><td>Volumen de hemorragia intraparenquimatosa</td><td><span class="chip warn">En validación</span></td><td>Ventanas cerebro/subdural/ósea, ASPECTS, ABC/2</td></tr>
+          <tr><td>TC cráneo</td><td>Hemorragia intraparenquimatosa</td><td><span class="chip bad">No confiable</span></td><td>Retirada para radiólogos: encontró 17 de 38 hemorragias informadas (no valora subdural ni subaracnoidea). Ventanas, ASPECTS y ABC/2 siguen disponibles</td></tr>
           <tr><td>RM próstata</td><td>Volumen glandular, zonas transicional y periférica, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>PI-RADS</td></tr>
           <tr><td>RM encéfalo (T1 3D)</td><td>Volúmenes de hipocampos, ventrículos y cerebro</td><td><span class="chip warn">Referencia</span></td><td>Fazekas, índice de Evans</td></tr>
           <tr><td>RM encéfalo con tumor</td><td>Volumen de tumor, núcleo y realce (MONAI BraTS)</td><td><span class="chip warn">En validación</span></td><td>Correcto en tumores grandes con realce; marcó el cerebelo en cerebros normales. Solo auditoría</td></tr>
+          <tr><td>TC con lesión focal</td><td>Lesión con un clic por IA (MONAI VISTA3D): hígado, páncreas, pulmón, hueso</td><td><span class="chip warn">Evaluación</span></td><td>Licencia de NVIDIA solo para investigación y evaluación; en HRSL coincidió con la segmentación por clic y el modelo de lesiones</td></tr>
+          <tr><td>RM angiografía TOF</td><td>Búsqueda de aneurismas</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría por ahora</td></tr>
+          <tr><td>RM de columna</td><td>Niveles vertebrales y discales para navegar</td><td><span class="chip ok">Disponible</span></td><td>Verificar el conteo desde C2 o el sacro</td></tr>
           <tr><td>Cualquier TC o RM</td><td>Volumen de lesión con un clic y pincel para corregir</td><td><span class="chip none">Sin IA</span></td><td>Paso «Volumen de lesión con un clic» en abdomen, cráneo, encéfalo, oncología e infección</td></tr>
-          <tr><td>RM columna</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Plantilla por nivel; revisión de niveles y grados de estenosis</td></tr>
+          <tr><td>RM columna</td><td>Niveles vertebrales (TotalSegmentator)</td><td><span class="chip ok">Disponible</span></td><td>Plantilla por nivel; revisión de niveles y grados de estenosis</td></tr>
           <tr><td>US Doppler injerto renal</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Evolución de IR, VPS y volumen entre estudios; criterios de estenosis</td></tr>
           <tr><td>Hemodinamia</td><td>Adquisiciones y dosis por corrida (PDA y kerma), leídas del DICOM y del protocolo del equipo</td><td><span class="chip none">Sin IA</span></td><td>Bitácora con momentos sobre la imagen, QCA, TIMI frame count, FFR/iFR, relato al informe</td></tr>
           <tr><td>Revisión visual general</td><td>Modelo de lenguaje con visión (MedGemma)</td><td><span class="chip bad">No confiable</span></td><td>Retirada: llamó normales 35 de 36 estudios con hallazgos</td></tr>
@@ -171,11 +174,15 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
       <table>
         <thead><tr><th>Medición</th><th>Estudios HRSL</th><th>Resultado</th></tr></thead>
         <tbody>
-          <tr><td>Volumen prostático (RM)</td><td class="mono">47</td><td>Correlación r = 0.96 con el volumen informado; sesgo −4 ml</td></tr>
+          <tr><td>Volumen prostático (RM)</td><td class="mono">59</td><td>IA/informe 0.92; correlación r = 0.96 en la serie inicial de 47</td></tr>
           <tr><td>Densidad de L1 (≤ 110 UH)</td><td class="mono">52</td><td>Sensibilidad 75 %, especificidad 83 % antes de corregir el ROI; se revalida con el método corregido</td></tr>
-          <tr><td>Hemorragia intracraneal</td><td class="mono">14</td><td>Sin falsos negativos; 2 falsos positivos. Ampliación en curso con 70 estudios</td></tr>
-          <tr><td>Nódulo pulmonar</td><td class="mono">9</td><td>Sin falsos negativos. Muchos «falsos positivos» resultaron nódulos pequeños o granulomas no informados</td></tr>
-          <tr><td>Revisión visual general (MedGemma)</td><td class="mono">37</td><td>Sensibilidad 0 %: retirada para radiólogos</td></tr>
+          <tr><td>Hemorragia intracraneal</td><td class="mono">76</td><td>Sensibilidad 45 %, especificidad 90 %: retirada para radiólogos</td></tr>
+          <tr><td>Nódulo pulmonar</td><td class="mono">69</td><td>Sensibilidad 94 %; muchos «falsos positivos» son nódulos pequeños o granulomas no informados</td></tr>
+          <tr><td>Aorta abdominal ≥ 30 mm</td><td class="mono">126</td><td>Especificidad 99 % tras medir solo aorta abdominal en series axiales</td></tr>
+          <tr><td>Esplenomegalia (&gt; 450 ml)</td><td class="mono">117</td><td>Sensibilidad 70 %, especificidad 96 %</td></tr>
+          <tr><td>Derrame pleural</td><td class="mono">67</td><td>Sensibilidad 79 %, especificidad 79 %</td></tr>
+          <tr><td>Revisión visual general (MedGemma)</td><td class="mono">45</td><td>Sensibilidad 0 %: retirada para radiólogos</td></tr>
+          <tr><td>Aneurisma cerebral (TOF)</td><td class="mono">14</td><td>Detectó los 2 aneurismas tipo blister; 1 falso positivo en 12 negativos tras el filtro de tamaño. En validación</td></tr>
         </tbody>
       </table>
     </div>
