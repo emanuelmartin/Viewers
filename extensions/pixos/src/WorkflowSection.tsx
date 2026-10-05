@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { SLABS, applySlab, createSegmentation } from './tools';
-import { SEG_TOOL_NAMES } from './segTools';
+import { armClickSegment } from './segTools';
 import { FOLLOW_UP_MODULE, SCENARIO_MODULES, WORKFLOWS, type Step } from './workflows';
 import PriorsSection, { openCompare, type Prior } from './PriorsSection';
 import { GraftSection, XASection } from './ClinicalSection';
@@ -122,8 +122,8 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
         const has = (segmentationService.getSegmentationRepresentations?.(viewportId) || []).length > 0;
         (has ? Promise.resolve() : createSegmentation(servicesManager, commandsManager, false))
           .then(() => {
-            commandsManager.runCommand('setToolActiveToolbar', { toolName: SEG_TOOL_NAMES.click });
-            setNote(`${step.label}: ${step.hint || 'clic dentro de la lesión'}. Luego «Calcular volúmenes» en «Volúmenes por segmentación» (más abajo en este panel).`);
+            setNote(`${step.label}: ${step.hint || 'clic dentro de la lesión'}. Haga un clic sobre la lesión en la imagen.`);
+            armClickSegment(servicesManager, message => setNote(message));
           })
           .catch(e => setNote(`No se pudo preparar la segmentación: ${e?.message || e}`));
         break;

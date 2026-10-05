@@ -1,6 +1,7 @@
 import { utilities as csToolsUtilities } from '@cornerstonejs/tools';
 import { datasetToDicomBlob } from '@ohif/extension-default/src/utils/dicomWriter';
 import { callCloud } from './ris';
+import { stackSegmentStats } from './segTools';
 
 // ── measurements ────────────────────────────────────────────────────────────
 
@@ -171,8 +172,13 @@ export async function segmentVolumes(servicesManager): Promise<SegmentVolume[]> 
     }
     for (const index of indices) {
       const s: any = stats?.[index] || {};
-      const volume = s.volume?.value;
-      const unit = String(s.volume?.unit || 'mm³');
+      let volume = s.volume?.value;
+      let unit = String(s.volume?.unit || 'mm³');
+      // Stack labelmaps (the HRSL mode): getStatistics gives nothing; count voxels with the real spacing
+      if (typeof volume !== 'number') {
+        const st = stackSegmentStats(seg.segmentationId, index);
+        if (st) { volume = st.ml; unit = 'ml'; s.mean = { value: st.mean }; }
+      }
       out.push({
         segmentationId: seg.segmentationId,
         segmentation: seg.label || 'Segmentación',
