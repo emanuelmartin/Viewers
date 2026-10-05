@@ -198,7 +198,8 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
           {organs && (
             <div className="mt-3 text-[12px]">
               <b>Volumetría:</b>
-              {Object.values(organs).map((o: any) => (
+              {/* CT prostate volume did not agree with the reports: not shown */}
+              {Object.entries(organs).filter(([k]) => k !== 'prostate').map(([, o]: [string, any]) => (
                 <div key={o.label} className="flex justify-between">
                   <span>{o.label}{o.partial ? ' (parcial)' : ''}</span>
                   <span>{o.volume_ml} ml · {o.mean_hu} UH</span>
