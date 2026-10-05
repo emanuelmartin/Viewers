@@ -94,7 +94,8 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
   const toSend = [...chosen, ...results];
 
   return (
-    <div className="p-3 text-white">
+    // The side panel is a flex column without its own scroll: this panel scrolls itself
+    <div className="ohif-scrollbar min-h-0 flex-1 overflow-y-auto p-3 text-white">
       <div className={`mb-3 ${muted}`}>
         {access.user?.fullName || 'Médico'} · {access.canSave ? 'puede enviar y guardar' : 'solo consulta'}
       </div>
