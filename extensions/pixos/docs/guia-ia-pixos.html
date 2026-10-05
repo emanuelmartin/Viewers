@@ -1,0 +1,209 @@
+<title>IA en PixOS HRSL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column for the explanation, wider tables for the reference parts. */
+:root {
+  --bg: #f6f8f9; --surface: #ffffff; --fg: #1d2a33; --muted: #5a6b76; --line: #d9e1e6;
+  --accent: #0f6f7a; --accent-soft: #e2f1f2;
+  --ok: #1f7a4d; --ok-bg: #e3f3ea; --warn: #8a5a00; --warn-bg: #fbf0d9; --bad: #a1312a; --bad-bg: #f8e4e2; --none: #4c5a64; --none-bg: #e9eef1;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181d; --surface: #182228; --fg: #e3ebef; --muted: #9db0bb; --line: #2b3a43;
+  --accent: #5cc3cc; --accent-soft: #163338;
+  --ok: #6fd3a0; --ok-bg: #173327; --warn: #f0c46a; --warn-bg: #3a2e14; --bad: #f19b93; --bad-bg: #3d1f1d; --none: #b3c2cb; --none-bg: #233038;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181d; --surface: #182228; --fg: #e3ebef; --muted: #9db0bb; --line: #2b3a43;
+  --accent: #5cc3cc; --accent-soft: #163338;
+  --ok: #6fd3a0; --ok-bg: #173327; --warn: #f0c46a; --warn-bg: #3a2e14; --bad: #f19b93; --bad-bg: #3d1f1d; --none: #b3c2cb; --none-bg: #233038;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); padding-inline: 20px; padding-block: 40px 64px; }
+main { max-width: 880px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.2; text-wrap: balance; margin: 0; font-weight: 650; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+h2 { font-size: 1.55rem; margin-bottom: 4px; }
+h3 { font-size: 1.12rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 1.1rem; color: var(--muted); margin-top: 12px; }
+.eyebrow { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+section { display: grid; gap: 16px; }
+section > p, section > ul { color: var(--fg); }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 68ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.9rem; color: var(--muted); }
+.chip { display: inline-block; font: 600 0.72rem/1 var(--body); letter-spacing: 0.03em; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { color: var(--ok); background: var(--ok-bg); }
+.chip.warn { color: var(--warn); background: var(--warn-bg); }
+.chip.bad { color: var(--bad); background: var(--bad-bg); }
+.chip.none { color: var(--none); background: var(--none-bg); }
+
+.layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.layer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.layer h3 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.layer ul { font-size: 0.95rem; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; min-width: 640px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font: 600 0.75rem/1.3 var(--body); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td .chip { margin-top: 2px; }
+
+.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 12px; max-width: none; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2rem 1fr; gap: 12px; align-items: start; }
+.steps li::before { content: counter(s); font: 600 0.9rem/2rem var(--mono); text-align: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); width: 2rem; height: 2rem; }
+.steps b { font-weight: 600; }
+
+.callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; display: grid; gap: 6px; }
+.callout.warn { border-left-color: var(--warn); }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 480px) { body { padding-inline: 16px; } }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">Hospital Real San Lucas · PixOS · octubre 2026</div>
+    <h1>Qué hace la IA en PixOS y qué no</h1>
+    <p class="lede">Guía para médicos radiólogos y especialistas: qué herramientas hay en el visor y en el editor de informes, cuáles están validadas con estudios del propio hospital, y cómo usarlas sin delegarles el diagnóstico.</p>
+  </header>
+
+  <section>
+    <h2>En una frase</h2>
+    <p>PixOS no informa estudios. Mide, ordena y recuerda: prepara el visor según el tipo de estudio, propone mediciones cuantitativas que tomarían minutos a mano, revisa la consistencia del informe antes de firmar y compara cada resultado de IA con lo que el radiólogo firmó para saber en qué se puede confiar.</p>
+    <div class="legend" aria-label="Leyenda de estados">
+      <span><span class="chip ok">Validada</span> contrastada con informes de HRSL; se muestra al radiólogo</span>
+      <span><span class="chip warn">En validación</span> funciona, pero aún se mide su exactitud</span>
+      <span><span class="chip bad">No confiable</span> retirada tras validarla</span>
+      <span><span class="chip none">Sin IA</span> reglas y herramientas deterministas</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tres capas de ayuda</h2>
+    <div class="layers">
+      <div class="layer">
+        <h3>Herramientas de trabajo <span class="chip none">Sin IA</span></h3>
+        <ul>
+          <li>Flujo de trabajo por tipo de estudio en el visor: ventanas, MPR, herramientas de medida, pasos a revisar.</li>
+          <li>Plantillas estructuradas (columna por nivel, Doppler venoso, injerto renal, coronariografía, ICP…).</li>
+          <li>Escalas y calculadoras: BI-RADS, TI-RADS, Bosniak, Fleischner, RECIST, QCA, Mehran, J-CTO y otras.</li>
+          <li>Revisión antes de firmar: lateralidad, niveles de la conclusión sin describir, escalas faltantes, informe vacío.</li>
+        </ul>
+      </div>
+      <div class="layer">
+        <h3>Mediciones automáticas <span class="chip ok">Validadas</span></h3>
+        <ul>
+          <li>Volumen y densidad de órganos abdominales.</li>
+          <li>Hallazgos oportunistas: densidad de L1, aorta abdominal, esteatosis, músculo en L3.</li>
+          <li>Volumen prostático en RM y densidad de APE.</li>
+          <li>Candidatos a nódulo pulmonar y hemorragia intracraneal, ubicables en la imagen (en validación ampliada).</li>
+        </ul>
+      </div>
+      <div class="layer">
+        <h3>Control de calidad <span class="chip warn">Continuo</span></h3>
+        <ul>
+          <li>Cada informe firmado se compara con lo que encontró la IA en ese estudio.</li>
+          <li>Se calcula sensibilidad, especificidad y concordancia por hallazgo.</li>
+          <li>Lo que no pasa la validación se retira o se queda solo para auditoría.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Un caso real, revisado imagen por imagen</h2>
+    <p class="muted">TC de abdomen y pelvis simple, mujer adulta mayor, sin estudios previos. Se revisó sobre las imágenes cada resultado de la IA frente al informe firmado.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Informe del radiólogo</th><th>Resultado de la IA</th><th>Revisión en imagen</th></tr></thead>
+        <tbody>
+          <tr><td>Disminución difusa de la densidad ósea</td><td class="mono">L1 43 UH → sugiere osteoporosis</td><td><span class="chip ok">Coincide</span><br>Al revisar se encontró que el ROI incluía el arco posterior; se corrigió a un ROI trabecular del cuerpo vertebral (método de Pickhardt).</td></tr>
+          <tr><td>Quistes hepáticos de 5 mm en segmentos III y IV</td><td class="mono">2 lesiones: 6.8 mm (32 UH) y 5.8 mm (14 UH)</td><td><span class="chip ok">Coincide</span><br>Las dos son los quistes descritos. Dos candidatos falsos (región cardiaca y borde con estructura densa) se eliminaron con un filtro nuevo.</td></tr>
+          <tr><td>Páncreas con infiltración grasa difusa</td><td class="mono">Páncreas 15 ml, 11 UH</td><td><span class="chip ok">Coincide</span><br>La grasa reduce el volumen segmentado y la densidad.</td></tr>
+          <tr><td>Placas calcificadas, calibre aórtico conservado</td><td class="mono">Aorta abdominal 22.8 mm</td><td><span class="chip ok">Coincide</span></td></tr>
+          <tr><td>Hígado sin esteatosis</td><td class="mono">Hígado 65 UH, +16 UH respecto al bazo</td><td><span class="chip ok">Coincide</span></td></tr>
+          <tr><td>(No lo menciona)</td><td class="mono">Músculo en L3 19 UH → mioesteatosis</td><td><span class="chip warn">Dato adicional</span><br>Hallazgo oportunista; el radiólogo decide si lo incluye.</td></tr>
+          <tr><td>Quistes corticales renales bilaterales, el mayor 18 × 20 mm, 22 UH</td><td class="mono">Sin quistes renales</td><td><span class="chip bad">No detectado</span><br>A 22 UH el quiste es casi isodenso al riñón (36 UH) en fase simple. Es una limitación del estudio sin contraste.</td></tr>
+          <tr><td>Diverticulosis, hernia hiatal</td><td class="mono">—</td><td><span class="chip none">Fuera de alcance</span><br>No hay modelo para estos hallazgos.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>El mismo estudio mostró dos fallas del flujo que ya se corrigieron: lo marcaba como «control» sin tener estudios previos, y añadía pasos de músculo-esquelético porque el informe mencionaba cambios degenerativos de la columna.</p>
+  </section>
+
+  <section>
+    <h2>Qué hay para cada tipo de estudio</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Estudio</th><th>Medición automática</th><th>Estado</th><th>Apoyo sin IA</th></tr></thead>
+        <tbody>
+          <tr><td>TC abdomen y pelvis</td><td>Volumen y densidad de órganos; L1; aorta abdominal; esteatosis (fase simple); músculo en L3</td><td><span class="chip ok">Validada</span></td><td>Plantilla, Bosniak, LI-RADS, lavado suprarrenal, incidentalomas ACR</td></tr>
+          <tr><td>TC abdomen: lesiones hepáticas</td><td>Lesiones focales con «Ver en imagen»</td><td><span class="chip warn">En validación</span></td><td>Solo visible para auditoría mientras se reducen falsos positivos</td></tr>
+          <tr><td>TC abdomen: quistes renales</td><td>Quistes ≥ 5 mm</td><td><span class="chip warn">En validación</span></td><td>Falla en quistes casi isodensos en fase simple</td></tr>
+          <tr><td>TC tórax</td><td>Candidatos a nódulo con diámetro y confianza; volumen de derrame</td><td><span class="chip warn">En validación</span></td><td>Fleischner, Lung-RADS, relación VD/VI</td></tr>
+          <tr><td>TC cráneo</td><td>Volumen de hemorragia intraparenquimatosa</td><td><span class="chip warn">En validación</span></td><td>Ventanas cerebro/subdural/ósea, ASPECTS, ABC/2</td></tr>
+          <tr><td>RM próstata</td><td>Volumen glandular, zonas transicional y periférica, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>PI-RADS</td></tr>
+          <tr><td>RM encéfalo (T1 3D)</td><td>Volúmenes de hipocampos, ventrículos y cerebro</td><td><span class="chip warn">Referencia</span></td><td>Fazekas, índice de Evans</td></tr>
+          <tr><td>RM columna</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Plantilla por nivel; revisión de niveles y grados de estenosis</td></tr>
+          <tr><td>US Doppler injerto renal</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Evolución de IR, VPS y volumen entre estudios; criterios de estenosis</td></tr>
+          <tr><td>Hemodinamia</td><td>Adquisiciones y dosis por corrida (PDA y kerma), leídas del DICOM y del protocolo del equipo</td><td><span class="chip none">Sin IA</span></td><td>Bitácora con momentos sobre la imagen, QCA, TIMI frame count, FFR/iFR, relato al informe</td></tr>
+          <tr><td>Revisión visual general</td><td>Modelo de lenguaje con visión (MedGemma)</td><td><span class="chip bad">No confiable</span></td><td>Retirada: llamó normales 35 de 36 estudios con hallazgos</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cómo se valida</h2>
+    <p>Cada vez que se firma un informe de un estudio analizado, el sistema compara lo que midió la IA con lo que escribió el radiólogo. El informe es la referencia: si la IA marca algo real que no se informó, cuenta como falso positivo, así que las cifras son conservadoras.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Medición</th><th>Estudios HRSL</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>Volumen prostático (RM)</td><td class="mono">47</td><td>Correlación r = 0.96 con el volumen informado; sesgo −4 ml</td></tr>
+          <tr><td>Densidad de L1 (≤ 110 UH)</td><td class="mono">52</td><td>Sensibilidad 75 %, especificidad 83 % antes de corregir el ROI; se revalida con el método corregido</td></tr>
+          <tr><td>Hemorragia intracraneal</td><td class="mono">14</td><td>Sin falsos negativos; 2 falsos positivos. Ampliación en curso con 70 estudios</td></tr>
+          <tr><td>Nódulo pulmonar</td><td class="mono">9</td><td>Sin falsos negativos. Muchos «falsos positivos» resultaron nódulos pequeños o granulomas no informados</td></tr>
+          <tr><td>Revisión visual general (MedGemma)</td><td class="mono">37</td><td>Sensibilidad 0 %: retirada para radiólogos</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Las cifras se actualizan solas en la página de auditoría de IA del RIS. Esta noche se procesan 304 estudios más con hallazgos positivos y negativos para cada medición.</p>
+  </section>
+
+  <section>
+    <h2>Cómo usarlo en un estudio</h2>
+    <ol class="steps">
+      <li><div><b>Abrir el estudio desde el RIS con sesión iniciada.</b> El panel PixOS del visor muestra el flujo para ese tipo de estudio y el motivo de la orden.</div></li>
+      <li><div><b>Seguir los pasos del flujo.</b> Cada paso prepara la vista: ventana, reconstrucción, herramienta o calculadora.</div></li>
+      <li><div><b>Revisar la sección IA.</b> Si el análisis aún no existe, «Analizar con IA» lo solicita; tarda alrededor de un minuto.</div></li>
+      <li><div><b>Verificar en la imagen.</b> «Ver en imagen» lleva la vista al hallazgo y lo marca con un anillo.</div></li>
+      <li><div><b>Enviar al informe lo que se confirme.</b> Las medidas aparecen en el editor del RIS en «Medidas del visor», listas para insertar.</div></li>
+      <li><div><b>Firmar.</b> Antes de firmar, PixOS avisa de inconsistencias; ninguna bloquea la firma, solo pide confirmar.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Límites que conviene tener presentes</h2>
+    <div class="callout warn">
+      <p><b>Toda medición automática es orientativa.</b> Se usa para no omitir y para ahorrar tiempo de medición; el diagnóstico y la redacción son del médico.</p>
+    </div>
+    <ul>
+      <li>La esteatosis y la mioesteatosis solo se interpretan en fase simple; con contraste la densidad no sirve para grasa.</li>
+      <li>Sin contraste, los quistes renales casi isodensos y las lesiones pequeñas pueden no detectarse.</li>
+      <li>Un estudio sin previos en el PACS no tiene módulo de evolución, aunque la orden diga «control».</li>
+      <li>La dosis de hemodinamia no incluye fluoroscopía hasta que el equipo envíe su reporte de dosis (RDSR).</li>
+      <li>Las herramientas de medida son para médicos con sesión; enviar al informe y guardar segmentaciones, solo para radiólogos. Los enlaces de pacientes muestran el estudio sin herramientas.</li>
+    </ul>
+  </section>
+
+  <footer>PixOS · Hospital Real San Lucas. Validación con informes firmados del hospital, abril–octubre de 2026. Modelos: TotalSegmentator, MONAI (próstata, nódulos pulmonares), FastSurfer.</footer>
+</main>
