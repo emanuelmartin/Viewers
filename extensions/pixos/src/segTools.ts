@@ -66,41 +66,54 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
   const src = (k: number) => cache.getImage(imageIds[k])?.voxelManager?.getScalarData?.() as ArrayLike<number> | undefined;
   const s0 = src(k0);
   if (!s0 || sx < 0 || sy < 0 || sx >= cols || sy >= rows) return { error: 'El punto no está sobre la imagen' };
-  // Seed band from the 5×5 neighbourhood
+  // Values are read through a 3×3 in-plane mean (CT noise of a non-contrast study is ~15 HU, larger than the
+  // contrast of many lesions against their organ)
+  const val = (d: ArrayLike<number>, x: number, y: number) => {
+    let t = 0, n = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const xx = x + dx, yy = y + dy;
+      if (xx >= 0 && yy >= 0 && xx < cols && yy < rows) { t += Number(d[yy * cols + xx]); n++; }
+    }
+    return t / n;
+  };
   const vals: number[] = [];
   for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
     const x = sx + dx, y = sy + dy;
-    if (x >= 0 && y >= 0 && x < cols && y < rows) vals.push(Number(s0[y * cols + x]));
+    if (x >= 0 && y >= 0 && x < cols && y < rows) vals.push(val(s0, x, y));
   }
   const mean = vals.reduce((a, v) => a + v, 0) / vals.length;
   const sd = Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length);
   const isCT = (metaData.get('generalSeriesModule', imageIds[k0]) as any)?.modality === 'CT';
-  const tol = isCT ? Math.min(80, Math.max(20, 2.5 * sd)) : Math.max(0.12 * Math.abs(mean), 2.5 * sd);
-  const lo = mean - tol, hi = mean + tol;
   const rx = Math.ceil(MAX_RADIUS_MM / colSp), ry = Math.ceil(MAX_RADIUS_MM / rowSp), rk = Math.ceil(MAX_RADIUS_MM / sliceSp);
-  const visited = new Map<number, Uint8Array>();
-  const mark = (k: number) => { let m = visited.get(k); if (!m) { m = new Uint8Array(cols * rows); visited.set(k, m); } return m; };
-  const stack: number[] = [sx, sy, k0];
-  mark(k0)[sy * cols + sx] = 1;
-  let count = 0, sum = 0, leaked = false;
-  while (stack.length) {
-    const k = stack.pop() as number, y = stack.pop() as number, x = stack.pop() as number;
-    count++;
-    sum += Number(src(k)![y * cols + x]);
-    for (const [nx, ny, nk] of [[x + 1, y, k], [x - 1, y, k], [x, y + 1, k], [x, y - 1, k], [x, y, k + 1], [x, y, k - 1]]) {
-      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || nk < 0 || nk >= imageIds.length) continue;
-      if (Math.abs(nx - sx) > rx || Math.abs(ny - sy) > ry || Math.abs(nk - k0) > rk) { leaked = true; continue; }
-      const m = mark(nk);
-      const i = ny * cols + nx;
-      if (m[i]) continue;
-      const d = src(nk);
-      if (!d) continue; // slice not loaded yet: boundary
-      const v = Number(d[i]);
-      if (v < lo || v > hi) continue;
-      m[i] = 1;
-      stack.push(nx, ny, nk);
+  // A region that leaks gets two more tries with a narrower band
+  let tol = isCT ? Math.min(40, Math.max(8, 2.5 * sd)) : Math.max(0.08 * Math.abs(mean), 2.5 * sd);
+  let visited = new Map<number, Uint8Array>();
+  let count = 0, sum = 0, leaked = true;
+  for (let attempt = 0; attempt < 3 && leaked; attempt++, tol *= 0.65) {
+    const lo = mean - tol, hi = mean + tol;
+    visited = new Map<number, Uint8Array>();
+    const mark = (k: number) => { let m = visited.get(k); if (!m) { m = new Uint8Array(cols * rows); visited.set(k, m); } return m; };
+    const stack: number[] = [sx, sy, k0];
+    mark(k0)[sy * cols + sx] = 1;
+    count = 0; sum = 0; leaked = false;
+    while (stack.length && !leaked) {
+      const k = stack.pop() as number, y = stack.pop() as number, x = stack.pop() as number;
+      count++;
+      sum += Number(src(k)![y * cols + x]);
+      for (const [nx, ny, nk] of [[x + 1, y, k], [x - 1, y, k], [x, y + 1, k], [x, y - 1, k], [x, y, k + 1], [x, y, k - 1]]) {
+        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || nk < 0 || nk >= imageIds.length) continue;
+        if (Math.abs(nx - sx) > rx || Math.abs(ny - sy) > ry || Math.abs(nk - k0) > rk) { leaked = true; break; }
+        const m = mark(nk);
+        const i = ny * cols + nx;
+        if (m[i]) continue;
+        const d = src(nk);
+        if (!d) continue; // slice not loaded yet: boundary
+        const v = val(d, nx, ny);
+        if (v < lo || v > hi) continue;
+        m[i] = 1;
+        stack.push(nx, ny, nk);
+      }
     }
-    if (leaked) break;
   }
   if (leaked) return { error: 'La región se extiende más de 6 cm (sale de la lesión). Haga clic más al centro o use el pincel.' };
   if (count < 5) return { error: 'No se encontró una región homogénea en el punto' };
