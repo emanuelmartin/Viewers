@@ -138,13 +138,20 @@ function growRegion(viewport: any, segmentationId: string, segmentIndex: number,
     return cur;
   };
   const area = (m: Uint8Array) => { let c = 0; for (let i = 0; i < N; i++) c += m[i]; return c; };
-  // Seed slice: narrow the band until the fill stays inside 6 cm
+  // Seed slice: band chosen by stability. Fill with growing tolerances and keep the widest one before the area
+  // jumps (> 1.6×): a jump means the region crossed the lesion edge into a neighbour of similar density.
   const seedIdx = sy * cols + sx;
-  let tol = isCT ? Math.min(40, Math.max(8, 2.5 * sd)) : Math.max(0.08 * Math.abs(mean), 2.5 * sd);
-  let first: Uint8Array | null = null;
-  for (let attempt = 0; attempt < 4 && !first; attempt++, tol *= 0.7) first = fill2d(s0, [seedIdx], mean - tol, mean + tol, null);
+  const maxTol = isCT ? Math.min(40, Math.max(10, 3 * sd)) : Math.max(0.1 * Math.abs(mean), 3 * sd);
+  let tol = 0, first: Uint8Array | null = null, firstArea = 0;
+  for (const f of [0.25, 0.35, 0.5, 0.7, 1]) {
+    const t = maxTol * f;
+    const m = fill2d(s0, [seedIdx], mean - t, mean + t, null);
+    if (!m) break;
+    const a = area(m);
+    if (first && a > 1.6 * firstArea + 10) break;
+    first = m; firstArea = a; tol = t;
+  }
   if (!first) return { error: 'La región se extiende más de 6 cm (sale de la lesión). Haga clic más al centro o use el pincel.' };
-  tol /= 0.7;
   first = open2d(first, [seedIdx]);
   if (area(first) < 4) return { error: 'No se encontró una región homogénea en el punto' };
   const lo = mean - tol, hi = mean + tol;
