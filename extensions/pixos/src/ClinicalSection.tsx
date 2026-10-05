@@ -20,8 +20,10 @@ async function send(studyUID: string, label: string, text: string) {
 type Run = {
   time: string | null; series: string; projection: string; frames: number; fps: number | null;
   dapGycm2: number | null; magnification: number | null; seriesInstanceUID: string; sopInstanceUID?: string;
+  kermaMgy?: number | null; kermaEstMgy?: number | null;
 };
-type XA = { runs: Run[]; totalRuns: number; totalFrames: number; totalDapGycm2: number; projections: string[]; text: string };
+type XA = { runs: Run[]; totalRuns: number; totalFrames: number; totalDapGycm2: number; projections: string[]; text: string;
+  kerma: { totalMgy: number; measuredRuns: number; estimated: boolean } | null; flags?: string[] };
 
 /** Puts one angiographic run (multiframe instance) in the active viewport. */
 function showRun(servicesManager: any, commandsManager: any, run: Run) {
@@ -97,13 +99,16 @@ export function XASection({ servicesManager, commandsManager, studyUID, canSave 
       {!xa && !error && <div className={muted}>Leyendo adquisiciones…</div>}
       {xa && (
         <div className="text-[12px]">
-          <div>{xa.totalRuns} adquisiciones · {xa.totalFrames} cuadros · PDA {xa.totalDapGycm2} Gy·cm² (sin fluoroscopía)</div>
+          <div>{xa.totalRuns} adquisiciones · {xa.totalFrames} cuadros · PDA {xa.totalDapGycm2} Gy·cm²
+            {xa.kerma ? ` · kerma ${xa.kerma.totalMgy} mGy${xa.kerma.estimated ? ` (${xa.kerma.measuredRuns} medidas, resto estimado)` : ''}` : ''} (sin fluoroscopía)</div>
+          {(xa.flags || []).map((f, i) => <div key={i} className="text-amber-300">• {f}</div>)}
           <div className="mt-1 max-h-40 overflow-y-auto">
             {xa.runs.map((run, i) => (
               <div key={i} className="flex cursor-pointer justify-between gap-1 rounded px-1 hover:bg-white/10"
                 onClick={() => setMsg(showRun(servicesManager, commandsManager, run) || `Adquisición ${i + 1} (${run.projection})`)}>
                 <span>{i + 1}. {run.projection}</span>
-                <span className={muted}>{run.frames} c{run.fps ? ` · ${run.fps} cps` : ''}{run.dapGycm2 != null ? ` · ${run.dapGycm2} Gy·cm²` : ''}</span>
+                <span className={muted}>{run.frames} c{run.fps ? ` · ${run.fps} cps` : ''}{run.dapGycm2 != null ? ` · ${run.dapGycm2} Gy·cm²` : ''}
+                  {run.kermaMgy != null ? ` · ${run.kermaMgy} mGy` : run.kermaEstMgy != null ? ` · ≈${run.kermaEstMgy} mGy` : ''}</span>
               </div>
             ))}
           </div>
@@ -131,7 +136,8 @@ export function XASection({ servicesManager, commandsManager, studyUID, canSave 
       {msg && <div className={`mt-1 ${muted}`}>{msg}</div>}
       {(xa || error) && (
         <ProcedureSection servicesManager={servicesManager} commandsManager={commandsManager} studyUID={studyUID} canSave={canSave}
-          runs={xa?.runs || []} acquisitions={xa?.text || null} />
+          runs={xa?.runs || []} acquisitions={xa?.text || null}
+          dose={xa ? { dapGycm2: xa.totalDapGycm2, kermaMgy: xa.kerma?.totalMgy ?? null } : null} />
       )}
     </div>
   );

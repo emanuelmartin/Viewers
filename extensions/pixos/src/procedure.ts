@@ -67,11 +67,12 @@ export const EVENT_DEFS: EventDef[] = [
       'espasmo', 'arritmia', 'bloqueo AV', 'hipotensión', 'hematoma del acceso', 'reacción al contraste', 'otra']),
     vessel, txt('grado', 'Grado / clasificación (NHLBI, Ellis…)'), txt('manejo', 'Manejo')] },
   { type: 'resultado', label: 'Resultado final', fields: [
-    vessel, num('residual', 'Estenosis residual', '%'), sel('timi', 'TIMI final', ['', '0', '1', '2', '3']), txt('comentario', 'Comentario')] },
+    vessel, num('residual', 'Estenosis residual', '%'), sel('timi', 'TIMI final', ['', '0', '1', '2', '3']),
+    sel('blush', 'Blush miocárdico (MBG)', ['', '0', '1', '2', '3']), txt('comentario', 'Comentario')] },
   { type: 'cierre', label: 'Cierre y dosis', fields: [
     sel('metodo', 'Hemostasia', ['banda de compresión radial', 'dispositivo de cierre vascular', 'compresión manual']),
-    num('contraste', 'Contraste total', 'ml'), num('fluoro', 'Tiempo de fluoroscopía', 'min'), num('kerma', 'Kerma en aire', 'mGy'),
-    num('pda', 'Producto dosis-área total', 'Gy·cm²')] },
+    num('contraste', 'Contraste total', 'ml'), num('tfg', 'TFG del paciente', 'ml/min/1.73 m²'), num('fluoro', 'Tiempo de fluoroscopía', 'min'),
+    num('kerma', 'Kerma en aire', 'mGy'), num('pda', 'Producto dosis-área total', 'Gy·cm²')] },
   { type: 'nota', label: 'Nota / momento', fields: [] },
 ];
 export const DEF = Object.fromEntries(EVENT_DEFS.map(d => [d.type, d])) as Record<string, EventDef>;
@@ -107,8 +108,18 @@ export function readingOf(e: ProcEvent): string | null {
     if (f.borde === 'sí') out.push('disección de borde');
     return out.join('; ') || null;
   }
-  if (e.type === 'cierre' && has(f.kerma) && Number(f.kerma) >= 5000) return 'kerma ≥ 5 Gy: seguimiento de piel (nivel de dosis relevante, NCRP 168)';
-  if (e.type === 'cierre' && has(f.pda) && Number(f.pda) >= 500) return 'PDA ≥ 500 Gy·cm²: seguimiento de piel (NCRP 168)';
+  if (e.type === 'cierre') {
+    const out: string[] = [];
+    if (has(f.kerma) && Number(f.kerma) >= 5000) out.push('kerma ≥ 5 Gy: seguimiento de piel a 2–4 semanas (NCRP 168)');
+    else if (has(f.kerma) && Number(f.kerma) >= 3000) out.push('kerma ≥ 3 Gy: vigilar dosis en piel');
+    if (has(f.pda) && Number(f.pda) >= 500) out.push('PDA ≥ 500 Gy·cm²: seguimiento de piel (NCRP 168)');
+    // Contrast volume / eGFR > 3.7: higher risk of contrast-associated kidney injury (Laskey 2007)
+    if (has(f.contraste) && has(f.tfg) && Number(f.tfg) > 0) {
+      const r = Math.round((Number(f.contraste) / Number(f.tfg)) * 10) / 10;
+      out.push(`relación contraste/TFG ${r}${r > 3.7 ? ' (> 3.7: mayor riesgo de lesión renal por contraste; vigilar creatinina 48–72 h)' : ''}`);
+    }
+    return out.join('; ') || null;
+  }
   return null;
 }
 
@@ -150,10 +161,12 @@ export function sentenceOf(e: ProcEvent): string {
       return `${String(f.tipo || 'Complicación').replace(/^./, c => c.toUpperCase())}${on(f)}${f.grado ? ` (${f.grado})` : ''}${at(e)}`
         + `${f.manejo ? `, manejada con ${f.manejo}` : ''}${tail}.`;
     case 'resultado':
-      return `Resultado final${on(f)}: ${[has(f.residual) && `estenosis residual de ${f.residual}%`, f.timi && `flujo TIMI ${f.timi}`, f.comentario]
+      return `Resultado final${on(f)}: ${[has(f.residual) && `estenosis residual de ${f.residual}%`, f.timi && `flujo TIMI ${f.timi}`,
+        f.blush && `blush miocárdico grado ${f.blush}`, f.comentario]
         .filter(Boolean).join(', ')}${tail}.`;
     case 'cierre':
-      return `Hemostasia con ${f.metodo || '—'}. ${[has(f.contraste) && `Contraste total ${f.contraste} ml`, has(f.fluoro) && `tiempo de fluoroscopía ${f.fluoro} min`,
+      return `${f.metodo ? `Hemostasia con ${f.metodo}. ` : ''}${[has(f.contraste) && `Contraste total ${f.contraste} ml`, has(f.tfg) && `TFG ${f.tfg} ml/min/1.73 m²`,
+        has(f.fluoro) && `tiempo de fluoroscopía ${f.fluoro} min`,
         has(f.kerma) && `kerma en aire ${f.kerma} mGy`, has(f.pda) && `producto dosis-área ${f.pda} Gy·cm²`].filter(Boolean).join(', ')}${tail}.`;
     default:
       return `${e.note || 'Nota'}${at(e)}.`;
@@ -184,7 +197,9 @@ export function narrativeOf(events: ProcEvent[], acquisitions: string | null): {
   ];
   const stents = pick(['stent']);
   if (stents.length) {
-    out.push({ label: 'Resumen', text: `${stents.length > 1 ? `Se implantaron ${stents.length} stents` : 'Se implantó 1 stent'}: ${stents.map(s => `${s.fields.vaso || '—'} ${dims(s.fields)}`.trim()).join('; ')}.` });
+    const total = stents.reduce((a, s) => a + (Number(s.fields.long) || 0), 0);
+    out.push({ label: 'Resumen', text: `${stents.length > 1 ? `Se implantaron ${stents.length} stents` : 'Se implantó 1 stent'}: `
+      + `${stents.map(s => `${s.fields.vaso || '—'} ${dims(s.fields)}`.trim()).join('; ')}${stents.length > 1 && total ? ` (longitud total ${total} mm)` : ''}.` });
   }
   return out;
 }

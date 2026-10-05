@@ -69,8 +69,9 @@ const newId = () => Math.random().toString(36).slice(2, 10);
  * one tied to the run and frame it happened on; the acquisitions from the
  * DICOM headers in the same timeline; and the narrative for the report.
  */
-export function ProcedureSection({ servicesManager, commandsManager, studyUID, canSave, runs, acquisitions }: {
+export function ProcedureSection({ servicesManager, commandsManager, studyUID, canSave, runs, acquisitions, dose }: {
   servicesManager: any; commandsManager: any; studyUID: string; canSave: boolean; runs: Run[]; acquisitions: string | null;
+  dose: { dapGycm2: number; kermaMgy: number | null } | null;
 }) {
   const [events, setEvents] = useState<ProcEvent[]>([]);
   const [version, setVersion] = useState<string | null>(null);
@@ -125,6 +126,23 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
     setEditing({ ...editing, fields: { ...editing.fields, [id]: v } });
   };
 
+  // Coronary angiography and closure/dose events from the DICOM headers (editable afterwards)
+  const prefill = () => {
+    const first = runs.map(r => dicomTime(r.time)).filter(Boolean).sort()[0] || '';
+    const last = runs.map(r => dicomTime(r.time)).filter(Boolean).sort().pop() || '';
+    const add: ProcEvent[] = [];
+    if (!events.some(e => e.type === 'diagnostico')) {
+      add.push({ id: newId(), type: 'diagnostico', time: first, flag: '', fields: {}, note: '', ref: runs[0]
+        ? { seriesInstanceUID: runs[0].seriesInstanceUID, sopInstanceUID: runs[0].sopInstanceUID || null, frame: 0, label: `adq. 1 (${runs[0].projection})` } : null });
+    }
+    if (!events.some(e => e.type === 'cierre') && dose) {
+      add.push({ id: newId(), type: 'cierre', time: last, flag: '', note: 'Dosis de las adquisiciones (sin fluoroscopía), de la cabecera DICOM y el protocolo del equipo.',
+        fields: { pda: Math.round(dose.dapGycm2 * 10) / 10, ...(dose.kermaMgy != null ? { kerma: dose.kermaMgy } : {}) }, ref: null });
+    }
+    if (!add.length) return setMsg('La bitácora ya tiene coronariografía y cierre.');
+    persist([...events, ...add]).then(ok => ok && setMsg('Precargado desde DICOM: complete catéteres, dominancia, contraste y TFG.'));
+  };
+
   const narrative = narrativeOf(events, acquisitions);
   const sendNarrative = () => callCloud('saveViewerMeasurements', {
     StudyInstanceUID: studyUID, items: narrative.map(p => ({ kind: 'Relato', label: p.label, text: p.text, values: {} })),
@@ -149,6 +167,7 @@ export function ProcedureSection({ servicesManager, commandsManager, studyUID, c
             <option value="">Marcar momento en esta imagen…</option>
             {EVENT_DEFS.map(d => <option key={d.type} value={d.type}>{d.label}</option>)}
           </select>
+          {!!runs.length && <button className={btn} disabled={busy} onClick={prefill}>Precargar desde DICOM</button>}
           <select className="rounded border border-white/20 bg-black px-1 py-1 text-[12px]" value=""
             onChange={e => e.target.value && start(e.target.value, false)}>
             <option value="">Agregar evento sin imagen…</option>
