@@ -151,6 +151,9 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>TC abdomen: quistes renales</td><td>Quistes ≥ 5 mm</td><td><span class="chip warn">En validación</span></td><td>Falla en quistes casi isodensos en fase simple</td></tr>
           <tr><td>TC tórax</td><td>Candidatos a nódulo con diámetro y confianza; volumen de derrame</td><td><span class="chip warn">En validación</span></td><td>Fleischner, Lung-RADS, relación VD/VI</td></tr>
           <tr><td>TC cráneo</td><td>Hemorragia intraparenquimatosa</td><td><span class="chip bad">No confiable</span></td><td>Retirada para radiólogos: encontró 17 de 38 hemorragias informadas (no valora subdural ni subaracnoidea). Ventanas, ASPECTS y ABC/2 siguen disponibles</td></tr>
+          <tr><td>TC cráneo: ventrículos</td><td>Volumen de ventrículos laterales, tercero y cuarto; índice de Evans automático</td><td><span class="chip warn">En validación</span></td><td>Alerta solo con Evans &gt; 0.3 y laterales ≥ 40 ml. Coincidió con el Evans informado (0.37 frente a 0.37)</td></tr>
+          <tr><td>TC abdomen simple: litiasis renal</td><td>Cálculos ≥ 3 vóxeles ≥ 300 UH en o junto al riñón, tamaño y lado</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría. No se calcula en fase contrastada; se descarta el patrón de contraste excretado</td></tr>
+          <tr><td>TC tórax: enfisema</td><td>% de pulmón bajo −950 UH por lóbulo</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría: no distinguió enfisema informado de pulmón normal en HRSL (protocolos y reconstrucciones variables)</td></tr>
           <tr><td>RM próstata</td><td>Volumen glandular, zonas transicional y periférica, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>PI-RADS</td></tr>
           <tr><td>RM encéfalo (T1 3D)</td><td>Volúmenes de hipocampos, ventrículos y cerebro</td><td><span class="chip warn">Referencia</span></td><td>Fazekas, índice de Evans</td></tr>
           <tr><td>RM encéfalo con tumor</td><td>Volumen de tumor, núcleo y realce (MONAI BraTS)</td><td><span class="chip warn">En validación</span></td><td>Correcto en tumores grandes con realce; marcó el cerebelo en cerebros normales. Solo auditoría</td></tr>
@@ -183,6 +186,9 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>Derrame pleural</td><td class="mono">67</td><td>Sensibilidad 79 %, especificidad 79 %</td></tr>
           <tr><td>Revisión visual general (MedGemma)</td><td class="mono">45</td><td>Sensibilidad 0 %: retirada para radiólogos</td></tr>
           <tr><td>Aneurisma cerebral (TOF)</td><td class="mono">14</td><td>Detectó los 2 aneurismas tipo blister; 1 falso positivo en 12 negativos tras el filtro de tamaño. En validación</td></tr>
+          <tr><td>Ventriculomegalia (TC cráneo)</td><td class="mono">8</td><td>Evans + volumen: 3 de 4 ventriculomegalias informadas detectadas (falló una «compensadora» con Evans 0.29), 0 de 3 negativos marcados</td></tr>
+          <tr><td>Litiasis renal (TC simple)</td><td class="mono">14</td><td>Detectó ≈ 5 de 8 litiasis informadas (fallan microlitiasis); 5 de 6 negativos limpios, el sexto era contraste excretado y ahora se descarta</td></tr>
+          <tr><td>Enfisema (LAA −950)</td><td class="mono">12</td><td>No discriminativo (positivos 0–5 %, un negativo 8 %): solo auditoría</td></tr>
         </tbody>
       </table>
     </div>

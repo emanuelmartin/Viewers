@@ -291,6 +291,15 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             </div>
           ))}
 
+          {(state.quant || []).filter(q => q.task === 'ct_head_ventricles').map((q, i) => (
+            <div key={`v${i}`} className="mt-3 text-[12px]">
+              <b>Ventrículos:</b>
+              <div>{q.text}</div>
+              {(q.flags || []).map((f: string) => <div key={f} className="text-amber-300">• {f}</div>)}
+              <div className={muted}>TotalSegmentator (ventricle_parts); índice de Evans en el corte axial de mayor anchura de astas frontales.</div>
+            </div>
+          ))}
+
           {(state.quant || []).some(q => q.task === 'ct_lung_nodules') && (
             <div className="mt-3 text-[12px]">
               <b>Nódulos candidatos ({nodules.length}):</b>
