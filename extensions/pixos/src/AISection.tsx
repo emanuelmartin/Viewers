@@ -232,6 +232,38 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             </div>
           ))}
 
+          {(state.quant || []).filter(q => q.task === 'mr_spine_levels').map((q, i) => (
+            <div key={`s${i}`} className="mt-3 text-[12px]">
+              <b>Niveles (RM):</b> {q.text}
+              <div className="mt-1 flex flex-wrap gap-1">
+                {(q.data?.discs || []).map((d: any) => (
+                  <button key={d.level} className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(d.world_lps), d.level, null)
+                      .then(problem => { setMessage(problem ? '' : `Disco ${d.level} en la vista activa.`); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>{d.level}</button>
+                ))}
+              </div>
+              <div className={muted}>Verifique el conteo desde C2 o el sacro: las variantes de transición cambian la numeración.</div>
+            </div>
+          ))}
+
+          {(state.quant || []).filter(q => q.task === 'mr_brain_aneurysm').map((q, i) => (
+            <div key={`a${i}`} className="mt-3 text-[12px]">
+              <b>Aneurismas (TOF, en validación):</b> {q.text}
+              {(q.data?.aneurysms || []).map((a: any, k: number) => (
+                <div key={k} className="mt-1 flex items-center justify-between gap-2">
+                  <span>{k + 1}. {a.diameter_mm} mm</span>
+                  <button className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(a.world_lps), `${k + 1}: ${a.diameter_mm} mm`, null)
+                      .then(problem => { setMessage(problem ? '' : `Candidato ${k + 1} en la vista activa (TOF): anillo amarillo.`); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>Ver en imagen</button>
+                </div>
+              ))}
+            </div>
+          ))}
+
           {(state.quant || []).filter(q => q.task === 'mr_brain_tumor').map((q, i) => (
             <div key={`t${i}`} className="mt-3 text-[12px]">
               <b>Tumor cerebral (BraTS, en validación):</b> {q.text}
