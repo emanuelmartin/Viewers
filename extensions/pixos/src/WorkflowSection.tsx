@@ -26,6 +26,17 @@ const SCENARIO_LABELS: Record<string, string> = {
   degenerativo: 'degenerativo', tamizaje: 'tamizaje', dolor_agudo: 'dolor agudo',
 };
 
+// Regions where each clinical scenario module makes sense (the report of an abdominal CT may mention
+// degenerative spine changes: that is not a reason to add MSK steps)
+const SCENARIO_REGIONS: Record<string, string[]> = {
+  degenerativo: ['columna_cervical', 'columna_dorsal', 'columna_lumbar', 'hombro', 'brazo_codo', 'mano_muneca', 'cadera', 'rodilla', 'pierna_tobillo_pie'],
+  vascular_evc: ['craneo', 'cuello', 'vascular'],
+  nodulo_seguimiento: ['torax'],
+  litiasis: ['abdomen', 'pelvis'],
+  obstetrico: ['pelvis', 'abdomen'],
+  trasplante: ['abdomen', 'pelvis'],
+};
+
 const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 function applyWindow(servicesManager, voi: [number, number]): string | null {
@@ -65,12 +76,16 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
   // Modules the base workflow already covers: «vascular» in coronary angiography is the study itself (not
   // stroke), and the graft Doppler workflow is the transplant module
   const covered: Record<string, string> = { xa_angio: 'vascular_evc', us_transplant: 'trasplante' };
-  const scenarios = (info.scenarios || []).filter(sc => covered[info.workflowId] !== sc);
+  const regionSet = new Set(info.regions || []);
+  const scenarios = (info.scenarios || []).filter(sc => covered[info.workflowId] !== sc)
+    .filter(sc => !SCENARIO_REGIONS[sc] || !regionSet.size || SCENARIO_REGIONS[sc].some(r => regionSet.has(r)));
+  // «Control» without earlier studies in the PACS: no follow-up steps, only a note
+  const hasPriors = !!info.priors?.some(p => p.instanceUUID);
   // Base workflow + clinical scenario modules + follow-up module; numbered as one list
   const groups = [
     { title: workflow.title, steps: workflow.steps },
     ...scenarios.map(sc => SCENARIO_MODULES[sc]).filter(Boolean),
-    ...(info.episode === 'control' ? [FOLLOW_UP_MODULE] : []),
+    ...(info.episode === 'control' && hasPriors ? [FOLLOW_UP_MODULE] : []),
   ].map(g => ({ ...g, steps: g.steps.filter(st => st.kind !== 'ai' || ai) }));
   const steps = groups.flatMap(g => g.steps);
   const prior = (info.priors || []).find(p => p.instanceUUID && p.sameModality) || (info.priors || []).find(p => p.instanceUUID);
@@ -154,10 +169,12 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
           {!!info.dicomComments?.length && <div className="text-white/60">DICOM: {info.dicomComments.join(' · ')}</div>}
         </div>
       ) : null}
-      {(!!info.scenarios?.length || info.episode === 'control') && (
+      {(!!scenarios.length || info.episode === 'control') && (
         <div className="mt-1 flex flex-wrap gap-1">
-          {info.episode === 'control' && <span className="rounded bg-amber-700/50 px-1.5 text-[11px]">control</span>}
-          {(info.scenarios || []).filter(sc => sc !== 'vascular_evc' || info.workflowId !== 'xa_angio').map(sc => <span key={sc} className="rounded bg-white/10 px-1.5 text-[11px]">{SCENARIO_LABELS[sc] || sc}</span>)}
+          {info.episode === 'control' && (
+            <span className="rounded bg-amber-700/50 px-1.5 text-[11px]">{hasPriors ? 'control' : 'control (sin previos en el PACS)'}</span>
+          )}
+          {scenarios.map(sc => <span key={sc} className="rounded bg-white/10 px-1.5 text-[11px]">{SCENARIO_LABELS[sc] || sc}</span>)}
         </div>
       )}
       {groups.map((g, gi) => {

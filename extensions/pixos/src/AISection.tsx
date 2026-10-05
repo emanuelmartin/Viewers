@@ -184,7 +184,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             <button className={btn} disabled={busy} onClick={() => load(false)}>Actualizar</button>
           </div>
           <div className={`mt-1 ${muted}`}>
-            Pasos: 1) Analizar con IA · 2) esperar a «listo» · 3) «Ver en imagen» carga la serie analizada y marca el nódulo.
+            Pasos: 1) Analizar con IA · 2) esperar a «listo» · 3) «Ver en imagen» carga la serie analizada y marca el hallazgo con un anillo.
           </div>
 
           {state.analysis && (
