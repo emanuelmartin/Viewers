@@ -123,11 +123,16 @@ export function readingOf(e: ProcEvent): string | null {
   return null;
 }
 
-/** One sentence for the narrative. */
+/** One sentence for the narrative (capitalised, single final period). */
 export function sentenceOf(e: ProcEvent): string {
+  const text = rawSentence(e).replace(/\.{2,}$/, '.');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function rawSentence(e: ProcEvent): string {
   const f = e.fields;
   const r = readingOf(e);
-  const tail = `${r ? `, ${r}` : ''}${e.note ? `. ${e.note}` : ''}`;
+  const tail = `${r ? `, ${r}` : ''}${e.note ? `. ${e.note.replace(/[.\s]+$/, '')}` : ''}`;
   switch (e.type) {
     case 'acceso':
       return `Acceso ${f.via || ''}${has(f.fr) ? ` con introductor ${f.fr} Fr` : ''}${f.guiado ? `, punción ${f.guiado}` : ''}${at(e)}${tail}.`;
