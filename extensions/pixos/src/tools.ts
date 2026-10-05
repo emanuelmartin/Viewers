@@ -145,10 +145,11 @@ export function applySlab(servicesManager, slab: (typeof SLABS)[number]): string
 
 // ── segmentation ────────────────────────────────────────────────────────────
 
-export async function createSegmentation(servicesManager, commandsManager): Promise<void> {
+export async function createSegmentation(servicesManager, commandsManager, showPanel = true): Promise<void> {
   const { viewportGridService, panelService } = servicesManager.services;
   await commandsManager.runCommand('createLabelmapForViewport', { viewportId: viewportGridService.getActiveViewportId() });
-  panelService?.activatePanel?.('@ohif/extension-cornerstone.panelModule.panelSegmentation', true);
+  // The one-click flow stays in the PixOS panel (its note and «Calcular volúmenes»)
+  if (showPanel) panelService?.activatePanel?.('@ohif/extension-cornerstone.panelModule.panelSegmentation', true);
 }
 
 export type SegmentVolume = { segmentationId: string; segmentation: string; segment: string; ml: number | null; mean?: number | null };

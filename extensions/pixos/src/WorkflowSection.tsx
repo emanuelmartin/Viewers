@@ -120,10 +120,10 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
         const { segmentationService, viewportGridService } = servicesManager.services;
         const viewportId = viewportGridService.getActiveViewportId();
         const has = (segmentationService.getSegmentationRepresentations?.(viewportId) || []).length > 0;
-        (has ? Promise.resolve() : createSegmentation(servicesManager, commandsManager))
+        (has ? Promise.resolve() : createSegmentation(servicesManager, commandsManager, false))
           .then(() => {
             commandsManager.runCommand('setToolActiveToolbar', { toolName: SEG_TOOL_NAMES.click });
-            setNote(`${step.label}: ${step.hint || 'clic dentro de la lesión'}. Luego «Calcular volúmenes» en «Volúmenes por segmentación».`);
+            setNote(`${step.label}: ${step.hint || 'clic dentro de la lesión'}. Luego «Calcular volúmenes» en «Volúmenes por segmentación» (más abajo en este panel).`);
           })
           .catch(e => setNote(`No se pudo preparar la segmentación: ${e?.message || e}`));
         break;
