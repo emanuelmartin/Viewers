@@ -27,6 +27,7 @@
       "nombre": "TotalSegmentator (tareas con licencia)",
       "tareas_pixos": [
         "en uso: ct_organs → composición corporal en L3 (tissue_types)",
+        "en uso: ct_cardiac → cavidades, VD/VI y coronarias (heartchambers_highres, coronary_arteries)",
         "instalados 2026-10-06: coronary_arteries",
         "heartchambers_highres",
         "tissue_types",
