@@ -33,6 +33,38 @@ function showAISeg(servicesManager, commandsManager, seg: any): Promise<string |
     }, 1500)));
 }
 
+/** Switches to MPR + 3D and loads the AI SEG into the 3D viewport, where it renders as surfaces. */
+function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<string | null> {
+  const { displaySetService, viewportGridService, userAuthenticationService } = servicesManager.services;
+  const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.seriesInstanceUID);
+  if (!ds) {
+    return Promise.resolve('La serie de IA aún no está en el visor: recargue el estudio.');
+  }
+  commandsManager.runCommand('setHangingProtocol', { protocolId: 'mprAnd3DVolumeViewport' });
+  return Promise.resolve(typeof ds.load === 'function' ? ds.load({ headers: userAuthenticationService.getAuthorizationHeader() }) : null)
+    .then(() => new Promise<string | null>(resolve => setTimeout(() => {
+      const viewports = [...(viewportGridService.getState().viewports?.values?.() || [])];
+      const v3d = viewports.find((v: any) => v.viewportOptions?.viewportType === 'volume3d');
+      if (!v3d) {
+        resolve('No se encontró la vista 3D en este diseño.');
+        return;
+      }
+      Promise.resolve(commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: v3d.viewportId }))
+        .then(() => resolve(null), e => resolve(`No se pudo cargar en 3D: ${e?.message || e}`));
+    }, 4000)));
+}
+
+/** Shows the isometric 3D views (secondary capture series) in the active viewport. */
+function showAIRenders(servicesManager, seg: any): string | null {
+  const { displaySetService, viewportGridService } = servicesManager.services;
+  const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.renderSeriesInstanceUID);
+  if (!ds) {
+    return 'Las vistas 3D aún no están en el visor: recargue el estudio.';
+  }
+  viewportGridService.setDisplaySetsForViewport({ viewportId: viewportGridService.getActiveViewportId(), displaySetInstanceUIDs: [ds.displaySetInstanceUID] });
+  return null;
+}
+
 type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
 type AIState = { plan: PlanItem[]; analysis: any; quant: any[]; description?: string };
 
@@ -229,6 +261,33 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                       <span>{sc.value.toLocaleString('es-MX', { maximumFractionDigits: 1 })}{sc.unit ? ` ${sc.unit}` : ''}</span>
                     </div>
                   ))}
+                  {(q.aiSeg?.stats || []).length > 0 && (
+                    <div className="mt-1">
+                      <div className="text-white/60">Medidas de la segmentación:</div>
+                      {q.aiSeg.stats.slice(0, 16).map((st: any) => (
+                        <div key={st.label} className="flex justify-between gap-2">
+                          <span className="text-white/70">{st.label}</span>
+                          <span>{st.volume_ml} ml{st.unit ? ` · ${st.mean} ${st.unit}` : ''} · {st.extent_mm?.[0]} mm</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {q.aiSeg && (
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <button className={btn} onClick={() => {
+                        showAISeg3D(servicesManager, commandsManager, q.aiSeg)
+                          .then(problem => { setMessage(problem ? '' : 'Segmentación de IA en la vista 3D (superficies); arrastre para rotar.'); setError(problem || ''); })
+                          .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
+                      }}>Ver en 3D</button>
+                      {q.aiSeg.renderSeriesInstanceUID && (
+                        <button className={btn} onClick={() => {
+                          const problem = showAIRenders(servicesManager, q.aiSeg);
+                          setMessage(problem ? '' : 'Vistas 3D isométricas de la segmentación (serie de IA en el PACS).');
+                          setError(problem || '');
+                        }}>Vistas 3D (imágenes)</button>
+                      )}
+                    </div>
+                  )}
                   {q.aiSeg && (
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <span className="text-white/60">{q.aiSeg.title} · {q.aiSeg.segments} segmento(s)</span>
