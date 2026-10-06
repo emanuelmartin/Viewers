@@ -9,6 +9,7 @@ import getCommandsModule from './getCommandsModule';
 import { loadAccess, watchRisSession } from './ris';
 import { installToolbarGate } from './toolbarGate';
 import { installSegmentationTools } from './segTools';
+import { installAISeriesFilter } from './aiSeries';
 
 let cleanup: Array<() => void> = [];
 
@@ -19,7 +20,8 @@ let cleanup: Array<() => void> = [];
  */
 function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
   cleanup.forEach(fn => fn());
-  cleanup = [installToolbarGate(servicesManager), watchRisSession(), installSegmentationTools(servicesManager, extensionManager)];
+  cleanup = [installToolbarGate(servicesManager), watchRisSession(), installSegmentationTools(servicesManager, extensionManager),
+    installAISeriesFilter(servicesManager)];
   loadAccess();
 }
 

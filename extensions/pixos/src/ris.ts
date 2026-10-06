@@ -14,6 +14,8 @@ export type ViewerAccess = {
   physician: boolean;
   canSave: boolean;
   ai: boolean;
+  /** Validation roles: also AI results still in validation */
+  validation?: boolean;
   user?: { objectId: string; fullName?: string | null };
 };
 
@@ -92,6 +94,7 @@ export function loadAccess(): Promise<ViewerAccess> {
         physician: !!r?.physician,
         canSave: !!r?.canSave,
         ai: !!r?.ai,
+        validation: !!r?.validation,
         user: r?.user,
       });
       return access;

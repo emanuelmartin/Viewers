@@ -11,6 +11,22 @@ const STATUS: Record<string, string> = {
   queued: 'en cola', running: 'procesando', done: 'listo', failed: 'falló', skipped: 'no aplica',
 };
 
+const AORTA_LABELS: Record<string, string> = {
+  ascendente: 'Ascendente', cayado: 'Cayado', descendente: 'Descendente torácica',
+  abdominal_suprarrenal: 'Abdominal suprarrenal', infrarrenal: 'Infrarrenal',
+};
+
+/** Loads the AI SEG series (stored by the AI queue in the PACS) over the image in the active viewport. */
+function showAISeg(servicesManager, commandsManager, seriesInstanceUID: string): Promise<string | null> {
+  const { displaySetService, viewportGridService } = servicesManager.services;
+  const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seriesInstanceUID);
+  if (!ds) {
+    return Promise.resolve('La serie de IA aún no está en el visor: recargue el estudio.');
+  }
+  return Promise.resolve(commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: viewportGridService.getActiveViewportId() }))
+    .then(() => null);
+}
+
 type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
 type AIState = { plan: PlanItem[]; analysis: any; quant: any[]; description?: string };
 
@@ -195,6 +211,33 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             </div>
           )}
 
+          {(state.quant || []).some(q => (q.scores || []).length || q.aiSeg) && (
+            <div className="mt-3 text-[12px]">
+              <b>Puntajes y medidas de IA:</b>
+              {(state.quant || []).filter(q => (q.scores || []).length || q.aiSeg).map((q, i) => (
+                <div key={`sc${i}`} className="mt-2 rounded border border-white/10 p-2">
+                  <div className="mb-1 text-white/80">{q.label || q.task}</div>
+                  {(q.scores || []).map((sc: any) => (
+                    <div key={sc.label} className="flex justify-between gap-2">
+                      <span className="text-white/70">{sc.label}</span>
+                      <span>{sc.value.toLocaleString('es-MX', { maximumFractionDigits: 1 })}{sc.unit ? ` ${sc.unit}` : ''}</span>
+                    </div>
+                  ))}
+                  {q.aiSeg && (
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <span className="text-white/60">{q.aiSeg.title} · {q.aiSeg.segments} segmento(s)</span>
+                      <button className={btn} onClick={() => {
+                        showAISeg(servicesManager, commandsManager, q.aiSeg.seriesInstanceUID)
+                          .then(problem => { setMessage(problem ? '' : 'Segmentación de IA sobre la vista activa (panel Segmentación para colores y visibilidad; en 3D se ve como superficie).'); setError(problem || ''); })
+                          .catch(e => { setMessage(''); setError(`No se pudo cargar: ${e?.message || e}`); });
+                      }}>Ver segmentación IA</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {organs && (
             <div className="mt-3 text-[12px]">
               <b>Volumetría:</b>
@@ -257,6 +300,38 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   <button className={btn} onClick={() => {
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(a.world_lps), `${k + 1}: ${a.diameter_mm} mm`, null)
                       .then(problem => { setMessage(problem ? '' : `Candidato ${k + 1} en la vista activa (TOF): anillo amarillo.`); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>Ver en imagen</button>
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {(state.quant || []).filter(q => q.task === 'ct_aorta').map((q, i) => (
+            <div key={`ao${i}`} className="mt-3 text-[12px]">
+              <b>Diámetros aórticos (perpendiculares a la línea central):</b> {q.text}
+              {Object.entries(q.data?.segments || {}).map(([k, sg]: [string, any]) => (
+                <div key={k} className="mt-1 flex items-center justify-between gap-2">
+                  <span>{AORTA_LABELS[k] || k}: {sg.max_eq_mm} mm</span>
+                  <button className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(sg.world_lps), `${AORTA_LABELS[k] || k}: ${sg.max_eq_mm} mm`, null)
+                      .then(problem => { setMessage(problem ? '' : `${AORTA_LABELS[k] || k}: corte de mayor diámetro (anillo amarillo); verifique con MPR.`); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>Ver en imagen</button>
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {(state.quant || []).filter(q => q.task === 'mr_brain_dwi').map((q, i) => (
+            <div key={`dw${i}`} className="mt-3 text-[12px]">
+              <b>Difusión restringida (en validación):</b> {q.text}
+              {(q.data?.lesions || []).filter((l: any) => l.volume_ml >= 0.3).map((l: any, k: number) => (
+                <div key={k} className="mt-1 flex items-center justify-between gap-2">
+                  <span>{k + 1}. {l.side}, {l.volume_ml} ml, ADC {l.mean_adc}</span>
+                  <button className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(l.world_lps), `${k + 1}: ${l.volume_ml} ml`, null)
+                      .then(problem => { setMessage(problem ? '' : `Zona ${k + 1} en la difusión: anillo amarillo; compare con el mapa ADC.`); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
                   }}>Ver en imagen</button>
                 </div>
