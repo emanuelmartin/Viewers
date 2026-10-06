@@ -17,14 +17,17 @@ const AORTA_LABELS: Record<string, string> = {
 };
 
 /** Loads the AI SEG series (stored by the AI queue in the PACS) over the image in the active viewport. */
-function showAISeg(servicesManager, commandsManager, seriesInstanceUID: string): Promise<string | null> {
+function showAISeg(servicesManager, commandsManager, seg: any): Promise<string | null> {
   const { displaySetService, viewportGridService } = servicesManager.services;
-  const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seriesInstanceUID);
+  const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.seriesInstanceUID);
   if (!ds) {
     return Promise.resolve('La serie de IA aún no está en el visor: recargue el estudio.');
   }
   return Promise.resolve(commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: viewportGridService.getActiveViewportId() }))
-    .then(() => null);
+    // The source series opens on its first image: go to the largest segment once the labelmap is in place
+    .then(() => new Promise<string | null>(resolve => setTimeout(() => {
+      resolve(seg.focusLps ? showPoint(servicesManager, toWorld(seg.focusLps), seg.focusLabel || '') : null);
+    }, 1500)));
 }
 
 type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
@@ -227,7 +230,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <span className="text-white/60">{q.aiSeg.title} · {q.aiSeg.segments} segmento(s)</span>
                       <button className={btn} onClick={() => {
-                        showAISeg(servicesManager, commandsManager, q.aiSeg.seriesInstanceUID)
+                        showAISeg(servicesManager, commandsManager, q.aiSeg)
                           .then(problem => { setMessage(problem ? '' : 'Segmentación de IA sobre la vista activa (panel Segmentación para colores y visibilidad; en 3D se ve como superficie).'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar: ${e?.message || e}`); });
                       }}>Ver segmentación IA</button>
