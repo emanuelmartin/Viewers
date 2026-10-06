@@ -276,7 +276,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <button className={btn} onClick={() => {
                         showAISeg3D(servicesManager, commandsManager, q.aiSeg)
-                          .then(problem => { setMessage(problem ? '' : 'Segmentación de IA en la vista 3D (superficies); arrastre para rotar.'); setError(problem || ''); })
+                          .then(problem => { setMessage(problem ? '' : 'Segmentación de IA en MPR y vista 3D; arrastre para rotar. Con muchas estructuras el navegador puede no alcanzar a generar las superficies: use «Vistas 3D (imágenes)».'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
                       {q.aiSeg.renderSeriesInstanceUID && (
