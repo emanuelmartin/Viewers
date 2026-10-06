@@ -180,6 +180,10 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>Encéfalo con tumor · BraTS SegResNet + HD-BET (Apache 2.0)</td><td>Volumen de tumor, núcleo y realce</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>Correcto en tumores grandes; marcó cerebelo en cerebros normales</td></tr>
           <tr><td>Angio-RM TOF · TotalSegmentator brain_aneurysm</td><td>Candidatos a aneurisma 2.5–10 mm</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>2 de 2 aneurismas; 1 falso positivo en 12 negativos (14)</td></tr>
           <tr><td>Columna · TotalSegmentator vertebrae_mr</td><td>Niveles vertebrales y discales para navegar</td><td><span class="chip ok">Disponible</span></td><td>Radiólogos</td><td class="mono">8 s</td><td>Niveles verificados en imagen (9); revisar el conteo desde C2 o el sacro</td></tr>
+          <tr class="grp"><th colspan="6">Angio-TC · TotalSegmentator y línea central PixOS · ≈ 40 s</th></tr>
+          <tr><td>Diámetros aórticos por segmento</td><td>Diámetro máximo perpendicular a la línea central: ascendente, cayado, descendente, suprarrenal, infrarrenal; alerta con umbrales de guía</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>Dentro de 5 mm del informe: suprarrenal 90 %, descendente 79 %, cayado 75 %, infrarrenal 74 %, ascendente 67 % (57 TC); sesgo +0.5 a +3.9 mm</td></tr>
+          <tr class="grp"><th colspan="6">RM de encéfalo · difusión (regla ADC, sin modelo entrenado) · ≈ 20 s</th></tr>
+          <tr><td>Difusión restringida</td><td>Volumen con ADC &lt; 620 ×10⁻⁶ mm²/s, brillante en b1000 y asimétrico frente al otro hemisferio</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>5 de 6 infartos agudos informados; 15 de 16 normales sin hallazgo (36); se acumula validación continua</td></tr>
           <tr class="grp"><th colspan="6">Radiografía</th></tr>
           <tr><td>Tórax · torchxrayvision DenseNet (Apache 2.0)</td><td>Probabilidad de 18 hallazgos</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">1.4 s</td><td>Derrame AUC 0.83, cardiomegalia 0.75, fractura 0.71; neumotórax no discrimina (197)</td></tr>
           <tr class="grp"><th colspan="6">Herramientas en el visor</th></tr>
@@ -190,6 +194,17 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
       </table>
     </div>
     <p class="muted">El informe es la referencia: si la IA marca algo real que no se informó, cuenta como falso positivo, así que las cifras son conservadoras. Por eso el calcio cardiaco, la esteatosis y la densidad de L1 parecen peores de lo que son. Las cifras se actualizan solas en la página de auditoría de IA del RIS, ahora con área ROC para la radiografía.</p>
+  </section>
+
+  <section>
+    <h2>Resultados de IA en el PACS, en 3D y en una sola lista</h2>
+    <ul>
+      <li><b>Serie de segmentación de IA.</b> Cada análisis guarda sus máscaras en el PACS como una serie DICOM SEG marcada como IA («IA · …», fabricante «PixOS IA»), junto a la serie original. En el visor, «Ver segmentación IA» la superpone y lleva la vista a la estructura principal; los resultados en validación lo dicen en el nombre.</li>
+      <li><b>Volumen y medidas por estructura.</b> Volumen, densidad media (UH en TC) y dimensión mayor de cada segmento, en el visor y en la lista de resultados.</li>
+      <li><b>Vistas 3D.</b> «Vistas 3D (imágenes)» abre dos vistas isométricas (anterior oblicua y lateral) generadas en el servidor y guardadas en el PACS; «Ver en 3D» abre MPR con las máscaras en color y la reconstrucción de volumen. Con muchas estructuras (p. ej. 16 órganos) el navegador no alcanza a generar superficies interactivas: use las imágenes.</li>
+      <li><b>Privacidad.</b> Las series de IA no aparecen en los enlaces de pacientes ni para usuarios sin sesión médica; las que están en validación solo las ven los roles de validación.</li>
+      <li><b>Resultados de IA (RIS · Análisis).</b> Todos los resultados con filtros por modelo, modalidad, protocolo, texto del hallazgo, alertas, serie de IA y fechas; cada fila abre el estudio en el visor.</li>
+    </ul>
   </section>
 
   <section>
