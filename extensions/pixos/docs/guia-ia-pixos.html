@@ -57,6 +57,8 @@ th { font: 600 0.75rem/1.3 var(--body); text-transform: uppercase; letter-spacin
 tr:last-child td { border-bottom: 0; }
 td .chip { margin-top: 2px; }
 
+tr.grp th { background: var(--surface); color: var(--fg); font: 600 0.85rem/1.3 var(--body); text-transform: none; letter-spacing: 0; padding-top: 18px; border-bottom: 2px solid var(--line); }
+table.catalog { min-width: 900px; }
 .steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 12px; max-width: none; }
 .steps li { counter-increment: s; display: grid; grid-template-columns: 2rem 1fr; gap: 12px; align-items: start; }
 .steps li::before { content: counter(s); font: 600 0.9rem/2rem var(--mono); text-align: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); width: 2rem; height: 2rem; }
@@ -103,9 +105,9 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
         <h3>Mediciones automáticas <span class="chip ok">Validadas</span></h3>
         <ul>
           <li>Volumen y densidad de órganos abdominales.</li>
-          <li>Hallazgos oportunistas: densidad de L1, aorta abdominal, esteatosis, músculo en L3.</li>
+          <li>Hallazgos oportunistas: aorta abdominal; como cribado, densidad de L1, esteatosis y músculo en L3.</li>
           <li>Volumen prostático en RM y densidad de APE.</li>
-          <li>Candidatos a nódulo pulmonar ubicables en la imagen; niveles vertebrales en RM de columna.</li>
+          <li>Derrame pleural en TC de tórax; niveles vertebrales en RM de columna.</li>
         </ul>
       </div>
       <div class="layer">
@@ -141,58 +143,67 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
   </section>
 
   <section>
-    <h2>Qué hay para cada tipo de estudio</h2>
+    <h2>Catálogo de modelos y herramientas</h2>
+    <p>Lista conciliada al 5 de octubre de 2026: qué entrega cada modelo, su estado, quién lo ve y cuánto tarda. La última columna compara con los informes firmados de HRSL; S = sensibilidad, E = especificidad, entre paréntesis el número de estudios.</p>
+    <div class="legend" aria-label="Disponibilidad">
+      <span><b>Radiólogos</b>: aparece en el visor y en el RIS</span>
+      <span><b>Solo auditoría</b>: solo administradores y auditores, mientras se valida</span>
+      <span><b>A demanda</b>: herramienta que el médico ejecuta en el visor</span>
+    </div>
     <div class="table-wrap">
-      <table>
-        <thead><tr><th>Estudio</th><th>Medición automática</th><th>Estado</th><th>Apoyo sin IA</th></tr></thead>
+      <table class="catalog">
+        <thead><tr><th>Modelo o medición</th><th>Qué entrega</th><th>Estado</th><th>Disponible para</th><th>Tiempo</th><th>Validación HRSL</th></tr></thead>
         <tbody>
-          <tr><td>TC abdomen y pelvis</td><td>Volumen y densidad de órganos; L1; aorta abdominal; esteatosis (fase simple); músculo en L3</td><td><span class="chip ok">Validada</span></td><td>Plantilla, Bosniak, LI-RADS, lavado suprarrenal, incidentalomas ACR</td></tr>
-          <tr><td>TC abdomen: lesiones hepáticas</td><td>Lesiones focales con «Ver en imagen»</td><td><span class="chip warn">En validación</span></td><td>Solo visible para auditoría mientras se reducen falsos positivos</td></tr>
-          <tr><td>TC abdomen: quistes renales</td><td>Quistes ≥ 5 mm</td><td><span class="chip warn">En validación</span></td><td>Falla en quistes casi isodensos en fase simple</td></tr>
-          <tr><td>TC tórax</td><td>Candidatos a nódulo con diámetro y confianza; volumen de derrame</td><td><span class="chip warn">En validación</span></td><td>Fleischner, Lung-RADS, relación VD/VI</td></tr>
-          <tr><td>TC cráneo</td><td>Hemorragia intraparenquimatosa</td><td><span class="chip bad">No confiable</span></td><td>Retirada para radiólogos: encontró 17 de 38 hemorragias informadas (no valora subdural ni subaracnoidea). Ventanas, ASPECTS y ABC/2 siguen disponibles</td></tr>
-          <tr><td>TC cráneo: ventrículos</td><td>Volumen de ventrículos laterales, tercero y cuarto; índice de Evans automático</td><td><span class="chip warn">En validación</span></td><td>Alerta solo con Evans &gt; 0.3 y laterales ≥ 40 ml. Coincidió con el Evans informado (0.37 frente a 0.37)</td></tr>
-          <tr><td>TC abdomen simple: litiasis renal</td><td>Cálculos ≥ 3 vóxeles ≥ 300 UH en o junto al riñón, tamaño y lado</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría. No se calcula en fase contrastada; se descarta el patrón de contraste excretado</td></tr>
-          <tr><td>TC tórax: enfisema</td><td>% de pulmón bajo −950 UH por lóbulo</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría: no distinguió enfisema informado de pulmón normal en HRSL (protocolos y reconstrucciones variables)</td></tr>
-          <tr><td>RM próstata</td><td>Volumen glandular, zonas transicional y periférica, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>PI-RADS</td></tr>
-          <tr><td>RM encéfalo (T1 3D)</td><td>Volúmenes de hipocampos, ventrículos y cerebro</td><td><span class="chip warn">Referencia</span></td><td>Fazekas, índice de Evans</td></tr>
-          <tr><td>RM encéfalo con tumor</td><td>Volumen de tumor, núcleo y realce (MONAI BraTS)</td><td><span class="chip warn">En validación</span></td><td>Correcto en tumores grandes con realce; marcó el cerebelo en cerebros normales. Solo auditoría</td></tr>
-          <tr><td>TC con lesión focal</td><td>Lesión con un clic por IA (MONAI VISTA3D): hígado, páncreas, pulmón, hueso</td><td><span class="chip warn">Evaluación</span></td><td>Licencia de NVIDIA solo para investigación y evaluación; en HRSL coincidió con la segmentación por clic y el modelo de lesiones</td></tr>
-          <tr><td>RM angiografía TOF</td><td>Búsqueda de aneurismas</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría por ahora</td></tr>
-          <tr><td>RM de columna</td><td>Niveles vertebrales y discales para navegar</td><td><span class="chip ok">Disponible</span></td><td>Verificar el conteo desde C2 o el sacro</td></tr>
-          <tr><td>Cualquier TC o RM</td><td>Volumen de lesión con un clic y pincel para corregir</td><td><span class="chip none">Sin IA</span></td><td>Paso «Volumen de lesión con un clic» en abdomen, cráneo, encéfalo, oncología e infección</td></tr>
-          <tr><td>RM columna</td><td>Niveles vertebrales (TotalSegmentator)</td><td><span class="chip ok">Disponible</span></td><td>Plantilla por nivel; revisión de niveles y grados de estenosis</td></tr>
-          <tr><td>US Doppler injerto renal</td><td>—</td><td><span class="chip none">Sin IA</span></td><td>Evolución de IR, VPS y volumen entre estudios; criterios de estenosis</td></tr>
-          <tr><td>Hemodinamia</td><td>Adquisiciones y dosis por corrida (PDA y kerma), leídas del DICOM y del protocolo del equipo</td><td><span class="chip none">Sin IA</span></td><td>Bitácora con momentos sobre la imagen, QCA, TIMI frame count, FFR/iFR, relato al informe</td></tr>
-          <tr><td>Revisión visual general</td><td>Modelo de lenguaje con visión (MedGemma)</td><td><span class="chip bad">No confiable</span></td><td>Retirada: llamó normales 35 de 36 estudios con hallazgos</td></tr>
+          <tr class="grp"><th colspan="6">TC de abdomen · TotalSegmentator (Apache 2.0) · mediana 94 s, p90 123 s por estudio</th></tr>
+          <tr><td>Volumen y densidad de órganos</td><td>Hígado, bazo, riñones, páncreas, vesícula, vejiga, próstata</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>Esplenomegalia &gt; 450 ml: S 71 %, E 95 % (155)</td></tr>
+          <tr><td>Aorta abdominal</td><td>Diámetro máximo bajo L1</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>≥ 30 mm: E 98 % (165); 2 de 3 aneurismas</td></tr>
+          <tr><td>Densidad de L1</td><td>UH trabeculares (Pickhardt)</td><td><span class="chip warn">Cribado</span></td><td>Radiólogos</td><td class="mono">—</td><td>≤ 110 UH: S 50 %, E 77 % (164); la osteopenia se informa poco</td></tr>
+          <tr><td>Esteatosis (fase simple)</td><td>Hígado ≤ 40 UH o −10 UH frente al bazo</td><td><span class="chip warn">Cribado</span></td><td>Radiólogos</td><td class="mono">—</td><td>Discrepa: los 5 hígados marcados (32–43 UH) no se mencionaron; los 4 informados medían 60–65 UH (46)</td></tr>
+          <tr><td>Músculo en L3</td><td>Área, índice y densidad muscular</td><td><span class="chip warn">Referencia</span></td><td>Radiólogos</td><td class="mono">—</td><td>Sin referencia: los informes no lo describen</td></tr>
+          <tr><td>Quistes renales</td><td>Modelo kidney_cysts</td><td><span class="chip warn">En validación</span></td><td>Radiólogos</td><td class="mono">—</td><td>S 53 %, E 85 % (167); falla en quistes casi isodensos</td></tr>
+          <tr><td>Lesiones hepáticas</td><td>Candidatos con segmento de Couinaud</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>S 62 %, E 69 % (165)</td></tr>
+          <tr><td>Litiasis renal (fase simple)</td><td>Cálculos ≥ 300 UH, tamaño y lado</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>≈ 5 de 8 informadas; 5 de 6 negativos limpios (14)</td></tr>
+          <tr><td>Litiasis vesicular calcificada</td><td>Cálculos ≥ 130 UH en la vesícula</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría</td><td class="mono">—</td><td>2 de 10 informadas: la TC no ve los cálculos no calcificados</td></tr>
+          <tr><td>Altura vertebral (Genant)</td><td>Pérdida de altura por vértebra</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría</td><td class="mono">—</td><td>Detectó las L1 informadas, pero 5 de 8 normales con falsas pérdidas de 40–79 %</td></tr>
+          <tr class="grp"><th colspan="6">TC de tórax · MONAI lung_nodule_ct_detection y TotalSegmentator (Apache 2.0) · mediana 58 s, p90 136 s</th></tr>
+          <tr><td>Nódulos pulmonares</td><td>Candidatos ≥ 5 mm ubicables en la imagen</td><td><span class="chip warn">En validación</span></td><td>Radiólogos</td><td class="mono">—</td><td>S 91 %, E 42 % (73); los menores de 5 mm solo se cuentan</td></tr>
+          <tr><td>Derrame pleural</td><td>Volumen por lado</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>S 80 %, E 83 % (71)</td></tr>
+          <tr><td>Derrame pericárdico</td><td>Volumen; se informa desde 30 ml</td><td><span class="chip warn">En validación</span></td><td>Radiólogos</td><td class="mono">—</td><td>S 44 %, E 97 % (71)</td></tr>
+          <tr><td>Calcio cardiaco</td><td>Agatston aproximado, coronario y valvular, fase simple</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">+30 s</td><td>10 de 10 informados con calcio; los «negativos» también lo tienen: los informes lo omiten (25)</td></tr>
+          <tr><td>Enfisema</td><td>% de pulmón bajo −950 UH por lóbulo</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría</td><td class="mono">—</td><td>No discriminativo (12)</td></tr>
+          <tr class="grp"><th colspan="6">TC de cráneo · TotalSegmentator (Apache 2.0) · mediana 30 s, p90 43 s</th></tr>
+          <tr><td>Ventrículos e índice de Evans</td><td>Volúmenes; alerta con Evans &gt; 0.3 y laterales ≥ 40 ml</td><td><span class="chip warn">En validación</span></td><td>Radiólogos</td><td class="mono">—</td><td>3 de 4 ventriculomegalias, 0 de 3 normales (8); Evans 0.37 = informe</td></tr>
+          <tr><td>Hemorragia intraparenquimatosa</td><td>Volumen de sangrado</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría</td><td class="mono">—</td><td>S 45 %, E 89 % (76); no valora subdural ni subaracnoidea</td></tr>
+          <tr class="grp"><th colspan="6">Resonancia magnética</th></tr>
+          <tr><td>Próstata · MONAI prostate_mri_anatomy (Apache 2.0)</td><td>Volumen, zonas, densidad de APE</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">6 s</td><td>IA/informe 0.92; 71 % dentro de ±20 % (59)</td></tr>
+          <tr><td>Encéfalo T1 3D · FastSurfer (Apache 2.0)</td><td>Hipocampos, ventrículos, cerebro</td><td><span class="chip warn">Referencia</span></td><td>Radiólogos</td><td class="mono">26 s</td><td>Sin referencia: los informes no dan volúmenes (13)</td></tr>
+          <tr><td>Encéfalo con tumor · BraTS SegResNet + HD-BET (Apache 2.0)</td><td>Volumen de tumor, núcleo y realce</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>Correcto en tumores grandes; marcó cerebelo en cerebros normales</td></tr>
+          <tr><td>Angio-RM TOF · TotalSegmentator brain_aneurysm</td><td>Candidatos a aneurisma 2.5–10 mm</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>2 de 2 aneurismas; 1 falso positivo en 12 negativos (14)</td></tr>
+          <tr><td>Columna · TotalSegmentator vertebrae_mr</td><td>Niveles vertebrales y discales para navegar</td><td><span class="chip ok">Disponible</span></td><td>Radiólogos</td><td class="mono">8 s</td><td>Niveles verificados en imagen (9); revisar el conteo desde C2 o el sacro</td></tr>
+          <tr class="grp"><th colspan="6">Radiografía</th></tr>
+          <tr><td>Tórax · torchxrayvision DenseNet (Apache 2.0)</td><td>Probabilidad de 18 hallazgos</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">1.4 s</td><td>Derrame AUC 0.83, cardiomegalia 0.75, fractura 0.71; neumotórax no discrimina (197)</td></tr>
+          <tr class="grp"><th colspan="6">Herramientas en el visor</th></tr>
+          <tr><td>Lesión con un clic por IA · MONAI VISTA3D</td><td>Segmentación 3D desde un punto (hígado, páncreas, pulmón, hueso)</td><td><span class="chip warn">Evaluación</span></td><td>A demanda en el visor</td><td class="mono">—</td><td>Licencia NVIDIA solo investigación y evaluación; coincidió con la segmentación por clic</td></tr>
+          <tr><td>Volumen de lesión con un clic</td><td>Crecimiento de región por corte y pincel</td><td><span class="chip none">Sin IA</span></td><td>A demanda en el visor</td><td class="mono">inmediato</td><td>—</td></tr>
+          <tr><td>Revisión visual general · MedGemma</td><td>Opinión de un modelo de lenguaje</td><td><span class="chip bad">No confiable</span></td><td>Solo auditoría</td><td class="mono">—</td><td>S 0 % (45): llamó normales casi todos los estudios con hallazgos</td></tr>
         </tbody>
       </table>
     </div>
+    <p class="muted">El informe es la referencia: si la IA marca algo real que no se informó, cuenta como falso positivo, así que las cifras son conservadoras. Por eso el calcio cardiaco, la esteatosis y la densidad de L1 parecen peores de lo que son. Las cifras se actualizan solas en la página de auditoría de IA del RIS, ahora con área ROC para la radiografía.</p>
   </section>
 
   <section>
-    <h2>Cómo se valida</h2>
-    <p>Cada vez que se firma un informe de un estudio analizado, el sistema compara lo que midió la IA con lo que escribió el radiólogo. El informe es la referencia: si la IA marca algo real que no se informó, cuenta como falso positivo, así que las cifras son conservadoras.</p>
+    <h2>Lo que se probó y se descartó</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Medición</th><th>Estudios HRSL</th><th>Resultado</th></tr></thead>
+        <thead><tr><th>Medición</th><th>Por qué no</th></tr></thead>
         <tbody>
-          <tr><td>Volumen prostático (RM)</td><td class="mono">59</td><td>IA/informe 0.92; correlación r = 0.96 en la serie inicial de 47</td></tr>
-          <tr><td>Densidad de L1 (≤ 110 UH)</td><td class="mono">52</td><td>Sensibilidad 75 %, especificidad 83 % antes de corregir el ROI; se revalida con el método corregido</td></tr>
-          <tr><td>Hemorragia intracraneal</td><td class="mono">76</td><td>Sensibilidad 45 %, especificidad 90 %: retirada para radiólogos</td></tr>
-          <tr><td>Nódulo pulmonar</td><td class="mono">69</td><td>Sensibilidad 94 %; muchos «falsos positivos» son nódulos pequeños o granulomas no informados</td></tr>
-          <tr><td>Aorta abdominal ≥ 30 mm</td><td class="mono">126</td><td>Especificidad 99 % tras medir solo aorta abdominal en series axiales</td></tr>
-          <tr><td>Esplenomegalia (&gt; 450 ml)</td><td class="mono">117</td><td>Sensibilidad 70 %, especificidad 96 %</td></tr>
-          <tr><td>Derrame pleural</td><td class="mono">67</td><td>Sensibilidad 79 %, especificidad 79 %</td></tr>
-          <tr><td>Revisión visual general (MedGemma)</td><td class="mono">45</td><td>Sensibilidad 0 %: retirada para radiólogos</td></tr>
-          <tr><td>Aneurisma cerebral (TOF)</td><td class="mono">14</td><td>Detectó los 2 aneurismas tipo blister; 1 falso positivo en 12 negativos tras el filtro de tamaño. En validación</td></tr>
-          <tr><td>Ventriculomegalia (TC cráneo)</td><td class="mono">8</td><td>Evans + volumen: 3 de 4 ventriculomegalias informadas detectadas (falló una «compensadora» con Evans 0.29), 0 de 3 negativos marcados</td></tr>
-          <tr><td>Litiasis renal (TC simple)</td><td class="mono">14</td><td>Detectó ≈ 5 de 8 litiasis informadas (fallan microlitiasis); 5 de 6 negativos limpios, el sexto era contraste excretado y ahora se descarta</td></tr>
-          <tr><td>Enfisema (LAA −950)</td><td class="mono">12</td><td>No discriminativo (positivos 0–5 %, un negativo 8 %): solo auditoría</td></tr>
+          <tr><td>Hepatomegalia por volumen hepático</td><td>Los hígados informados como grandes (1 000–4 400 ml) se solapan con los normales; el radiólogo la juzga por la extensión y la complexión</td></tr>
+          <tr><td>Crecimiento prostático en TC</td><td>Volúmenes informados 30–49 ml frente a una mediana de 29 ml en los no informados</td></tr>
+          <tr><td>Enfisema por densidad</td><td>Los informados tenían 0–5 % bajo −950 UH y un normal 8 %: protocolos y filtros distintos</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Las cifras se actualizan solas en la página de auditoría de IA del RIS. Esta noche se procesan 304 estudios más con hallazgos positivos y negativos para cada medición.</p>
   </section>
 
   <section>
@@ -222,5 +233,5 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
     </ul>
   </section>
 
-  <footer>PixOS · Hospital Real San Lucas. Validación con informes firmados del hospital, abril–octubre de 2026. Modelos: TotalSegmentator, MONAI (próstata, nódulos pulmonares), FastSurfer.</footer>
+  <footer>PixOS · Hospital Real San Lucas. Validación con informes firmados del hospital, abril–octubre de 2026. Modelos de licencia abierta (TotalSegmentator, MONAI, FastSurfer, HD-BET, torchxrayvision) y MONAI VISTA3D solo en evaluación (licencia NVIDIA no comercial).</footer>
 </main>
