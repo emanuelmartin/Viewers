@@ -23,7 +23,10 @@ function showAISeg(servicesManager, commandsManager, seg: any): Promise<string |
   if (!ds) {
     return Promise.resolve('La serie de IA aún no está en el visor: recargue el estudio.');
   }
-  return Promise.resolve(commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: viewportGridService.getActiveViewportId() }))
+  const { userAuthenticationService } = servicesManager.services;
+  // Load (download and register the segmentation) before hydrating: hydration only adds the representation
+  return Promise.resolve(typeof ds.load === 'function' ? ds.load({ headers: userAuthenticationService.getAuthorizationHeader() }) : null)
+    .then(() => commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: viewportGridService.getActiveViewportId() }))
     // The source series opens on its first image: go to the largest segment once the labelmap is in place
     .then(() => new Promise<string | null>(resolve => setTimeout(() => {
       resolve(seg.focusLps ? showPoint(servicesManager, toWorld(seg.focusLps), seg.focusLabel || '') : null);
