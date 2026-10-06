@@ -132,6 +132,7 @@ export const WORKFLOWS: Record<string, Workflow> = {
       mpr,
       { kind: 'slab', label: 'MIP 20 mm', slabId: 'mip20' },
       { kind: 'layout', label: 'MPR + 3D', protocolId: 'mprAnd3DVolumeViewport' },
+      { kind: 'ai', label: 'Diámetros aórticos (GPU)', hint: 'Línea central y diámetro máximo perpendicular por segmento; la aorta segmentada se carga en 3D con «Ver segmentación IA»' },
       length('Calibre del vaso / longitud de estenosis'),
       { kind: 'calc', label: 'Relación VD/VI (TEP)', calcId: 'ratio', hint: 'Marque diámetro del VD y del VI en eje axial: ≥ 1 sugiere sobrecarga' },
       { kind: 'guide', label: 'CAD-RADS / Stanford', hint: 'Coronarias: CAD-RADS; disección aórtica: Stanford A o B' },
