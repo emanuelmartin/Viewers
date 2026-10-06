@@ -1,19 +1,210 @@
 {
-  "_doc": "Registro de licencias de los modelos y herramientas de IA de PixOS. comercializable: si = se puede incluir en un producto que se vende; no = solo uso interno/no comercial (HRSL puede usarlo porque no se vende); revisar = depende de los datos de entrenamiento o de condiciones que hay que confirmar antes de vender. Actualizado 2026-10-06.",
+  "_doc": "Registro de licencias de los modelos y herramientas de IA de PixOS. comercializable: si = se puede incluir en un producto que se vende; no = solo uso interno/no comercial (HRSL puede usarlo porque no se vende); revisar = depende de los datos de entrenamiento o de condiciones que hay que confirmar antes de vender. Actualizado 2026-10-06 (licencia académica de TotalSegmentator activa).",
   "modelos": [
-    { "id": "totalsegmentator-open", "nombre": "TotalSegmentator (tareas abiertas)", "tareas_pixos": ["ct_organs", "ct_lung_nodules (lóbulos, corazón, aorta, derrames)", "ct_head_bleed (cerebral_bleed, ventricle_parts)", "kidney_cysts", "liver_lesions", "liver_segments", "mr_brain_aneurysm", "mr_spine_levels", "ct_aorta"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0 (tareas sin licencia)", "comercializable": "si", "uso_hrsl": "si", "notas": "Tareas que no están en la lista commercial_models de TotalSegmentator.", "fuente": "https://github.com/wasserth/TotalSegmentator" },
-    { "id": "totalsegmentator-licensed", "nombre": "TotalSegmentator (tareas con licencia)", "tareas_pixos": ["pendiente: coronary_arteries", "heartchambers_highres", "tissue_types", "aortic_dissection", "renal_arteries", "brain_structures", "appendicular_bones", "vertebrae_body", "thigh_shoulder_muscles", "face"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Licencia académica gratuita (no comercial) o licencia comercial de pago", "comercializable": "no", "uso_hrsl": "si (con licencia académica)", "notas": "Requiere clave: la solicita el titular en el formulario de TotalSegmentator; se instala con totalseg_set_license.", "fuente": "https://github.com/wasserth/TotalSegmentator" },
-    { "id": "monai-lung-nodule", "nombre": "MONAI lung_nodule_ct_detection (RetinaNet)", "tareas_pixos": ["ct_lung_nodules"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "revisar", "uso_hrsl": "si", "notas": "Entrenado con LUNA16 (derivado de LIDC-IDRI, CC BY 3.0): confirmar atribución antes de vender.", "fuente": "https://github.com/Project-MONAI/model-zoo" },
-    { "id": "monai-prostate", "nombre": "MONAI prostate_mri_anatomy", "tareas_pixos": ["mr_prostate"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "revisar", "uso_hrsl": "si", "notas": "Entrenado con prostate158: confirmar la licencia del conjunto de datos.", "fuente": "https://github.com/Project-MONAI/model-zoo" },
-    { "id": "monai-brats", "nombre": "MONAI brats_mri_segmentation (SegResNet) + HD-BET", "tareas_pixos": ["mr_brain_tumor"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "revisar", "uso_hrsl": "si", "notas": "Datos BraTS 2018 con condiciones de uso de investigación: confirmar antes de vender.", "fuente": "https://github.com/Project-MONAI/model-zoo" },
-    { "id": "monai-vista3d", "nombre": "MONAI VISTA3D", "tareas_pixos": ["vista3d_point"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "NVIDIA OneWay Noncommercial License", "comercializable": "no", "uso_hrsl": "si (evaluación)", "notas": "Etiquetado como «evaluación» en el visor.", "fuente": "https://github.com/Project-MONAI/model-zoo" },
-    { "id": "fastsurfer", "nombre": "FastSurfer (FastSurferCNN)", "tareas_pixos": ["mr_brain_volumes"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "si", "uso_hrsl": "si", "notas": "", "fuente": "https://github.com/Deep-MI/FastSurfer" },
-    { "id": "hd-bet", "nombre": "HD-BET", "tareas_pixos": ["mr_brain_tumor", "mr_brain_dwi"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "si", "uso_hrsl": "si", "notas": "", "fuente": "https://github.com/MIC-DKFZ/HD-BET" },
-    { "id": "torchxrayvision", "nombre": "torchxrayvision DenseNet (densenet121-res224-all)", "tareas_pixos": ["cxr"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0", "comercializable": "revisar", "uso_hrsl": "si", "notas": "Pesos entrenados con varios conjuntos (algunos de uso de investigación, p. ej. CheXpert y MIMIC-CXR): no vender sin revisar.", "fuente": "https://github.com/mlmed/torchxrayvision" },
-    { "id": "medgemma", "nombre": "MedGemma", "tareas_pixos": ["image_analysis (retirada)"], "licencia_codigo": "Health AI Developer Foundations", "licencia_pesos": "Health AI Developer Foundations terms of use", "comercializable": "revisar", "uso_hrsl": "si (retirada por desempeño)", "notas": "Condiciones propias de Google: revisar antes de cualquier uso comercial.", "fuente": "https://developers.google.com/health-ai-developer-foundations" },
-    { "id": "deepisles", "nombre": "DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER)", "tareas_pixos": ["pendiente: mr_brain_stroke"], "licencia_codigo": "Apache-2.0", "licencia_pesos": "Apache-2.0 (Zenodo 14026715)", "comercializable": "revisar", "uso_hrsl": "si", "notas": "Datos ISLES'22: confirmar condiciones antes de vender.", "fuente": "https://github.com/ezequieldlrosa/DeepIsles" },
-    { "id": "lst-ai", "nombre": "LST-AI (lesiones de sustancia blanca)", "tareas_pixos": ["no instalado: requiere FLAIR 3D"], "licencia_codigo": "MIT", "licencia_pesos": "MIT", "comercializable": "si", "uso_hrsl": "si", "notas": "Herramienta declarada de investigación por sus autores.", "fuente": "https://github.com/CompImg/LST-AI" },
-    { "id": "pixos-rules", "nombre": "Reglas y mediciones propias PixOS", "tareas_pixos": ["mr_brain_dwi (ADC < 620 + asimetría)", "ct_aorta (línea central)", "calcio cardiaco aproximado", "índice de Evans", "L1, esteatosis, músculo L3", "segmentación por clic y pincel"], "licencia_codigo": "Propia", "licencia_pesos": "Sin pesos", "comercializable": "si", "uso_hrsl": "si", "notas": "Dependen de las segmentaciones de los modelos de arriba: su licencia se hereda.", "fuente": "" },
-    { "id": "highdicom", "nombre": "highdicom (DICOM SEG y capturas 3D)", "tareas_pixos": ["series de IA en el PACS"], "licencia_codigo": "MIT", "licencia_pesos": "—", "comercializable": "si", "uso_hrsl": "si", "notas": "", "fuente": "https://github.com/ImagingDataCommons/highdicom" }
+    {
+      "id": "totalsegmentator-open",
+      "nombre": "TotalSegmentator (tareas abiertas)",
+      "tareas_pixos": [
+        "ct_organs",
+        "ct_lung_nodules (lóbulos, corazón, aorta, derrames)",
+        "ct_head_bleed (cerebral_bleed, ventricle_parts)",
+        "kidney_cysts",
+        "liver_lesions",
+        "liver_segments",
+        "mr_brain_aneurysm",
+        "mr_spine_levels",
+        "ct_aorta"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0 (tareas sin licencia)",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "Tareas que no están en la lista commercial_models de TotalSegmentator.",
+      "fuente": "https://github.com/wasserth/TotalSegmentator"
+    },
+    {
+      "id": "totalsegmentator-licensed",
+      "nombre": "TotalSegmentator (tareas con licencia)",
+      "tareas_pixos": [
+        "instalados 2026-10-06: coronary_arteries",
+        "heartchambers_highres",
+        "tissue_types",
+        "tissue_4_types",
+        "tissue_types_mr",
+        "brain_structures",
+        "vertebrae_body",
+        "appendicular_bones",
+        "aortic_sinuses",
+        "body_stats_cnn_ct"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Licencia académica gratuita (no comercial) o licencia comercial de pago",
+      "comercializable": "no",
+      "uso_hrsl": "si (licencia académica activa en ubuntu-ai, a nombre del titular)",
+      "notas": "Licencia académica no comercial: solo HRSL / uso interno. Para venderlos se necesita licencia comercial de pago (jakob.wasserthal@usb.ch). Todo resultado basado en estas tareas debe marcarse como no comercializable.",
+      "fuente": "https://github.com/wasserth/TotalSegmentator"
+    },
+    {
+      "id": "monai-lung-nodule",
+      "nombre": "MONAI lung_nodule_ct_detection (RetinaNet)",
+      "tareas_pixos": [
+        "ct_lung_nodules"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Entrenado con LUNA16 (derivado de LIDC-IDRI, CC BY 3.0): confirmar atribución antes de vender.",
+      "fuente": "https://github.com/Project-MONAI/model-zoo"
+    },
+    {
+      "id": "monai-prostate",
+      "nombre": "MONAI prostate_mri_anatomy",
+      "tareas_pixos": [
+        "mr_prostate"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Entrenado con prostate158: confirmar la licencia del conjunto de datos.",
+      "fuente": "https://github.com/Project-MONAI/model-zoo"
+    },
+    {
+      "id": "monai-brats",
+      "nombre": "MONAI brats_mri_segmentation (SegResNet) + HD-BET",
+      "tareas_pixos": [
+        "mr_brain_tumor"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Datos BraTS 2018 con condiciones de uso de investigación: confirmar antes de vender.",
+      "fuente": "https://github.com/Project-MONAI/model-zoo"
+    },
+    {
+      "id": "monai-vista3d",
+      "nombre": "MONAI VISTA3D",
+      "tareas_pixos": [
+        "vista3d_point"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "NVIDIA OneWay Noncommercial License",
+      "comercializable": "no",
+      "uso_hrsl": "si (evaluación)",
+      "notas": "Etiquetado como «evaluación» en el visor.",
+      "fuente": "https://github.com/Project-MONAI/model-zoo"
+    },
+    {
+      "id": "fastsurfer",
+      "nombre": "FastSurfer (FastSurferCNN)",
+      "tareas_pixos": [
+        "mr_brain_volumes"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "",
+      "fuente": "https://github.com/Deep-MI/FastSurfer"
+    },
+    {
+      "id": "hd-bet",
+      "nombre": "HD-BET",
+      "tareas_pixos": [
+        "mr_brain_tumor",
+        "mr_brain_dwi"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "",
+      "fuente": "https://github.com/MIC-DKFZ/HD-BET"
+    },
+    {
+      "id": "torchxrayvision",
+      "nombre": "torchxrayvision DenseNet (densenet121-res224-all)",
+      "tareas_pixos": [
+        "cxr"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Pesos entrenados con varios conjuntos (algunos de uso de investigación, p. ej. CheXpert y MIMIC-CXR): no vender sin revisar.",
+      "fuente": "https://github.com/mlmed/torchxrayvision"
+    },
+    {
+      "id": "medgemma",
+      "nombre": "MedGemma",
+      "tareas_pixos": [
+        "image_analysis (retirada)"
+      ],
+      "licencia_codigo": "Health AI Developer Foundations",
+      "licencia_pesos": "Health AI Developer Foundations terms of use",
+      "comercializable": "revisar",
+      "uso_hrsl": "si (retirada por desempeño)",
+      "notas": "Condiciones propias de Google: revisar antes de cualquier uso comercial.",
+      "fuente": "https://developers.google.com/health-ai-developer-foundations"
+    },
+    {
+      "id": "deepisles",
+      "nombre": "DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER)",
+      "tareas_pixos": [
+        "pendiente: mr_brain_stroke"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0 (Zenodo 14026715)",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Datos ISLES'22: confirmar condiciones antes de vender.",
+      "fuente": "https://github.com/ezequieldlrosa/DeepIsles"
+    },
+    {
+      "id": "lst-ai",
+      "nombre": "LST-AI (lesiones de sustancia blanca)",
+      "tareas_pixos": [
+        "no instalado: requiere FLAIR 3D"
+      ],
+      "licencia_codigo": "MIT",
+      "licencia_pesos": "MIT",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "Herramienta declarada de investigación por sus autores.",
+      "fuente": "https://github.com/CompImg/LST-AI"
+    },
+    {
+      "id": "pixos-rules",
+      "nombre": "Reglas y mediciones propias PixOS",
+      "tareas_pixos": [
+        "mr_brain_dwi (ADC < 620 + asimetría)",
+        "ct_aorta (línea central)",
+        "calcio cardiaco aproximado",
+        "índice de Evans",
+        "L1, esteatosis, músculo L3",
+        "segmentación por clic y pincel"
+      ],
+      "licencia_codigo": "Propia",
+      "licencia_pesos": "Sin pesos",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "Dependen de las segmentaciones de los modelos de arriba: su licencia se hereda.",
+      "fuente": ""
+    },
+    {
+      "id": "highdicom",
+      "nombre": "highdicom (DICOM SEG y capturas 3D)",
+      "tareas_pixos": [
+        "series de IA en el PACS"
+      ],
+      "licencia_codigo": "MIT",
+      "licencia_pesos": "—",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "",
+      "fuente": "https://github.com/ImagingDataCommons/highdicom"
+    }
   ]
 }
