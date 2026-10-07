@@ -16,6 +16,7 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
   const [look, setLook] = useState<Look>(() => getLook(view.viewportId, view.segmentationId));
   const [, setTick] = useState(0);
   const [problem, setProblem] = useState('');
+  const [shown, setShown] = useState<Record<number, boolean>>({});
   const { colours, opacity, volume } = look;
 
   const change = (next: Partial<Look>) => {
@@ -34,12 +35,12 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
   const representation = segmentationService
     .getSegmentationRepresentations(view.viewportId, { segmentationId: view.segmentationId })
     ?.find((r: any) => r.type === 'Surface');
-  const visible = (index: number) => representation?.segments?.[index]?.visible !== false;
+  const visible = (index: number) => shown[index] ?? representation?.segments?.[index]?.visible !== false;
   const indices = Object.keys(segments).map(Number).filter(i => segments[i]);
-  // The segmentation state changes synchronously; redraw the list right away
+  // The segmentation's visibility updates asynchronously: the list shows the choice right away
   const toggle = (index: number, show: boolean) => {
     setStructureVisible(servicesManager, view.viewportId, view.segmentationId, index, show);
-    setTick(t => t + 1);
+    setShown(prev => ({ ...prev, [index]: show }));
   };
   const all = (show: boolean) => indices.forEach(i => toggle(i, show));
   const presets: Array<[VolumeMode, string]> = view.modality === 'MR'
