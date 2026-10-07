@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { utilities as csUtils } from '@cornerstonejs/core';
 import { callCloud } from './ris';
+import Viewer3D from './Viewer3D';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -279,6 +280,15 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                           .then(problem => { setMessage(problem ? '' : 'Segmentación de IA en MPR y vista 3D; arrastre para rotar. Con muchas estructuras el navegador puede no alcanzar a generar las superficies: use «Vistas 3D (imágenes)».'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
+                      {q.aiSeg.meshUrl && (
+                        <button className={btn} onClick={() => {
+                          servicesManager.services.uiModalService.show({
+                            title: `${q.aiSeg.title} · vista 3D interactiva`,
+                            content: Viewer3D,
+                            contentProps: { url: q.aiSeg.meshUrl, title: q.aiSeg.title },
+                          });
+                        }}>Vista 3D interactiva</button>
+                      )}
                       {q.aiSeg.renderSeriesInstanceUID && (
                         <button className={btn} onClick={() => {
                           const problem = showAIRenders(servicesManager, q.aiSeg);
