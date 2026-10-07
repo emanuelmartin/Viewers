@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { utilities as csUtils } from '@cornerstonejs/core';
 import { callCloud } from './ris';
-import Viewer3D from './Viewer3D';
+import { showPoint, toWorld } from './navigate';
+import { addAI3DDisplaySets, openAI3D } from './ai3d';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -69,68 +69,6 @@ function showAIRenders(servicesManager, seg: any): string | null {
 type PlanItem = { type: string; task?: string; label: string; eta: string; note: string; job: null | { status: string; error?: string | null; remote?: string | null } };
 type AIState = { plan: PlanItem[]; analysis: any; quant: any[]; description?: string };
 
-/**
- * The lung nodule bundle reads the volume with ITK and saves boxes in its
- * patient coordinates, LPS millimetres like Cornerstone (checked on an HRSL
- * study: a reported right posterior subpleural nodule lands there).
- */
-const toWorld = (p: number[]): [number, number, number] => [p[0], p[1], p[2]];
-
-/**
- * Moves the active viewport to a world point (LPS mm) and rings it for a few
- * seconds: volume viewports (MPR) centre the point on its slice; stack
- * viewports go to the closest image.
- */
-function showPoint(servicesManager, world: [number, number, number], label: string, voi: [number, number] | null = null): string | null {
-  const { viewportGridService, cornerstoneViewportService } = servicesManager.services;
-  const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
-  if (!viewport) {
-    return 'No hay una vista activa';
-  }
-  if (typeof viewport.setImageIdIndex === 'function') {
-    const index = csUtils.getClosestStackImageIndexForPoint(world, viewport);
-    if (index == null) {
-      return 'El punto no está en esta serie: cargue la serie analizada o use MPR';
-    }
-    viewport.setImageIdIndex(index);
-  } else {
-    const { focalPoint, position } = viewport.getCamera();
-    viewport.setCamera({
-      focalPoint: world,
-      position: [world[0] + position[0] - focalPoint[0], world[1] + position[1] - focalPoint[1], world[2] + position[2] - focalPoint[2]],
-    });
-    viewport.render();
-  }
-  if (voi && typeof viewport.setProperties === 'function') {
-    // Window for the finding: lung (W 1500 / L -600) for nodules, liver for focal lesions
-    viewport.setProperties({ voiRange: { lower: voi[0], upper: voi[1] } });
-    viewport.render();
-  }
-  // Ring on top of the canvas at the point, removed after 6 s
-  window.setTimeout(() => {
-    const [x, y] = viewport.worldToCanvas(world);
-    const host: HTMLElement = viewport.element;
-    if (!host || !Number.isFinite(x)) return;
-    const ring = document.createElement('div');
-    ring.title = label;
-    Object.assign(ring.style, {
-      position: 'absolute', left: `${x - 22}px`, top: `${y - 22}px`, width: '44px', height: '44px', borderRadius: '50%',
-      border: '2px solid #facc15', boxShadow: '0 0 0 2px rgba(0,0,0,.6)', pointerEvents: 'none', zIndex: '20',
-    });
-    const tag = document.createElement('div');
-    tag.textContent = label;
-    Object.assign(tag.style, {
-      position: 'absolute', left: `${x + 26}px`, top: `${y - 10}px`, color: '#facc15', font: '12px system-ui',
-      textShadow: '0 0 3px #000', pointerEvents: 'none', zIndex: '20', whiteSpace: 'nowrap',
-    });
-    host.style.position = host.style.position || 'relative';
-    host.appendChild(ring);
-    host.appendChild(tag);
-    window.setTimeout(() => { ring.remove(); tag.remove(); }, 6000);
-  }, 150);
-  return null;
-}
-
 const fetchState = (uid: string, request = false, redo = false) =>
   callCloud<AIState>(request ? 'viewerRequestAIAnalysis' : 'viewerAIFindings', { StudyInstanceUID: uid, redo });
 
@@ -187,6 +125,13 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
       .catch(e => setError(e?.message || String(e)))
       .then(() => setBusy(false));
   };
+
+  // The 3D views of the results, as series of the study (drag them to any viewport)
+  useEffect(() => {
+    if (state?.quant?.length) {
+      addAI3DDisplaySets(servicesManager, studyUID, state.quant);
+    }
+  }, [servicesManager, state, studyUID]);
 
   // Results so far when the study opens
   useEffect(() => {
@@ -281,14 +226,15 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
                       {q.aiSeg.meshUrl && (
-                        <button className={btn} onClick={() => {
-                          servicesManager.services.uiModalService.show({
-                            title: `${q.aiSeg.title} · vista 3D interactiva`,
-                            content: Viewer3D,
-                            contentProps: { url: q.aiSeg.meshUrl, title: q.aiSeg.title },
-                            containerClassName: 'max-w-[92vw] w-auto',
-                          });
-                        }}>Vista 3D interactiva</button>
+                        <button className={primaryBtn} onClick={() => {
+                          const [uid] = addAI3DDisplaySets(servicesManager, studyUID, [q]);
+                          openAI3D(servicesManager, commandsManager, uid)
+                            .then(problem => {
+                              setMessage(problem ? '' : 'Vista 3D en el visor: Seleccionar muestra los datos de cada estructura; Distancia y Ángulo miden sobre las superficies; un clic lleva los cortes a ese punto. También está en la lista de series («IA · 3D interactivo») para arrastrarla a cualquier recuadro.');
+                              setError(problem || '');
+                            })
+                            .catch(e => { setMessage(''); setError(`No se pudo abrir la vista 3D: ${e?.message || e}`); });
+                        }}>Abrir 3D en el visor</button>
                       )}
                       {q.aiSeg.renderSeriesInstanceUID && (
                         <button className={btn} onClick={() => {
