@@ -163,8 +163,10 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
 
   return (
     <div className="flex h-[75vh] w-[min(1200px,85vw)] gap-3 text-white">
-      <div ref={mountRef} className="relative min-w-0 flex-1 rounded border border-white/10 bg-black">
-        {status && <div className="absolute inset-0 flex items-center justify-center text-[13px] text-white/70">{status}</div>}
+      <div className="relative min-w-0 flex-1 rounded border border-white/10 bg-black">
+        {/* The canvas lives in its own element: React empties an element whose children change, which removed it */}
+        <div ref={mountRef} className="absolute inset-0" />
+        {status && <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[13px] text-white/70">{status}</div>}
       </div>
       <div className="ohif-scrollbar flex w-64 shrink-0 flex-col gap-2 overflow-y-auto text-[12px]">
         <div className="text-white/60">Resultado automático, no diagnóstico. Arrastre para rotar, rueda para acercar.</div>
