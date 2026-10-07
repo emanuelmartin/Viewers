@@ -11,6 +11,7 @@ import { installToolbarGate } from './toolbarGate';
 import { installSegmentationTools } from './segTools';
 import { installAISeriesFilter } from './aiSeries';
 import { installSurfacePicking } from './aiSurfaces';
+import { installBetter3D } from './better3D';
 
 let cleanup: Array<() => void> = [];
 
@@ -22,7 +23,7 @@ let cleanup: Array<() => void> = [];
 function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
   cleanup.forEach(fn => fn());
   cleanup = [installToolbarGate(servicesManager), watchRisSession(), installSegmentationTools(servicesManager, extensionManager),
-    installAISeriesFilter(servicesManager), installSurfacePicking(servicesManager)];
+    installAISeriesFilter(servicesManager), installSurfacePicking(servicesManager), installBetter3D(servicesManager)];
   loadAccess();
 }
 

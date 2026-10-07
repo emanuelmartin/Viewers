@@ -242,3 +242,129 @@ export function installSurfacePicking(servicesManager): () => void {
     document.removeEventListener('pointerup', onUp, true);
   };
 }
+
+/** Realistic colours by structure name (Spanish labels of the AI service); lesions stay a vivid yellow to stand out. */
+const REALISTIC: Array<[RegExp, [number, number, number]]> = [
+  [/tumor|lesi[oó]n|n[oó]dulo|infarto|hemorragia|sangrado|aneurisma|met[aá]stasis/, [255, 205, 40]],
+  [/quiste/, [185, 215, 240]],
+  [/h[ií]gado/, [128, 52, 40]],
+  [/bazo/, [112, 38, 62]],
+  [/ri[nñ][oó]n|renal/, [150, 62, 50]],
+  [/ves[ií]cula/, [72, 122, 52]],
+  [/p[aá]ncreas/, [222, 182, 130]],
+  [/vejiga/, [228, 200, 128]],
+  [/pr[oó]stata/, [200, 132, 120]],
+  [/suprarrenal/, [205, 160, 90]],
+  [/tiroides/, [160, 62, 62]],
+  [/aorta|arteria|car[oó]tida|coronari|tronco|il[ií]aca|subclavia|braquiocef/, [196, 36, 36]],
+  [/vena|cava|porta|yugular|seno venoso/, [62, 82, 170]],
+  [/coraz[oó]n|miocardio|ventr[ií]culo (izq|der)|aur[ií]cula|atrio/, [168, 48, 48]],
+  [/ventr[ií]culo|lcr|l[ií]quido/, [120, 170, 232]],
+  [/pulm[oó]n|l[oó]bulo/, [232, 172, 172]],
+  [/tr[aá]quea|bronquio/, [222, 200, 190]],
+  [/es[oó]fago|est[oó]mago|duodeno|intestino|colon|recto|yeyuno|[ií]leon/, [222, 150, 128]],
+  [/m[uú]sculo|psoas|gl[uú]teo|autóctono|aut[oó]ctono/, [168, 66, 58]],
+  [/grasa/, [240, 220, 150]],
+  [/sustancia blanca/, [236, 222, 212]],
+  [/cerebro|cerebelo|corteza|sustancia gris|hipocampo|t[aá]lamo|tronco encef/, [212, 168, 160]],
+  [/v[eé]rtebra|costilla|estern[oó]n|clav[ií]cula|esc[aá]pula|cr[aá]neo|f[eé]mur|h[uú]mero|pelvis|sacro|cadera|hueso|cóccix|c[oó]ccix|disco/, [236, 226, 202]],
+];
+
+const realistic = (label: string): [number, number, number] =>
+  REALISTIC.find(([re]) => re.test(normal(label)))?.[1] || [205, 150, 130];
+
+/** The surface actors of a segmentation in a 3D viewport, by segment index. */
+function surfaceActors(viewport: any, segmentationId: string): Map<number, any> {
+  const out = new Map<number, any>();
+  const prefix = `${segmentationId}-${cstEnums.SegmentationRepresentations.Surface}-`;
+  (viewport?.getActors?.() || []).forEach((entry: any) => {
+    const uid = String(entry.representationUID || '');
+    if (uid.startsWith(prefix)) {
+      out.set(Number(uid.slice(prefix.length)), entry.actor);
+    }
+  });
+  return out;
+}
+
+export type ColourMode = 'distintivo' | 'realista';
+export type VolumeMode = 'oculto' | 'CT-Bones' | 'CT-Soft-Tissue' | 'CT-AAA' | 'CT-Lung' | 'MR-Default' | 'MR-Angio';
+
+/**
+ * Look of the AI surfaces in a 3D viewport: colours (the segmentation's own, distinct per structure, or realistic
+ * anatomical ones), opacity and a lit, slightly glossy material. The segmentation panel's colours are not changed.
+ */
+export function styleSurfaces(servicesManager, viewportId: string, segmentationId: string, colours: ColourMode, opacity: number) {
+  const { cornerstoneViewportService, segmentationService } = servicesManager.services;
+  const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+  if (!viewport) {
+    return 0;
+  }
+  const segments = segmentationService.getSegmentation(segmentationId)?.segments || {};
+  const actors = surfaceActors(viewport, segmentationId);
+  actors.forEach((actor, index) => {
+    const own = segmentationService.getSegmentColor(viewportId, segmentationId, index) || [200, 200, 200];
+    const rgb = colours === 'realista' ? realistic(segments[index]?.label || '') : own;
+    const property = actor.getProperty();
+    property.setColor(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+    property.setOpacity(opacity);
+    property.setAmbient(0.15);
+    property.setDiffuse(0.85);
+    property.setSpecular(colours === 'realista' ? 0.35 : 0.2);
+    property.setSpecularPower(25);
+    // Translucent surfaces must not hide the ones behind them
+    actor.setForceTranslucent?.(opacity < 0.99);
+  });
+  viewport.render();
+  return actors.size;
+}
+
+/** The CT/MR volume rendering behind the surfaces: hidden, or one of Cornerstone's presets. */
+export function setVolumeMode(servicesManager, viewportId: string, mode: VolumeMode) {
+  const viewport: any = servicesManager.services.cornerstoneViewportService.getCornerstoneViewport(viewportId);
+  if (!viewport) {
+    return;
+  }
+  (viewport.getActors?.() || []).forEach((entry: any) => {
+    if (entry.actor?.isA?.('vtkVolume') && !entry.representationUID) {
+      entry.actor.setVisibility(mode !== 'oculto');
+    }
+  });
+  if (mode !== 'oculto') {
+    viewport.setProperties({ preset: mode });
+  }
+  viewport.render();
+}
+
+/** Switches structures on and off in the 3D viewport (same state the Segmentation panel shows). */
+export function setStructureVisible(servicesManager, viewportId: string, segmentationId: string, segmentIndex: number, visible: boolean) {
+  servicesManager.services.segmentationService.setSegmentVisibility(viewportId, segmentationId, segmentIndex, visible, cstEnums.SegmentationRepresentations.Surface);
+}
+
+/** PNG of the 3D viewport as it is on screen, with the title and the AI disclaimer burnt in. */
+export function download3D(servicesManager, viewportId: string, title: string): string | null {
+  const viewport: any = servicesManager.services.cornerstoneViewportService.getCornerstoneViewport(viewportId);
+  const canvas: HTMLCanvasElement | undefined = viewport?.getCanvas?.();
+  if (!canvas) {
+    return 'No hay vista 3D';
+  }
+  viewport.render();
+  const out = document.createElement('canvas');
+  out.width = canvas.width;
+  out.height = canvas.height;
+  const ctx = out.getContext('2d');
+  if (!ctx) {
+    return 'El navegador no permitió crear la imagen';
+  }
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, out.width, out.height);
+  ctx.drawImage(canvas, 0, 0);
+  const size = Math.max(12, Math.round(out.width / 70));
+  ctx.font = `${size}px sans-serif`;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(`${title} · resultado automático, no diagnóstico`, size, out.height - size);
+  const a = document.createElement('a');
+  a.href = out.toDataURL('image/png');
+  a.download = `${title.replace(/[^\wáéíóúñ ]+/gi, '').trim() || 'vista-3d'}.png`;
+  a.click();
+  return null;
+}

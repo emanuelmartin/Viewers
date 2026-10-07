@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { showPoint, toWorld } from './navigate';
 import { attachAISurfaces } from './aiSurfaces';
+import AI3DControls, { AI3DView } from './AI3DControls';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -42,7 +43,7 @@ const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
  * on and off and selected in the Segmentation panel; a click on a surface takes the MPR planes there, where OHIF's
  * measurement tools work.
  */
-async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<string | null> {
+async function showAISeg3D(servicesManager, commandsManager, seg: any, onView: (view: AI3DView) => void): Promise<string | null> {
   const { displaySetService, viewportGridService, userAuthenticationService, cornerstoneViewportService } = servicesManager.services;
   const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.seriesInstanceUID);
   if (!ds) {
@@ -55,7 +56,11 @@ async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<
   let surfaces = 0;
   if (seg.meshUrl) {
     const frameOfReferenceUID = ds.instance?.FrameOfReferenceUID || source?.instances?.[0]?.FrameOfReferenceUID || source?.FrameOfReferenceUID;
-    surfaces = await attachAISurfaces(servicesManager, ds.displaySetInstanceUID, seg.meshUrl, frameOfReferenceUID).catch(() => 0);
+    surfaces = await attachAISurfaces(servicesManager, ds.displaySetInstanceUID, seg.meshUrl, frameOfReferenceUID).catch(e => {
+      console.warn('PixOS: AI surfaces not attached', e);
+      return 0;
+    });
+    console.info('PixOS: AI surfaces attached', surfaces);
   }
   // The layout is built from the series in the active viewport: the analysed one
   const activeId = viewportGridService.getActiveViewportId();
@@ -76,7 +81,19 @@ async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<
   if (!v3d) {
     return 'No se encontró la vista 3D en este diseño.';
   }
-  await commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: v3d.viewportId });
+  // Surfaces in 3D, the labelmap over the MPR planes
+  const { segmentationService } = servicesManager.services;
+  ds.isHydrated = true;
+  for (const v of viewportGridService.getState().viewports.values()) {
+    if (!cornerstoneViewportService.getCornerstoneViewport(v.viewportId)) {
+      continue;
+    }
+    await segmentationService.addSegmentationRepresentation(v.viewportId, {
+      segmentationId: ds.displaySetInstanceUID,
+      type: (v.viewportId === v3d.viewportId ? 'Surface' : 'Labelmap') as any,
+    });
+  }
+  onView({ viewportId: v3d.viewportId, segmentationId: ds.displaySetInstanceUID, seriesInstanceUID: seg.seriesInstanceUID, title: seg.title, modality: source?.Modality || '' });
   if (seg.meshUrl && !surfaces) {
     return 'Las superficies de la IA no coinciden con la segmentación: el navegador las calcula y con muchas estructuras puede no alcanzar. Use «Vistas 3D (imágenes)».';
   }
@@ -141,6 +158,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [view3D, setView3D] = useState<AI3DView | null>(null);
 
   const load = (request: boolean, redo = false) => {
     setError('');
@@ -242,7 +260,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   {q.aiSeg && (
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <button className={btn} onClick={() => {
-                        showAISeg3D(servicesManager, commandsManager, q.aiSeg)
+                        showAISeg3D(servicesManager, commandsManager, q.aiSeg, setView3D)
                           .then(problem => { setMessage(problem ? '' : 'MPR + 3D con la segmentación de IA: en el panel Segmentación encienda o apague estructuras; clic sobre una superficie lleva los planos MPR a ese punto para medir con Longitud, Ángulo, etc.'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
@@ -254,6 +272,9 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                         }}>Vistas 3D (imágenes)</button>
                       )}
                     </div>
+                  )}
+                  {view3D && q.aiSeg && view3D.seriesInstanceUID === q.aiSeg.seriesInstanceUID && (
+                    <AI3DControls key={view3D.viewportId} servicesManager={servicesManager} view={view3D} />
                   )}
                   {q.aiSeg && (
                     <div className="mt-1 flex items-center justify-between gap-2">
