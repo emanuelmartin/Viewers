@@ -25,7 +25,11 @@ export default function AI3DMenu(props: Props): ReactNode {
   const { toolbarService } = servicesManager.services;
   const { IconContainer, className: iconClassName, containerProps } = useIconPresentation();
   const { align, side } = toolbarService.getAlignAndSide(location);
-  const view = isOpen ? aiSurfaceView(servicesManager, viewportId) : null;
+  // Evaluated against the active viewport: draw it only in the viewport that shows the surfaces
+  const view = aiSurfaceView(servicesManager, viewportId);
+  if (!view) {
+    return null;
+  }
   const Icon = <Icons.ByName name="tab-segmentation" className={iconClassName} />;
   const idProp = rest.id ? { id: `${rest.id}-${viewportId}` } : {};
 
@@ -43,11 +47,7 @@ export default function AI3DMenu(props: Props): ReactNode {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-72 border-none bg-transparent p-0 shadow-none" side={side} align={align} sideOffset={5}>
-        {view ? (
-          <AI3DControls servicesManager={servicesManager} view={view} />
-        ) : (
-          <div className="bg-popover rounded p-2 text-[11px] text-white/70">Esta vista no tiene superficies de IA.</div>
-        )}
+        <AI3DControls servicesManager={servicesManager} view={view} />
       </PopoverContent>
     </Popover>
   );

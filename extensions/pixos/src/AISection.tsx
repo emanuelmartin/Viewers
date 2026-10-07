@@ -92,6 +92,7 @@ async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<
       type: (v.viewportId === v3d.viewportId ? 'Surface' : 'Labelmap') as any,
     });
   }
+  viewportGridService.setActiveViewportId(v3d.viewportId);
   // Lit surfaces without the volume in front of them; the «IA 3D» menu of the viewport changes it
   applyLook(servicesManager, v3d.viewportId, ds.displaySetInstanceUID, getLook(v3d.viewportId, ds.displaySetInstanceUID));
   if (!surfaces) {
