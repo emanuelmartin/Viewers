@@ -380,7 +380,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_dwi' || q.task === 'mr_brain_stroke').map((q, i) => (
             <div key={`dw${i}`} className="mt-3 text-[12px]">
-              <b>{q.task === 'mr_brain_stroke' ? 'Infarto (DeepISLES, en validación):' : 'Difusión restringida (en validación):'}</b> {q.text}
+              <b>{q.task === 'mr_brain_stroke' ? 'Restricción a la difusión (DeepISLES; verificar con ADC):' : 'Difusión restringida (en validación):'}</b> {q.text}
               {(q.data?.lesions || []).filter((l: any) => l.volume_ml >= 0.3).map((l: any, k: number) => (
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{k + 1}. {l.side}, {l.volume_ml} ml, ADC {l.mean_adc}</span>

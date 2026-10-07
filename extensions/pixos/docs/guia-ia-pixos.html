@@ -182,8 +182,9 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>Columna · TotalSegmentator vertebrae_mr</td><td>Niveles vertebrales y discales para navegar</td><td><span class="chip ok">Disponible</span></td><td>Radiólogos</td><td class="mono">8 s</td><td>Niveles verificados en imagen (9); revisar el conteo desde C2 o el sacro</td></tr>
           <tr class="grp"><th colspan="6">Angio-TC · TotalSegmentator y línea central PixOS · ≈ 40 s</th></tr>
           <tr><td>Diámetros aórticos por segmento</td><td>Diámetro máximo perpendicular a la línea central: ascendente, cayado, descendente, suprarrenal, infrarrenal; alerta con umbrales de guía</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>Dentro de 5 mm del informe: suprarrenal 90 %, descendente 79 %, cayado 75 %, infrarrenal 74 %, ascendente 67 % (57 TC); sesgo +0.5 a +3.9 mm</td></tr>
-          <tr class="grp"><th colspan="6">RM de encéfalo · difusión (regla ADC, sin modelo entrenado) · ≈ 20 s</th></tr>
-          <tr><td>Difusión restringida</td><td>Volumen con ADC &lt; 620 ×10⁻⁶ mm²/s, brillante en b1000 y asimétrico frente al otro hemisferio</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>5 de 6 infartos agudos informados; 15 de 16 normales sin hallazgo (36); se acumula validación continua</td></tr>
+          <tr class="grp"><th colspan="6">RM de encéfalo · difusión · ≈ 3 min</th></tr>
+          <tr><td>Restricción a la difusión · DeepISLES (SEALS, NVAUTO, FACTORIZER; Apache 2.0)</td><td>Volumen y localización de zonas con restricción (infarto agudo; también tumor, absceso o hematoma)</td><td><span class="chip ok">Validada</span></td><td>Radiólogos</td><td class="mono">—</td><td>S 75 %, E 91 % con ≥ 0.3 ml (70 RM, oct 2026); no detecta infartos puntiformes; verificar con ADC</td></tr>
+          <tr><td>Difusión restringida (regla ADC)</td><td>Volumen con ADC &lt; 620 ×10⁻⁶ mm²/s, brillante en b1000 y asimétrico frente al otro hemisferio</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">—</td><td>S 50 %, E 92 % (111): queda solo para comparar con DeepISLES</td></tr>
           <tr class="grp"><th colspan="6">Radiografía</th></tr>
           <tr><td>Tórax · torchxrayvision DenseNet (Apache 2.0)</td><td>Probabilidad de 18 hallazgos</td><td><span class="chip warn">En validación</span></td><td>Solo auditoría</td><td class="mono">1.4 s</td><td>Derrame AUC 0.83, cardiomegalia 0.75, fractura 0.71; neumotórax no discrimina (197)</td></tr>
           <tr class="grp"><th colspan="6">Herramientas en el visor</th></tr>
@@ -216,6 +217,7 @@ footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--li
           <tr><td>Hepatomegalia por volumen hepático</td><td>Los hígados informados como grandes (1 000–4 400 ml) se solapan con los normales; el radiólogo la juzga por la extensión y la complexión</td></tr>
           <tr><td>Crecimiento prostático en TC</td><td>Volúmenes informados 30–49 ml frente a una mediana de 29 ml en los no informados</td></tr>
           <tr><td>Enfisema por densidad</td><td>Los informados tenían 0–5 % bajo −950 UH y un normal 8 %: protocolos y filtros distintos</td></tr>
+          <tr><td>Hemorragia intracraneal con BLAST-CT (Apache 2.0)</td><td>En 81 TC de cráneo marcó un borde falso de sangre extraaxial junto al cráneo en casi todos los normales; con filtros de grosor, distancia al hueso o lateralidad no superó al modelo actual (mejor combinación: S 53 %, E 82 %)</td></tr>
         </tbody>
       </table>
     </div>

@@ -14,10 +14,11 @@ Registro de licencias de los modelos y herramientas de IA de PixOS. comercializa
 | HD-BET | mr_brain_tumor, mr_brain_dwi | Apache-2.0 | **si** | si |  |
 | torchxrayvision DenseNet (densenet121-res224-all) | cxr | Apache-2.0 | **revisar** | si | Pesos entrenados con varios conjuntos (algunos de uso de investigación, p. ej. CheXpert y MIMIC-CXR): no vender sin revisar. |
 | MedGemma | image_analysis (retirada) | Health AI Developer Foundations terms of use | **revisar** | si (retirada por desempeño) | Condiciones propias de Google: revisar antes de cualquier uso comercial. |
-| DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER) | en uso: mr_brain_stroke (SEALS + NVAUTO + FACTORIZER, voto de mayoría; solo auditoría) | Apache-2.0 (Zenodo 14026715) | **revisar** | si | Datos ISLES'22: confirmar condiciones antes de vender. Corre en entorno propio (PyTorch 2.11/CUDA 12.8) con parches de compatibilidad documentados en hrsl_service/stroke.py. |
+| DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER) | en uso: mr_brain_stroke (SEALS + NVAUTO + FACTORIZER, voto de mayoría; validado como detector de restricción a la difusión, visible para médicos) | Apache-2.0 (Zenodo 14026715) | **revisar** | si | Datos ISLES'22: confirmar condiciones antes de vender. Corre en entorno propio (PyTorch 2.11/CUDA 12.8) con parches de compatibilidad documentados en hrsl_service/stroke.py. |
 | LST-AI (lesiones de sustancia blanca) | no instalado: requiere FLAIR 3D | MIT | **si** | si | Herramienta declarada de investigación por sus autores. |
 | Reglas y mediciones propias PixOS | mr_brain_dwi (ADC < 620 + asimetría), ct_aorta (línea central), calcio cardiaco aproximado, índice de Evans, L1, esteatosis, músculo L3, segmentación por clic y pincel | Sin pesos | **si** | si | Dependen de las segmentaciones de los modelos de arriba: su licencia se hereda. |
 | highdicom (DICOM SEG y capturas 3D) | series de IA en el PACS | — | **si** | si |  |
 | trimesh / fast_simplification (mallas; se muestran en el 3D de OHIF con vtk.js, BSD-3) | superficies 3D de segmentaciones en el visor | — | **si** | si |  |
 
 Fuente de verdad: `licencias-ia.json` (este archivo se genera de él).
+| BLAST-CT (hemorragia intracraneal: IPH, extraaxial, IVH, edema) | evaluado y descartado (oct 2026): falsos positivos extraaxiales en TC normales del HRSL | Apache-2.0 (repositorio biomedia-mira/blast-ct) | **si** | no (descartado por desempeño) |  |

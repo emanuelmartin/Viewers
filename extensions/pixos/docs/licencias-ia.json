@@ -155,7 +155,7 @@
       "id": "deepisles",
       "nombre": "DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER)",
       "tareas_pixos": [
-        "en uso: mr_brain_stroke (SEALS + NVAUTO + FACTORIZER, voto de mayoría; solo auditoría)"
+        "en uso: mr_brain_stroke (SEALS + NVAUTO + FACTORIZER, voto de mayoría; validado como detector de restricción a la difusión, visible para médicos)"
       ],
       "licencia_codigo": "Apache-2.0",
       "licencia_pesos": "Apache-2.0 (Zenodo 14026715)",
@@ -220,6 +220,19 @@
       "uso_hrsl": "si",
       "notas": "",
       "fuente": "https://github.com/mikedh/trimesh"
+    },
+    {
+      "id": "blast-ct",
+      "nombre": "BLAST-CT (hemorragia intracraneal: IPH, extraaxial, IVH, edema)",
+      "tareas_pixos": [
+        "evaluado y descartado (oct 2026): falsos positivos extraaxiales en TC normales del HRSL"
+      ],
+      "licencia_codigo": "Apache-2.0",
+      "licencia_pesos": "Apache-2.0 (repositorio biomedia-mira/blast-ct)",
+      "comercializable": "si",
+      "uso_hrsl": "no (descartado por desempeño)",
+      "notas": "",
+      "fuente": "https://github.com/biomedia-mira/blast-ct"
     }
   ]
 }
