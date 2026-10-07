@@ -286,6 +286,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                             title: `${q.aiSeg.title} · vista 3D interactiva`,
                             content: Viewer3D,
                             contentProps: { url: q.aiSeg.meshUrl, title: q.aiSeg.title },
+                            containerClassName: 'max-w-[92vw] w-auto',
                           });
                         }}>Vista 3D interactiva</button>
                       )}

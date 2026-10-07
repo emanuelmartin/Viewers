@@ -37,8 +37,9 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
       if (!el || disposed) {
         return;
       }
-      const w = el.clientWidth;
-      const h = el.clientHeight;
+      // The modal may still be opening (size 0): use a sensible size and follow the element afterwards
+      const w = el.clientWidth || 900;
+      const h = el.clientHeight || 600;
       const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(w, h);
@@ -79,6 +80,16 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
       sceneRef.current = { meshes, renderer, camera, controls, center, size };
       setParts(meshes.map(m => ({ name: m.name || m.parent?.name || 'estructura', visible: true, color: `#${m.material.color.getHexString()}` })));
       setStatus('');
+      const resize = new ResizeObserver(() => {
+        const cw = el.clientWidth;
+        const ch = el.clientHeight;
+        if (cw && ch) {
+          renderer.setSize(cw, ch);
+          camera.aspect = cw / ch;
+          camera.updateProjectionMatrix();
+        }
+      });
+      resize.observe(el);
       const loop = () => {
         controls.update();
         renderer.render(scene, camera);
@@ -86,6 +97,7 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
       };
       loop();
       cleanup = () => {
+        resize.disconnect();
         cancelAnimationFrame(frame);
         controls.dispose();
         renderer.dispose();
