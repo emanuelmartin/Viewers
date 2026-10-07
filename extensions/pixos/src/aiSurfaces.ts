@@ -426,3 +426,58 @@ export function installSurfaceGuard(servicesManager): () => void {
     segmentationService.addSegmentationRepresentation = original;
   };
 }
+
+/** The AI segmentation drawn as surfaces in a 3D viewport, if any: what the viewport's «IA 3D» menu controls. */
+export function aiSurfaceView(servicesManager, viewportId: string) {
+  const { segmentationService, cornerstoneViewportService, displaySetService } = servicesManager.services;
+  const viewport: any = viewportId ? cornerstoneViewportService.getCornerstoneViewport(viewportId) : null;
+  if (viewport?.type !== 'volume3d') {
+    return null;
+  }
+  for (const representation of segmentationService.getSegmentationRepresentations(viewportId) || []) {
+    if (representation.type !== cstEnums.SegmentationRepresentations.Surface || !pickable.has(representation.segmentationId)) {
+      continue;
+    }
+    const ds = displaySetService.getDisplaySetByUID(representation.segmentationId);
+    const source = ds && displaySetService.getDisplaySetByUID(ds.referencedDisplaySetInstanceUID);
+    return {
+      viewportId,
+      segmentationId: representation.segmentationId,
+      seriesInstanceUID: ds?.SeriesInstanceUID || '',
+      title: String(ds?.SeriesDescription || 'IA').replace(/ · en validación$/, ''),
+      modality: source?.Modality || '',
+    };
+  }
+  return null;
+}
+
+export type Look = { colours: ColourMode; opacity: number; volume: VolumeMode };
+const looks = new Map<string, Look>();
+const lookKey = (viewportId: string, segmentationId: string) => `${viewportId}|${segmentationId}`;
+
+/** What was chosen for the AI surfaces of a 3D viewport (kept while the menu is closed). */
+export function getLook(viewportId: string, segmentationId: string): Look {
+  return looks.get(lookKey(viewportId, segmentationId)) || { colours: 'distintivo', opacity: 1, volume: 'oculto' };
+}
+
+/** Stores and applies a look: surface colours and opacity, and the volume behind them. */
+export function applyLook(servicesManager, viewportId: string, segmentationId: string, look: Look) {
+  const previous = looks.get(lookKey(viewportId, segmentationId));
+  looks.set(lookKey(viewportId, segmentationId), look);
+  styleSurfaces(servicesManager, viewportId, segmentationId, look.colours, look.opacity);
+  if (!previous || previous.volume !== look.volume) {
+    setVolumeMode(servicesManager, viewportId, look.volume);
+  }
+}
+
+/** Surfaces re-created by Cornerstone (e.g. a structure switched back on) get their chosen look again. */
+export function installLooks(servicesManager): () => void {
+  const { segmentationService } = servicesManager.services;
+  const sub = segmentationService.subscribe(segmentationService.EVENTS.SEGMENTATION_REPRESENTATION_MODIFIED, () => {
+    looks.forEach((look, key) => {
+      const [viewportId, segmentationId] = key.split('|');
+      styleSurfaces(servicesManager, viewportId, segmentationId, look.colours, look.opacity);
+    });
+  });
+  return () => sub.unsubscribe();
+}

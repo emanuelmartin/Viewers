@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ColourMode, download3D, setStructureVisible, setVolumeMode, styleSurfaces, VolumeMode } from './aiSurfaces';
+import { applyLook, download3D, getLook, Look, setStructureVisible, VolumeMode } from './aiSurfaces';
 
 export type AI3DView = { viewportId: string; segmentationId: string; seriesInstanceUID: string; title: string; modality: string };
 
@@ -13,25 +13,22 @@ const on = 'rounded border border-primary bg-primary/60 px-2 py-0.5 text-[11px] 
  */
 export default function AI3DControls({ servicesManager, view }: { servicesManager: any; view: AI3DView }) {
   const { segmentationService } = servicesManager.services;
-  const [colours, setColours] = useState<ColourMode>('distintivo');
-  const [opacity, setOpacity] = useState(1);
-  const [volume, setVolume] = useState<VolumeMode>('oculto');
+  const [look, setLook] = useState<Look>(() => getLook(view.viewportId, view.segmentationId));
   const [, setTick] = useState(0);
   const [problem, setProblem] = useState('');
+  const { colours, opacity, volume } = look;
 
-  // Look of the surfaces; again when they are re-created (visibility from the Segmentation panel re-renders them)
+  const change = (next: Partial<Look>) => {
+    const merged = { ...look, ...next };
+    setLook(merged);
+    applyLook(servicesManager, view.viewportId, view.segmentationId, merged);
+  };
+
+  // The structure list follows the segmentation (also when changed from the Segmentation panel)
   useEffect(() => {
-    styleSurfaces(servicesManager, view.viewportId, view.segmentationId, colours, opacity);
-    const sub = segmentationService.subscribe(segmentationService.EVENTS.SEGMENTATION_REPRESENTATION_MODIFIED, () => {
-      styleSurfaces(servicesManager, view.viewportId, view.segmentationId, colours, opacity);
-      setTick(t => t + 1);
-    });
+    const sub = segmentationService.subscribe(segmentationService.EVENTS.SEGMENTATION_REPRESENTATION_MODIFIED, () => setTick(t => t + 1));
     return () => sub.unsubscribe();
-  }, [servicesManager, segmentationService, view, colours, opacity]);
-
-  useEffect(() => {
-    setVolumeMode(servicesManager, view.viewportId, volume);
-  }, [servicesManager, view, volume]);
+  }, [segmentationService]);
 
   const segments: Record<string, any> = segmentationService.getSegmentation(view.segmentationId)?.segments || {};
   const representation = segmentationService
@@ -45,21 +42,21 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
     : [['oculto', 'Oculto'], ['CT-Bones', 'Hueso'], ['CT-AAA', 'Vasos'], ['CT-Lung', 'Pulmón'], ['CT-Soft-Tissue', 'Tejido blando']];
 
   return (
-    <div className="mt-2 rounded border border-white/10 p-2 text-[11px]">
+    <div className="bg-popover rounded border border-white/10 p-2 text-[11px] text-white">
       <div className="mb-1 font-semibold text-white/80">Vista 3D · {view.title}</div>
       <div className="mb-1 flex flex-wrap items-center gap-1">
         <span className="text-white/60">Color:</span>
-        <button className={colours === 'distintivo' ? on : btn} onClick={() => setColours('distintivo')}>Distintivo</button>
-        <button className={colours === 'realista' ? on : btn} onClick={() => setColours('realista')}>Realista</button>
+        <button className={colours === 'distintivo' ? on : btn} onClick={() => change({ colours: 'distintivo' })}>Distintivo</button>
+        <button className={colours === 'realista' ? on : btn} onClick={() => change({ colours: 'realista' })}>Realista</button>
       </div>
       <label className="mb-1 flex items-center gap-2">
         <span className="text-white/60">Opacidad</span>
-        <input className="min-w-0 flex-1" type="range" min={0.1} max={1} step={0.05} value={opacity} onChange={e => setOpacity(Number(e.target.value))} />
+        <input className="min-w-0 flex-1" type="range" min={0.1} max={1} step={0.05} value={opacity} onChange={e => change({ opacity: Number(e.target.value) })} />
       </label>
       <div className="mb-1 flex flex-wrap items-center gap-1">
         <span className="text-white/60">Volumen:</span>
         {presets.map(([mode, label]) => (
-          <button key={mode} className={volume === mode ? on : btn} onClick={() => setVolume(mode)}>{label}</button>
+          <button key={mode} className={volume === mode ? on : btn} onClick={() => change({ volume: mode })}>{label}</button>
         ))}
       </div>
       <div className="mb-1 flex flex-wrap gap-1">
@@ -77,7 +74,7 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
         ))}
       </div>
       <div className="mt-1 text-white/50">
-        Arrastre para rotar (herramientas de OHIF: zoom, mover, rotar). Clic en una superficie lleva el MPR a ese punto: mida ahí con Longitud o Ángulo.
+        Zoom, mover, rotar, captura y mediciones: barra superior. Clic en una superficie lleva el MPR a ese punto para medir ahí.
       </div>
     </div>
   );

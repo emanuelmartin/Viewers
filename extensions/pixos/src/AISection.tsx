@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { showPoint, toWorld } from './navigate';
-import { attachAISurfaces, registerAIMeshes } from './aiSurfaces';
-import AI3DControls, { AI3DView } from './AI3DControls';
+import { applyLook, attachAISurfaces, getLook, registerAIMeshes } from './aiSurfaces';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -43,7 +42,7 @@ const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
  * on and off and selected in the Segmentation panel; a click on a surface takes the MPR planes there, where OHIF's
  * measurement tools work.
  */
-async function showAISeg3D(servicesManager, commandsManager, seg: any, onView: (view: AI3DView) => void): Promise<string | null> {
+async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<string | null> {
   const { displaySetService, viewportGridService, userAuthenticationService, cornerstoneViewportService } = servicesManager.services;
   const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.seriesInstanceUID);
   if (!ds) {
@@ -93,7 +92,8 @@ async function showAISeg3D(servicesManager, commandsManager, seg: any, onView: (
       type: (v.viewportId === v3d.viewportId ? 'Surface' : 'Labelmap') as any,
     });
   }
-  onView({ viewportId: v3d.viewportId, segmentationId: ds.displaySetInstanceUID, seriesInstanceUID: seg.seriesInstanceUID, title: seg.title, modality: source?.Modality || '' });
+  // Lit surfaces without the volume in front of them; the «IA 3D» menu of the viewport changes it
+  applyLook(servicesManager, v3d.viewportId, ds.displaySetInstanceUID, getLook(v3d.viewportId, ds.displaySetInstanceUID));
   if (!surfaces) {
     return 'Este resultado no trae superficies 3D (es anterior a ellas): la segmentación queda en los planos MPR. «Repetir análisis» las genera; mientras tanto use «Vistas 3D (imágenes)».';
   }
@@ -158,7 +158,6 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [view3D, setView3D] = useState<AI3DView | null>(null);
 
   const load = (request: boolean, redo = false) => {
     setError('');
@@ -265,8 +264,8 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   {q.aiSeg && (
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <button className={btn} onClick={() => {
-                        showAISeg3D(servicesManager, commandsManager, q.aiSeg, setView3D)
-                          .then(problem => { setMessage(problem ? '' : 'MPR + 3D con la segmentación de IA: en el panel Segmentación encienda o apague estructuras; clic sobre una superficie lleva los planos MPR a ese punto para medir con Longitud, Ángulo, etc.'); setError(problem || ''); })
+                        showAISeg3D(servicesManager, commandsManager, q.aiSeg)
+                          .then(problem => { setMessage(problem ? '' : 'MPR + 3D con la segmentación de IA. En la esquina superior derecha del recuadro 3D, el botón «IA 3D» tiene color, opacidad, estructuras, volumen y PNG. Clic sobre una superficie lleva los planos MPR a ese punto para medir con Longitud, Ángulo, etc.'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
                       {q.aiSeg.renderSeriesInstanceUID && (
@@ -277,9 +276,6 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                         }}>Vistas 3D (imágenes)</button>
                       )}
                     </div>
-                  )}
-                  {view3D && q.aiSeg && view3D.seriesInstanceUID === q.aiSeg.seriesInstanceUID && (
-                    <AI3DControls key={view3D.viewportId} servicesManager={servicesManager} view={view3D} />
                   )}
                   {q.aiSeg && (
                     <div className="mt-1 flex items-center justify-between gap-2">
