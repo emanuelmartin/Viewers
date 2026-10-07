@@ -1,0 +1,260 @@
+<title>Guía de reporte HRSL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column for the workflow and the conventions; wide tables for the per-study reference. */
+:root {
+  --bg: #f6f8f9; --surface: #ffffff; --fg: #1d2a33; --muted: #5a6b76; --line: #d9e1e6;
+  --accent: #0f6f7a; --accent-soft: #e2f1f2;
+  --ok: #1f7a4d; --ok-bg: #e3f3ea; --warn: #8a5a00; --warn-bg: #fbf0d9; --bad: #a1312a; --bad-bg: #f8e4e2; --none: #4c5a64; --none-bg: #e9eef1;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181d; --surface: #182228; --fg: #e3ebef; --muted: #9db0bb; --line: #2b3a43;
+  --accent: #5cc3cc; --accent-soft: #163338;
+  --ok: #6fd3a0; --ok-bg: #173327; --warn: #f0c46a; --warn-bg: #3a2e14; --bad: #f19b93; --bad-bg: #3d1f1d; --none: #b3c2cb; --none-bg: #233038;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181d; --surface: #182228; --fg: #e3ebef; --muted: #9db0bb; --line: #2b3a43;
+  --accent: #5cc3cc; --accent-soft: #163338;
+  --ok: #6fd3a0; --ok-bg: #173327; --warn: #f0c46a; --warn-bg: #3a2e14; --bad: #f19b93; --bad-bg: #3d1f1d; --none: #b3c2cb; --none-bg: #233038;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); padding-inline: 20px; padding-block: 40px 64px; }
+main { max-width: 900px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.2; text-wrap: balance; margin: 0; font-weight: 650; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+h2 { font-size: 1.55rem; margin-bottom: 4px; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 1.1rem; color: var(--muted); margin-top: 12px; }
+.eyebrow { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+section { display: grid; gap: 16px; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 68ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.chip { display: inline-block; font: 600 0.72rem/1 var(--body); letter-spacing: 0.03em; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { color: var(--ok); background: var(--ok-bg); }
+.chip.warn { color: var(--warn); background: var(--warn-bg); }
+.chip.bad { color: var(--bad); background: var(--bad-bg); }
+.chip.none { color: var(--none); background: var(--none-bg); }
+
+.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 14px; max-width: none; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2rem 1fr; gap: 12px; align-items: start; }
+.steps li::before { content: counter(s); font: 600 0.9rem/2rem var(--mono); text-align: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); width: 2rem; height: 2rem; }
+.steps b { font-weight: 600; }
+.steps .where { display: block; font-size: 0.88rem; color: var(--muted); }
+
+.report { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 0; display: grid; }
+.report .row { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 16px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.report .row:last-child { border-bottom: 0; }
+.report .row > div { min-width: 0; }
+.report .h { font: 600 0.78rem/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); padding-top: 3px; }
+.report .ex { font-family: var(--display); font-size: 0.98rem; color: var(--muted); margin-top: 4px; }
+@media (max-width: 560px) { .report .row { grid-template-columns: 1fr; gap: 4px; } }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; min-width: 700px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font: 600 0.75rem/1.3 var(--body); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td ul { gap: 2px; font-size: 0.9rem; }
+td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box ul { font-size: 0.95rem; }
+.callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; display: grid; gap: 6px; }
+.callout.warn { border-left-color: var(--bad); }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 480px) { body { padding-inline: 16px; } }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">Hospital Real San Lucas · PixOS · octubre 2026</div>
+    <h1>Guía de reporte</h1>
+    <p class="lede">Cómo estructurar un informe de imagen en el HRSL, qué secciones y medidas lleva cada estudio, y qué hace el editor de PixOS en cada paso para que el informe salga completo y sin errores.</p>
+  </header>
+
+  <section id="pasos">
+    <div>
+      <div class="eyebrow">Flujo de trabajo</div>
+      <h2>Pasos para informar un estudio</h2>
+    </div>
+    <ol class="steps">
+      <li><div><b>Elegir el estudio en Pendientes de informe.</b> Primero los marcados <span class="chip bad">STAT</span> o con <span class="chip bad">Hallazgo crítico</span>, luego los vencidos según el tiempo objetivo de la modalidad.
+        <span class="where">RIS → Pendientes de informe</span></div></li>
+      <li><div><b>Leer la indicación y los datos clínicos.</b> El motivo de la orden orienta qué responder en la conclusión. Si falta, el RIS muestra el inferido (marcado «IA»): confírmelo.
+        <span class="where">Encabezado del editor · Flujo de trabajo en el visor</span></div></li>
+      <li><div><b>Revisar estudios previos.</b> La conclusión previa a la vista, la tabla de medidas comparadas (cambio en % y tiempo de duplicación de nódulos) y la comparación de imágenes lado a lado.
+        <span class="where">Editor → Estudios previos</span></div></li>
+      <li><div><b>Abrir el visor y revisar las imágenes.</b> Use el diseño que corresponde al estudio (MPR, MPR + 3D, ventanas). Revise lo que la IA marcó en el panel IA: son candidatos, no diagnósticos.
+        <span class="where">Ver imágenes → Herramientas PixOS</span></div></li>
+      <li><div><b>Iniciar el texto con la plantilla del estudio.</b> El RIS sugiere la plantilla por modalidad y descripción. Escriba o dicte solo lo positivo y pulse «Llenar plantilla»; «Usar hallazgos y medidas de IA» precarga lo que la IA encontró. Lo que la IA ponga y usted no dijo aparece en amarillo para revisar.
+        <span class="where">Editor → Informe estructurado · Dictar</span></div></li>
+      <li><div><b>Medir y enviar las medidas al informe.</b> Mida en el visor (longitud, ángulo, volumen) y use «Enviar al informe»; las medidas automáticas validadas están en «IA del estudio» con botón para insertarlas.
+        <span class="where">Visor → Enviar al informe · Editor → Medidas del visor · IA del estudio</span></div></li>
+      <li><div><b>Clasificar y recomendar.</b> Cuando el texto tiene un nódulo, un aneurisma, un incidentaloma o una categoría Bosniak sin recomendación, «Sugerencias» ofrece la recomendación de la guía ya calculada con las medidas que usted escribió. Elija la opción (por ejemplo, bajo o alto riesgo) e insértela.
+        <span class="where">Editor → Sugerencias · Informe estructurado → Clasificar</span></div></li>
+      <li><div><b>Redactar la conclusión.</b> Numerada, en orden de importancia clínica, con lateralidad y clasificación; responde a la indicación.</div></li>
+      <li><div><b>Revisar antes de firmar.</b> Al firmar, el RIS lista lo que falta o no coincide (ver «Revisión antes de firmar»). Corrija o confirme.
+        <span class="where">Firmar</span></div></li>
+      <li><div><b>Comunicar el hallazgo crítico.</b> Si el informe describe un hallazgo crítico, regístrelo: el aviso de firma tiene «Registrar hallazgo crítico y firmar», que avisa al médico tratante y queda pendiente hasta que confirme de recibido.
+        <span class="where">Firmar · Hallazgo crítico</span></div></li>
+    </ol>
+  </section>
+
+  <section id="estructura">
+    <div>
+      <div class="eyebrow">Estructura</div>
+      <h2>Secciones del informe</h2>
+      <p class="muted">En este orden. Las que no aplican se omiten; las demás no se dejan vacías.</p>
+    </div>
+    <div class="report">
+      <div class="row"><div class="h">Estudio</div><div>Nombre del estudio y región, como en la orden.<div class="ex">Tomografía de abdomen y pelvis simple y contrastada</div></div></div>
+      <div class="row"><div class="h">Indicación</div><div>Motivo clínico de la orden, en una línea.<div class="ex">Dolor en fosa iliaca derecha, descartar apendicitis.</div></div></div>
+      <div class="row"><div class="h">Técnica</div><div>Equipo y fases, contraste (vía y volumen), reconstrucciones; en TC, la dosis (botón «Dosis»).<div class="ex">Fases simple y portal tras 90 ml de contraste IV. DLP total 742 mGy·cm.</div></div></div>
+      <div class="row"><div class="h">Comparación</div><div>Estudio previo con fecha, o «sin estudios previos».<div class="ex">Se compara con TC del 12/03/2026.</div></div></div>
+      <div class="row"><div class="h">Hallazgos</div><div>Por órganos o sistemas, en orden anatómico. Positivos con localización, tamaño (mm) y característica; negativos pertinentes a la indicación.<div class="ex">Apéndice cecal de 11 mm con pared engrosada y estriación de la grasa periapendicular.</div></div></div>
+      <div class="row"><div class="h">Conclusión</div><div>Numerada, por importancia; con lateralidad, clasificación (BI-RADS, Bosniak, Fleischner…) y respuesta a la indicación. Todo hallazgo significativo de los hallazgos aparece aquí.<div class="ex">1. Apendicitis aguda no complicada.</div></div></div>
+      <div class="row"><div class="h">Recomendaciones</div><div>Conducta según guía y plazo, cuando aplica.<div class="ex">Nódulo pulmonar sólido único de 7 mm: TC a los 6-12 meses (Fleischner 2017, bajo riesgo).</div></div></div>
+      <div class="row"><div class="h">Comunicación</div><div>Solo para hallazgo crítico: a quién se avisó y cuándo (lo registra el RIS).</div></div>
+    </div>
+  </section>
+
+  <section id="redaccion">
+    <div>
+      <div class="eyebrow">Convenciones</div>
+      <h2>Cómo escribir medidas, lados y negativos</h2>
+    </div>
+    <div class="two">
+      <div class="box"><h3>Medidas</h3><ul>
+        <li>Siempre con unidad: <span class="mono">12 mm</span>, <span class="mono">1.2 cm</span>. «Mide 12» no se entiende.</li>
+        <li>Lesiones: eje mayor × eje menor (× craneocaudal); nódulos pulmonares en mm.</li>
+        <li>Volúmenes en ml; densidades en UH; velocidades en cm/s.</li>
+        <li>Un decimal como máximo; punto decimal.</li>
+      </ul></div>
+      <div class="box"><h3>Lateralidad y localización</h3><ul>
+        <li>Derecho / izquierdo escrito en hallazgos y en conclusión, igual en ambos.</li>
+        <li>Lóbulo y segmento pulmonar; segmento hepático (I–VIII); nivel vertebral (L4-L5).</li>
+        <li>Para comparar con previos use los mismos términos que el informe anterior.</li>
+      </ul></div>
+      <div class="box"><h3>Negativos y plantillas</h3><ul>
+        <li>Negativos pertinentes a la indicación, no listas largas sin relación.</li>
+        <li>Revise que no queden órganos del otro sexo ni texto de otro paciente.</li>
+        <li>No firme informes de una palabra («OK»); si el estudio es normal, dígalo con la frase normal de la plantilla.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section id="por-estudio">
+    <div>
+      <div class="eyebrow">Referencia</div>
+      <h2>Qué lleva cada estudio</h2>
+      <p class="muted">Lo mínimo que debe contestar el informe y lo que PixOS ofrece para medirlo. Las herramientas de IA marcadas como validadas lo están contra informes firmados del HRSL.</p>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Estudio</th><th>Debe incluir</th><th>Clasificación / recomendación</th><th>Herramientas PixOS</th></tr></thead>
+      <tbody>
+        <tr><td><b>TC de cráneo</b></td><td><ul><li>Hemorragia: tipo, lado, espesor o volumen</li><li>Desviación de línea media (mm)</li><li>Sistema ventricular, isquemia</li></ul></td><td>ASPECTS en isquemia; ABC/2 en hematoma; índice de Evans</td><td>Ventrículos e índice de Evans (IA, validado); calculadoras ASPECTS, ABC/2</td></tr>
+        <tr><td><b>TC de tórax</b></td><td><ul><li>Nódulos: número, tipo, tamaño, lóbulo</li><li>Derrames, consolidación, adenopatías</li><li>Aorta y arteria pulmonar</li></ul></td><td>Fleischner 2017 (incidental) o Lung-RADS (tamizaje)</td><td>Nódulos candidatos ≥ 5 mm (IA); comparación de tamaño con el previo; recomendación Fleischner automática</td></tr>
+        <tr><td><b>TC de abdomen y pelvis</b></td><td><ul><li>Órganos sólidos con lesiones medidas y segmento</li><li>Vía biliar, litiasis, apéndice</li><li>Aorta abdominal (diámetro)</li></ul></td><td>Bosniak 2019, incidentalomas ACR (suprarrenal, páncreas, hígado), SVS para aorta</td><td>Volumetría, aorta, composición corporal L3 (IA); 3D de órganos; recomendaciones ACR/SVS automáticas</td></tr>
+        <tr><td><b>Uro-TC</b></td><td><ul><li>Litos: tamaño, localización, densidad</li><li>Hidronefrosis (grado)</li><li>Quistes renales</li></ul></td><td>Bosniak 2019</td><td>Plantilla urotac; comparación de litos con el previo</td></tr>
+        <tr><td><b>Angio-TC de aorta</b></td><td><ul><li>Diámetros por segmento, perpendiculares a la línea central</li><li>Disección, trombo, ramas</li></ul></td><td>Umbrales de aneurisma (SVS)</td><td>Diámetros aórticos por segmento (IA, validado ±5 mm) con «Ver en imagen»; MPR + 3D</td></tr>
+        <tr><td><b>RM de encéfalo</b></td><td><ul><li>Lesiones: secuencia, señal, difusión, realce</li><li>Volumetría si se solicita</li></ul></td><td>—</td><td>Volumetría cerebral (referencia); 3D de estructuras</td></tr>
+        <tr><td><b>RM de columna</b></td><td><ul><li>Nivel por nivel: disco, canal, forámenes</li><li>Grado de estenosis</li></ul></td><td>Leve / moderada / severa por nivel</td><td>Conteo de niveles (IA) para ubicar; revisión de niveles conclusión ↔ hallazgos</td></tr>
+        <tr><td><b>US de abdomen</b></td><td><ul><li>Hígado, vesícula (pared, litos, pólipos), vía biliar</li><li>Riñones con medidas</li></ul></td><td>SRU 2022 para pólipo vesicular</td><td>Recomendación SRU automática al medir el pólipo</td></tr>
+        <tr><td><b>US de tiroides</b></td><td><ul><li>Nódulos: tamaño y características</li></ul></td><td>ACR TI-RADS con conducta (BAAF / seguimiento)</td><td>Calculadora TI-RADS</td></tr>
+        <tr><td><b>Mama</b></td><td><ul><li>Hallazgos por mama y cuadrante</li></ul></td><td>BI-RADS obligatorio</td><td>Calculadora BI-RADS (la firma avisa si falta)</td></tr>
+        <tr><td><b>Radiografía de tórax</b></td><td><ul><li>Silueta cardiaca, parénquima, pleura, hueso</li></ul></td><td>Índice cardiotorácico si aplica</td><td>Clasificador de tórax (en validación, solo roles de validación)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="guias">
+    <div>
+      <div class="eyebrow">Recomendaciones</div>
+      <h2>Guías que el editor calcula</h2>
+      <p class="muted">Con el tamaño y las características escritas en el informe, el editor propone la recomendación. Cuando la guía necesita un dato que el texto no dice, ofrece las alternativas para elegir.</p>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Hallazgo escrito</th><th>Guía</th><th>Qué toma del texto</th><th>Qué elige usted</th></tr></thead>
+      <tbody>
+        <tr><td>Nódulo pulmonar (TC)</td><td>Fleischner 2017</td><td>Tipo (sólido, vidrio despulido, parcialmente sólido), número, promedio de ejes, edad ≥ 35</td><td>Riesgo bajo o alto; tipo si dice «subsólido». No aplica a tamizaje ni a cáncer conocido.</td></tr>
+        <tr><td>Aorta abdominal ≥ 30 mm</td><td>SVS 2018</td><td>Diámetro (no longitud)</td><td>—</td></tr>
+        <tr><td>Nódulo suprarrenal</td><td>ACR 2017</td><td>Tamaño y densidad en UH (≤ 10 UH = adenoma)</td><td>No aplica con antecedente oncológico</td></tr>
+        <tr><td>Nódulo tiroideo en TC/RM</td><td>ACR 2015</td><td>Tamaño y edad del paciente</td><td>Edad, si el registro no la tiene</td></tr>
+        <tr><td>Quiste pancreático</td><td>ACR 2017</td><td>Tamaño y datos de alarma (nódulo mural, Wirsung)</td><td>—</td></tr>
+        <tr><td>Pólipo vesicular (US)</td><td>SRU 2022</td><td>Tamaño, pediculado o sésil</td><td>Morfología, si no se describe</td></tr>
+        <tr><td>Quiste renal con categoría</td><td>Bosniak 2019</td><td>Categoría escrita (I, II, IIF, III, IV)</td><td>—</td></tr>
+        <tr><td>BI-RADS, TI-RADS, LI-RADS, PI-RADS, O-RADS, CAD-RADS, Lung-RADS</td><td>Calculadoras</td><td colspan="2">El editor avisa cuando falta la categoría y abre la calculadora correspondiente.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="revision">
+    <div>
+      <div class="eyebrow">Control de calidad</div>
+      <h2>Revisión antes de firmar</h2>
+      <p class="muted">Las mismas reglas corren mientras escribe (Sugerencias) y al firmar. Frecuencia medida en 4,000 informes firmados del HRSL (abril–octubre 2026).</p>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Revisión</th><th>Al firmar</th><th>Informes en que se habría mostrado</th></tr></thead>
+      <tbody>
+        <tr><td>Informe vacío o de una palabra («OK»)</td><td><span class="chip bad">pide confirmar</span></td><td class="num">199 (5.0%)</td></tr>
+        <tr><td>Hallazgo crítico descrito (hemorragia, neumotórax, TEP, disección…)</td><td><span class="chip bad">pide confirmar · permite registrarlo</span></td><td class="num">186 (4.7%)</td></tr>
+        <tr><td>Hallazgo significativo que no está en la conclusión (masa, fractura, derrame, neumotórax, adenopatías…)</td><td><span class="chip warn">sugerencia</span></td><td class="num">169 (4.2%)</td></tr>
+        <tr><td>Lateralidad de la conclusión distinta a la de los hallazgos</td><td><span class="chip bad">pide confirmar</span></td><td class="num">55 (1.4%)</td></tr>
+        <tr><td>Sin conclusión</td><td><span class="chip warn">sugerencia</span></td><td class="num">49 (1.2%)</td></tr>
+        <tr><td>Recomendación de guía faltante (Fleischner, ACR, SVS, Bosniak…)</td><td><span class="chip warn">sugerencia con texto listo</span></td><td class="num">54 (1.4%)</td></tr>
+        <tr><td>Órgano del otro sexo (útero en hombre, próstata en mujer)</td><td><span class="chip bad">pide confirmar</span></td><td class="num">6</td></tr>
+        <tr><td>Medida sin unidad o con «m» en vez de «mm»</td><td><span class="chip warn">sugerencia</span></td><td class="num">6</td></tr>
+        <tr><td>Campos de plantilla sin llenar (___), niveles de columna sin describir</td><td><span class="chip bad">pide confirmar</span></td><td class="num">—</td></tr>
+        <tr><td>Diferencia con la IA (hallazgo de la IA no informado, o medida &gt; 20% distinta)</td><td><span class="chip none">panel IA</span></td><td class="num">—</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">Las reglas se revisaron caso por caso sobre esos informes: las de la tabla muestran sobre todo omisiones reales (por ejemplo, un neumotórax y fracturas costales descritos que no pasaron a la conclusión). Siguen siendo ayudas: la decisión es del radiólogo.</p>
+  </section>
+
+  <section id="criticos">
+    <div>
+      <div class="eyebrow">Comunicación</div>
+      <h2>Hallazgos críticos</h2>
+    </div>
+    <div class="two">
+      <div class="box"><h3>Qué se considera crítico</h3><ul>
+        <li>Hemorragia intracraneal, herniación o desviación de línea media</li>
+        <li>Neumotórax, tromboembolia pulmonar</li>
+        <li>Disección o ruptura aórtica</li>
+        <li>Neumoperitoneo, isquemia intestinal</li>
+        <li>Torsión testicular u ovárica, embarazo ectópico</li>
+        <li>Compresión medular, isquemia cerebral aguda</li>
+        <li>Trombosis venosa profunda</li>
+      </ul></div>
+      <div class="box"><h3>Cómo se comunica</h3><ul>
+        <li>«Hallazgo crítico» en el editor, o «Registrar hallazgo crítico y firmar» al firmar.</li>
+        <li>El estudio pasa a STAT, se avisa por WhatsApp al médico tratante y queda pendiente hasta que confirme de recibido.</li>
+        <li>Si el aviso no llega, llame por teléfono y anótelo en el informe (a quién y a qué hora).</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section id="dosis">
+    <div>
+      <div class="eyebrow">Protección radiológica</div>
+      <h2>Dosis de radiación en TC</h2>
+    </div>
+    <p>El tomógrafo GE no envía un reporte estructurado de dosis; PixOS lee la imagen «Informe de dosis» de cada estudio (CTDIvol por serie, DLP total) y la guarda en el registro. En el editor, el botón <b>Dosis</b> muestra los valores, la dosis efectiva estimada y las TC del paciente en 12 meses, y la inserta en la técnica.</p>
+    <ul>
+      <li>Alerta si el CTDIvol supera los valores de referencia del ACR para adultos: cráneo 75 mGy (maniquí de 16 cm), abdomen 25 mGy (maniquí de 32 cm), o 1000 mGy (valor de alerta NEMA XR 25).</li>
+      <li>Dosis efectiva = DLP × k (AAPM 96): cráneo 0.0021, cuello 0.0059, tórax 0.014, abdomen-pelvis 0.015 mSv/mGy·cm. Es una estimación para la población, no la dosis de órganos del paciente.</li>
+      <li>El percentil 75 de cada región en «Análisis → Dosis de radiación» sirve como nivel de referencia local para revisar protocolos.</li>
+    </ul>
+  </section>
+
+  <footer>PixOS · Hospital Real San Lucas. Guías: Fleischner Society 2017, ACR Incidental Findings (2015–2017), SVS 2018, SRU 2022, Bosniak 2019, ACR TI-RADS 2017, BI-RADS 5.ª ed., ACR–AAPM CT reference values, NEMA XR 25, AAPM Report 96. Las herramientas automáticas apoyan el informe; el diagnóstico y la recomendación final son del médico radiólogo.</footer>
+</main>
