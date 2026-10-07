@@ -155,13 +155,13 @@
       "id": "deepisles",
       "nombre": "DeepISLES (ensamble ISLES'22: SEALS, NVAUTO, FACTORIZER)",
       "tareas_pixos": [
-        "pendiente: mr_brain_stroke"
+        "en uso: mr_brain_stroke (SEALS + NVAUTO + FACTORIZER, voto de mayoría; solo auditoría)"
       ],
       "licencia_codigo": "Apache-2.0",
       "licencia_pesos": "Apache-2.0 (Zenodo 14026715)",
       "comercializable": "revisar",
       "uso_hrsl": "si",
-      "notas": "Datos ISLES'22: confirmar condiciones antes de vender.",
+      "notas": "Datos ISLES'22: confirmar condiciones antes de vender. Corre en entorno propio (PyTorch 2.11/CUDA 12.8) con parches de compatibilidad documentados en hrsl_service/stroke.py.",
       "fuente": "https://github.com/ezequieldlrosa/DeepIsles"
     },
     {
@@ -207,6 +207,19 @@
       "uso_hrsl": "si",
       "notas": "",
       "fuente": "https://github.com/ImagingDataCommons/highdicom"
+    },
+    {
+      "id": "three-trimesh",
+      "nombre": "three.js (visor 3D) y trimesh / fast_simplification (mallas)",
+      "tareas_pixos": [
+        "vista 3D interactiva de segmentaciones"
+      ],
+      "licencia_codigo": "MIT",
+      "licencia_pesos": "—",
+      "comercializable": "si",
+      "uso_hrsl": "si",
+      "notas": "",
+      "fuente": "https://github.com/mrdoob/three.js"
     }
   ]
 }
