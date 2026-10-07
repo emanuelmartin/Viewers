@@ -71,6 +71,10 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
       const meshes: any[] = [];
       root.traverse((o: any) => {
         if (o.isMesh) {
+          // Older exports carry no normals: without them the lit material renders black
+          if (!o.geometry.attributes.normal) {
+            o.geometry.computeVertexNormals();
+          }
           o.material = o.material.clone();
           o.material.transparent = true;
           o.material.side = THREE.DoubleSide;
@@ -78,7 +82,7 @@ export default function Viewer3D({ url, title }: { url: string; title: string })
         }
       });
       sceneRef.current = { meshes, renderer, camera, controls, center, size };
-      setParts(meshes.map(m => ({ name: m.name || m.parent?.name || 'estructura', visible: true, color: `#${m.material.color.getHexString()}` })));
+      setParts(meshes.map(m => ({ name: String(m.name || m.parent?.name || 'estructura').replace(/_/g, ' '), visible: true, color: `#${m.material.color.getHexString()}` })));
       setStatus('');
       const resize = new ResizeObserver(() => {
         const cw = el.clientWidth;
