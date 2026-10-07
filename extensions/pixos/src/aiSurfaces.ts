@@ -368,3 +368,61 @@ export function download3D(servicesManager, viewportId: string, title: string): 
   a.click();
   return null;
 }
+
+/** Surfaces the AI service exported, by the SEG's SeriesInstanceUID (filled from the study's AI results). */
+const meshes = new Map<string, string>();
+export function registerAIMeshes(quant: Array<{ aiSeg?: { seriesInstanceUID?: string; meshUrl?: string } }>) {
+  (quant || []).forEach(q => {
+    if (q.aiSeg?.seriesInstanceUID && q.aiSeg.meshUrl) {
+      meshes.set(q.aiSeg.seriesInstanceUID, q.aiSeg.meshUrl);
+    }
+  });
+}
+
+/** Beyond this many structures the browser's labelmap → surface conversion can exhaust the tab's memory. */
+const MAX_CONVERTED_SEGMENTS = 4;
+
+/**
+ * Every way a segmentation reaches a 3D viewport (Ver en 3D, the MPR + 3D layout's hydration sync, dragging a SEG,
+ * the Segmentation panel) goes through segmentationService.addSegmentationRepresentation. Before a 3D viewport asks
+ * for surfaces that the segmentation does not have: the AI surfaces are attached when the AI service exported them;
+ * otherwise, with more than a few structures, the segmentation stays in the image planes and the user is told why,
+ * instead of the conversion taking the tab down.
+ */
+export function installSurfaceGuard(servicesManager): () => void {
+  const { segmentationService, cornerstoneViewportService, displaySetService, uiNotificationService } = servicesManager.services;
+  const original = segmentationService.addSegmentationRepresentation;
+  const warned = new Set<string>();
+  segmentationService.addSegmentationRepresentation = async function (viewportId: string, options: any) {
+    const viewport: any = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+    const wantsSurface = !options?.type || options.type === cstEnums.SegmentationRepresentations.Surface;
+    const segmentation = segmentationService.getSegmentation(options?.segmentationId);
+    if (viewport?.type === 'volume3d' && wantsSurface && segmentation && !segmentation.representationData?.Surface?.geometryIds?.size) {
+      const ds = displaySetService.getDisplaySetByUID(options.segmentationId);
+      const meshUrl = ds && meshes.get(ds.SeriesInstanceUID);
+      let attached = 0;
+      if (meshUrl) {
+        const frameOfReferenceUID = ds.instance?.FrameOfReferenceUID
+          || displaySetService.getDisplaySetByUID(ds.referencedDisplaySetInstanceUID)?.instances?.[0]?.FrameOfReferenceUID;
+        attached = await attachAISurfaces(servicesManager, options.segmentationId, meshUrl, frameOfReferenceUID).catch(() => 0);
+      }
+      const count = Object.values(segmentation.segments || {}).filter(Boolean).length;
+      if (!attached && count > MAX_CONVERTED_SEGMENTS) {
+        if (!warned.has(options.segmentationId)) {
+          warned.add(options.segmentationId);
+          uiNotificationService?.show({
+            title: 'Segmentación sin superficies 3D',
+            message: `Tiene ${count} estructuras y no trae superficies precalculadas: se muestra en los planos (MPR) y no en 3D, para no agotar la memoria del navegador.`,
+            type: 'info',
+            duration: 7000,
+          });
+        }
+        return;
+      }
+    }
+    return original.call(this, viewportId, options);
+  };
+  return () => {
+    segmentationService.addSegmentationRepresentation = original;
+  };
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { showPoint, toWorld } from './navigate';
-import { attachAISurfaces } from './aiSurfaces';
+import { attachAISurfaces, registerAIMeshes } from './aiSurfaces';
 import AI3DControls, { AI3DView } from './AI3DControls';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
@@ -94,8 +94,8 @@ async function showAISeg3D(servicesManager, commandsManager, seg: any, onView: (
     });
   }
   onView({ viewportId: v3d.viewportId, segmentationId: ds.displaySetInstanceUID, seriesInstanceUID: seg.seriesInstanceUID, title: seg.title, modality: source?.Modality || '' });
-  if (seg.meshUrl && !surfaces) {
-    return 'Las superficies de la IA no coinciden con la segmentación: el navegador las calcula y con muchas estructuras puede no alcanzar. Use «Vistas 3D (imágenes)».';
+  if (!surfaces) {
+    return 'Este resultado no trae superficies 3D (es anterior a ellas): la segmentación queda en los planos MPR. «Repetir análisis» las genera; mientras tanto use «Vistas 3D (imágenes)».';
   }
   return null;
 }
@@ -171,6 +171,11 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
       .catch(e => setError(e?.message || String(e)))
       .then(() => setBusy(false));
   };
+
+  // The AI surfaces of the results, used whenever one of their SEGs reaches a 3D viewport
+  useEffect(() => {
+    registerAIMeshes(state?.quant || []);
+  }, [state]);
 
   // Results so far when the study opens
   useEffect(() => {
