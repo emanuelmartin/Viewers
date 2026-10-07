@@ -18,6 +18,6 @@ Registro de licencias de los modelos y herramientas de IA de PixOS. comercializa
 | LST-AI (lesiones de sustancia blanca) | no instalado: requiere FLAIR 3D | MIT | **si** | si | Herramienta declarada de investigación por sus autores. |
 | Reglas y mediciones propias PixOS | mr_brain_dwi (ADC < 620 + asimetría), ct_aorta (línea central), calcio cardiaco aproximado, índice de Evans, L1, esteatosis, músculo L3, segmentación por clic y pincel | Sin pesos | **si** | si | Dependen de las segmentaciones de los modelos de arriba: su licencia se hereda. |
 | highdicom (DICOM SEG y capturas 3D) | series de IA en el PACS | — | **si** | si |  |
-| three.js (visor 3D) y trimesh / fast_simplification (mallas) | vista 3D interactiva de segmentaciones | — | **si** | si |  |
+| trimesh / fast_simplification (mallas; se muestran en el 3D de OHIF con vtk.js, BSD-3) | superficies 3D de segmentaciones en el visor | — | **si** | si |  |
 
 Fuente de verdad: `licencias-ia.json` (este archivo se genera de él).

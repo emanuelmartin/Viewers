@@ -209,17 +209,17 @@
       "fuente": "https://github.com/ImagingDataCommons/highdicom"
     },
     {
-      "id": "three-trimesh",
-      "nombre": "three.js (visor 3D) y trimesh / fast_simplification (mallas)",
+      "id": "trimesh-meshes",
+      "nombre": "trimesh / fast_simplification (mallas; se muestran en el 3D de OHIF con vtk.js, BSD-3)",
       "tareas_pixos": [
-        "vista 3D interactiva de segmentaciones"
+        "superficies 3D de segmentaciones en el visor"
       ],
       "licencia_codigo": "MIT",
       "licencia_pesos": "—",
       "comercializable": "si",
       "uso_hrsl": "si",
       "notas": "",
-      "fuente": "https://github.com/mrdoob/three.js"
+      "fuente": "https://github.com/mikedh/trimesh"
     }
   ]
 }

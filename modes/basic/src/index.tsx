@@ -32,9 +32,6 @@ export const ohif = {
 
 export const pixos = {
   pixos: "@ohif/extension-pixos.panelModule.pixos",
-  // Interactive 3D surfaces of AI segmentations, as a viewport of the grid
-  ai3dViewport: '@ohif/extension-pixos.viewportModule.ai3d',
-  ai3dSopClassHandler: '@ohif/extension-pixos.sopClassHandlerModule.ai3d',
 };
 
 export const cornerstone = {
@@ -308,10 +305,6 @@ export const basicLayout = {
       {
         namespace: dicomRT.viewport,
         displaySetsToDisplay: [dicomRT.sopClassHandler],
-      },
-      {
-        namespace: pixos.ai3dViewport,
-        displaySetsToDisplay: [pixos.ai3dSopClassHandler],
       },
     ],
   },

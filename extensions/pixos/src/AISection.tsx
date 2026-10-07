@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
 import { showPoint, toWorld } from './navigate';
-import { addAI3DDisplaySets, openAI3D } from './ai3d';
+import { attachAISurfaces } from './aiSurfaces';
 
 const title = 'mb-2 text-[13px] font-semibold text-white';
 const btn = 'rounded border border-white/20 px-2 py-1 text-[12px] text-white hover:bg-white/10 disabled:opacity-40';
@@ -34,25 +34,53 @@ function showAISeg(servicesManager, commandsManager, seg: any): Promise<string |
     }, 1500)));
 }
 
-/** Switches to MPR + 3D and loads the AI SEG into the 3D viewport, where it renders as surfaces. */
-function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<string | null> {
-  const { displaySetService, viewportGridService, userAuthenticationService } = servicesManager.services;
+const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/**
+ * OHIF's MPR + 3D layout with the AI segmentation: the surfaces the AI service computed go into the segmentation
+ * (aiSurfaces.ts) before it reaches the 3D viewport, so nothing is converted in the browser. Structures are switched
+ * on and off and selected in the Segmentation panel; a click on a surface takes the MPR planes there, where OHIF's
+ * measurement tools work.
+ */
+async function showAISeg3D(servicesManager, commandsManager, seg: any): Promise<string | null> {
+  const { displaySetService, viewportGridService, userAuthenticationService, cornerstoneViewportService } = servicesManager.services;
   const ds = displaySetService.getActiveDisplaySets().find((d: any) => d.SeriesInstanceUID === seg.seriesInstanceUID);
   if (!ds) {
-    return Promise.resolve('La serie de IA aún no está en el visor: recargue el estudio.');
+    return 'La serie de IA aún no está en el visor: recargue el estudio.';
+  }
+  if (typeof ds.load === 'function') {
+    await ds.load({ headers: userAuthenticationService.getAuthorizationHeader() });
+  }
+  const source = displaySetService.getDisplaySetByUID(ds.referencedDisplaySetInstanceUID);
+  let surfaces = 0;
+  if (seg.meshUrl) {
+    const frameOfReferenceUID = ds.instance?.FrameOfReferenceUID || source?.instances?.[0]?.FrameOfReferenceUID || source?.FrameOfReferenceUID;
+    surfaces = await attachAISurfaces(servicesManager, ds.displaySetInstanceUID, seg.meshUrl, frameOfReferenceUID).catch(() => 0);
+  }
+  // The layout is built from the series in the active viewport: the analysed one
+  const activeId = viewportGridService.getActiveViewportId();
+  if (source && !viewportGridService.getState().viewports.get(activeId)?.displaySetInstanceUIDs?.includes(source.displaySetInstanceUID)) {
+    viewportGridService.setDisplaySetsForViewport({ viewportId: activeId, displaySetInstanceUIDs: [source.displaySetInstanceUID] });
+    await wait(1500);
   }
   commandsManager.runCommand('setHangingProtocol', { protocolId: 'mprAnd3DVolumeViewport' });
-  return Promise.resolve(typeof ds.load === 'function' ? ds.load({ headers: userAuthenticationService.getAuthorizationHeader() }) : null)
-    .then(() => new Promise<string | null>(resolve => setTimeout(() => {
-      const viewports = [...(viewportGridService.getState().viewports?.values?.() || [])];
-      const v3d = viewports.find((v: any) => v.viewportOptions?.viewportType === 'volume3d');
-      if (!v3d) {
-        resolve('No se encontró la vista 3D en este diseño.');
-        return;
-      }
-      Promise.resolve(commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: v3d.viewportId }))
-        .then(() => resolve(null), e => resolve(`No se pudo cargar en 3D: ${e?.message || e}`));
-    }, 4000)));
+  let v3d: any = null;
+  for (let i = 0; i < 60 && !v3d; i++) {
+    await wait(250);
+    const viewports = [...(viewportGridService.getState().viewports?.values?.() || [])];
+    const candidate = viewports.find((v: any) => v.viewportOptions?.viewportType === 'volume3d');
+    if (candidate && cornerstoneViewportService.getCornerstoneViewport(candidate.viewportId)?.getActors?.().length) {
+      v3d = candidate;
+    }
+  }
+  if (!v3d) {
+    return 'No se encontró la vista 3D en este diseño.';
+  }
+  await commandsManager.runCommand('hydrateSecondaryDisplaySet', { displaySet: ds, viewportId: v3d.viewportId });
+  if (seg.meshUrl && !surfaces) {
+    return 'Las superficies de la IA no coinciden con la segmentación: el navegador las calcula y con muchas estructuras puede no alcanzar. Use «Vistas 3D (imágenes)».';
+  }
+  return null;
 }
 
 /** Shows the isometric 3D views (secondary capture series) in the active viewport. */
@@ -125,13 +153,6 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
       .catch(e => setError(e?.message || String(e)))
       .then(() => setBusy(false));
   };
-
-  // The 3D views of the results, as series of the study (drag them to any viewport)
-  useEffect(() => {
-    if (state?.quant?.length) {
-      addAI3DDisplaySets(servicesManager, studyUID, state.quant);
-    }
-  }, [servicesManager, state, studyUID]);
 
   // Results so far when the study opens
   useEffect(() => {
@@ -222,20 +243,9 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <button className={btn} onClick={() => {
                         showAISeg3D(servicesManager, commandsManager, q.aiSeg)
-                          .then(problem => { setMessage(problem ? '' : 'Segmentación de IA en MPR y vista 3D; arrastre para rotar. Con muchas estructuras el navegador puede no alcanzar a generar las superficies: use «Vistas 3D (imágenes)».'); setError(problem || ''); })
+                          .then(problem => { setMessage(problem ? '' : 'MPR + 3D con la segmentación de IA: en el panel Segmentación encienda o apague estructuras; clic sobre una superficie lleva los planos MPR a ese punto para medir con Longitud, Ángulo, etc.'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
-                      {q.aiSeg.meshUrl && (
-                        <button className={primaryBtn} onClick={() => {
-                          const [uid] = addAI3DDisplaySets(servicesManager, studyUID, [q]);
-                          openAI3D(servicesManager, commandsManager, uid)
-                            .then(problem => {
-                              setMessage(problem ? '' : 'Vista 3D en el visor: Seleccionar muestra los datos de cada estructura; Distancia y Ángulo miden sobre las superficies; un clic lleva los cortes a ese punto. También está en la lista de series («IA · 3D interactivo») para arrastrarla a cualquier recuadro.');
-                              setError(problem || '');
-                            })
-                            .catch(e => { setMessage(''); setError(`No se pudo abrir la vista 3D: ${e?.message || e}`); });
-                        }}>Abrir 3D en el visor</button>
-                      )}
                       {q.aiSeg.renderSeriesInstanceUID && (
                         <button className={btn} onClick={() => {
                           const problem = showAIRenders(servicesManager, q.aiSeg);

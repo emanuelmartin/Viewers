@@ -967,9 +967,6 @@ importers:
       react:
         specifier: 19.2.7
         version: 19.2.7
-      three:
-        specifier: 0.180.0
-        version: 0.180.0
 
   extensions/test-extension:
     dependencies:
@@ -13282,9 +13279,6 @@ packages:
     engines: {node: '>=10.18'}
     peerDependencies:
       tslib: 2.8.1
-
-  three@0.180.0:
-    resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==}
 
   throttleit@1.0.1:
     resolution: {integrity: sha512-vDZpf9Chs9mAdfY046mcPt8fg5QSZr37hEH4TXYBnDF+izxgrbRGUAAaBvIk/fJm9aOFCGFd1EsNg5AZCbnQCQ==}
@@ -27910,8 +27904,6 @@ snapshots:
   thingies@2.6.0(tslib@2.8.1):
     dependencies:
       tslib: 2.8.1
-
-  three@0.180.0: {}
 
   throttleit@1.0.1: {}
 

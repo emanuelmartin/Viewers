@@ -6,12 +6,11 @@ import { id } from './id';
 import getPanelModule from './getPanelModule';
 import getCustomizationModule from './getCustomizationModule';
 import getCommandsModule from './getCommandsModule';
-import getViewportModule from './getViewportModule';
 import { loadAccess, watchRisSession } from './ris';
 import { installToolbarGate } from './toolbarGate';
 import { installSegmentationTools } from './segTools';
 import { installAISeriesFilter } from './aiSeries';
-import { installAI3D } from './ai3d';
+import { installSurfacePicking } from './aiSurfaces';
 
 let cleanup: Array<() => void> = [];
 
@@ -23,7 +22,7 @@ let cleanup: Array<() => void> = [];
 function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
   cleanup.forEach(fn => fn());
   cleanup = [installToolbarGate(servicesManager), watchRisSession(), installSegmentationTools(servicesManager, extensionManager),
-    installAISeriesFilter(servicesManager), installAI3D(servicesManager)];
+    installAISeriesFilter(servicesManager), installSurfacePicking(servicesManager)];
   loadAccess();
 }
 
@@ -32,4 +31,4 @@ function onModeExit() {
   cleanup = [];
 }
 
-export default { id, getPanelModule, getViewportModule, getCustomizationModule, getCommandsModule, onModeEnter, onModeExit };
+export default { id, getPanelModule, getCustomizationModule, getCommandsModule, onModeEnter, onModeExit };
