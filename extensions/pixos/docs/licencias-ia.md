@@ -19,6 +19,6 @@ Registro de licencias de los modelos y herramientas de IA de PixOS. comercializa
 | Reglas y mediciones propias PixOS | mr_brain_dwi (ADC < 620 + asimetría), ct_aorta (línea central), calcio cardiaco aproximado, índice de Evans, L1, esteatosis, músculo L3, segmentación por clic y pincel | Sin pesos | **si** | si | Dependen de las segmentaciones de los modelos de arriba: su licencia se hereda. |
 | highdicom (DICOM SEG y capturas 3D) | series de IA en el PACS | — | **si** | si |  |
 | trimesh / fast_simplification (mallas; se muestran en el 3D de OHIF con vtk.js, BSD-3) | superficies 3D de segmentaciones en el visor | — | **si** | si |  |
+| BLAST-CT (hemorragia intracraneal: IPH, extraaxial, IVH, edema) | evaluado y descartado (oct 2026): falsos positivos extraaxiales en TC normales del HRSL | Apache-2.0 (repositorio biomedia-mira/blast-ct) | **si** | no (descartado por desempeño) |  |
 
 Fuente de verdad: `licencias-ia.json` (este archivo se genera de él).
-| BLAST-CT (hemorragia intracraneal: IPH, extraaxial, IVH, edema) | evaluado y descartado (oct 2026): falsos positivos extraaxiales en TC normales del HRSL | Apache-2.0 (repositorio biomedia-mira/blast-ct) | **si** | no (descartado por desempeño) |  |
