@@ -14,6 +14,11 @@ const HSRL_IS_IOS =
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const HSRL_IS_MOBILE = HSRL_IS_IOS || /Android|Mobi/i.test(navigator.userAgent);
+// Image cache by the computer's memory (Chrome reports up to 8 GB; Safari/Firefox report nothing). MPR + 3D adds the
+// GPU textures and the 3D rendering on top of the cache (~1.3 GB more on a 1200-image CT), so a 2 GB cache took the
+// tab past what 8 GB computers allow.
+const HSRL_DEVICE_GB = navigator.deviceMemory || 8;
+const HSRL_CACHE_MB = HSRL_IS_MOBILE ? 512 : HSRL_DEVICE_GB < 8 ? 768 : 1536;
 
 /** @type {AppTypes.Config} */
 window.config = {
@@ -41,7 +46,7 @@ window.config = {
     thumbnail: HSRL_IS_MOBILE ? 2 : 3,
     prefetch: HSRL_IS_MOBILE ? 2 : 4,
   },
-  maxCacheSize: (HSRL_IS_MOBILE ? 512 : 2048) * 1024 * 1024,
+  maxCacheSize: HSRL_CACHE_MB * 1024 * 1024,
   studyPrefetcher: {
     enabled: true,
     // Production values: with HTTP/1.1 (6 connections per host) a larger
