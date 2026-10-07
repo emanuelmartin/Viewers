@@ -36,7 +36,12 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
     ?.find((r: any) => r.type === 'Surface');
   const visible = (index: number) => representation?.segments?.[index]?.visible !== false;
   const indices = Object.keys(segments).map(Number).filter(i => segments[i]);
-  const all = (show: boolean) => indices.forEach(i => setStructureVisible(servicesManager, view.viewportId, view.segmentationId, i, show));
+  // The segmentation state changes synchronously; redraw the list right away
+  const toggle = (index: number, show: boolean) => {
+    setStructureVisible(servicesManager, view.viewportId, view.segmentationId, index, show);
+    setTick(t => t + 1);
+  };
+  const all = (show: boolean) => indices.forEach(i => toggle(i, show));
   const presets: Array<[VolumeMode, string]> = view.modality === 'MR'
     ? [['oculto', 'Oculto'], ['MR-Default', 'RM'], ['MR-Angio', 'Angio RM']]
     : [['oculto', 'Oculto'], ['CT-Bones', 'Hueso'], ['CT-AAA', 'Vasos'], ['CT-Lung', 'Pulmón'], ['CT-Soft-Tissue', 'Tejido blando']];
@@ -68,7 +73,7 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
       <div className="ohif-scrollbar max-h-48 overflow-y-auto">
         {indices.map(i => (
           <label key={i} className="flex cursor-pointer items-center gap-2">
-            <input type="checkbox" checked={visible(i)} onChange={e => setStructureVisible(servicesManager, view.viewportId, view.segmentationId, i, e.target.checked)} />
+            <input type="checkbox" checked={visible(i)} onChange={e => toggle(i, e.target.checked)} />
             <span>{segments[i].label}</span>
           </label>
         ))}
