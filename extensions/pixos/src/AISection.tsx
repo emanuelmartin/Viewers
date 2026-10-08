@@ -421,6 +421,29 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
             </div>
           ))}
 
+          {(state.quant || []).filter(q => q.task === 'ct_head_bleed' && q.data?.ich).map((q, i) => (
+            <div key={`h${i}`} className="mt-3 text-[12px]">
+              <b>Hemorragia intracraneal (clasificador RSNA):</b> probabilidad {Math.round(q.data.ich.any * 100)}%
+              <div className="mt-1 flex flex-wrap gap-x-3">
+                {Object.entries(q.data.ich.probs || {}).filter(([k]) => k !== 'cualquiera').map(([k, v]: [string, any]) => (
+                  <span key={k} className={v >= 0.4 ? 'text-amber-300' : 'text-white/60'}>{k} {Math.round(v * 100)}%</span>
+                ))}
+              </div>
+              {(q.flags || []).map((f: string) => <div key={f} className="text-amber-300">• {f}</div>)}
+              {q.data.ich.focus_lps && (
+                <div className="mt-1">
+                  <button className={btn} onClick={() => {
+                    showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(q.data.ich.focus_lps), `hemorragia ${Math.round(q.data.ich.any * 100)}%`, [0, 80])
+                      .then(problem => { setMessage(problem ? '' : 'Corte con mayor probabilidad de hemorragia (ventana cerebral): verifique en los cortes vecinos.'); setError(problem || ''); })
+                      .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
+                  }}>Ver corte más sospechoso</button>
+                </div>
+              )}
+              {String(q.text || '').includes('Ventrículos') && <div className="mt-1">Ventrículos{String(q.text).split('Ventrículos').slice(1).join('Ventrículos')}</div>}
+              <div className={muted}>S 76 %, E 92 % en 91 TC del HRSL; un resultado negativo no descarta hemorragia.</div>
+            </div>
+          ))}
+
           {(state.quant || []).filter(q => q.task === 'ct_head_ventricles').map((q, i) => (
             <div key={`v${i}`} className="mt-3 text-[12px]">
               <b>Ventrículos:</b>
