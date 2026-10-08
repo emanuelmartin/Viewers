@@ -233,6 +233,19 @@
       "uso_hrsl": "no (descartado por desempeño)",
       "notas": "",
       "fuente": "https://github.com/biomedia-mira/blast-ct"
+    },
+    {
+      "id": "ich-ianpan",
+      "nombre": "ct-head-hemorrhage-detection (Ian Pan; MaxViT + GRU)",
+      "tareas_pixos": [
+        "en uso: ct_head_bleed (probabilidad por subtipo, cortes de 5 mm; validado S 76 %, E 92 % en 91 TC del HRSL)"
+      ],
+      "licencia_codigo": "MIT",
+      "licencia_pesos": "MIT (Hugging Face ianpan/ct-head-hemorrhage-detection)",
+      "comercializable": "revisar",
+      "uso_hrsl": "si",
+      "notas": "Entrenado con los datos del reto RSNA 2019 (uso de investigación): confirmar condiciones del conjunto de datos antes de vender.",
+      "fuente": "https://huggingface.co/ianpan/ct-head-hemorrhage-detection"
     }
   ]
 }
