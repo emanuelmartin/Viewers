@@ -246,6 +246,19 @@
       "uso_hrsl": "si",
       "notas": "Entrenado con los datos del reto RSNA 2019 (uso de investigación): confirmar condiciones del conjunto de datos antes de vender.",
       "fuente": "https://huggingface.co/ianpan/ct-head-hemorrhage-detection"
+    },
+    {
+      "id": "pe-mazurowski",
+      "nombre": "PulmonaryEmbolismSegmentation (Mazurowski Lab, nnU-Net v2 ResEnc)",
+      "tareas_pixos": [
+        "evaluado y descartado (oct 2026): falsos positivos en TC simple y en angio-TC del HRSL"
+      ],
+      "licencia_codigo": "ver repositorio",
+      "licencia_pesos": "CC-BY-NC-4.0",
+      "comercializable": "no",
+      "uso_hrsl": "no (descartado por desempeño)",
+      "notas": "",
+      "fuente": "https://huggingface.co/yzluka/PulmonaryEmbolismSegmentation"
     }
   ]
 }
