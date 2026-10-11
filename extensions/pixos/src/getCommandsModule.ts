@@ -1,5 +1,9 @@
+import { addViewportToReport } from './reportCapture';
+
 /**
  * PixOS commands.
+ *
+ * pixosAddToReport: the active viewport goes to the images of the study's report in the RIS.
  *
  * toggleCinePlayback (space): plays or pauses the active viewport's series
  * when it has more than one frame, opening the cine player (which shows the
@@ -30,12 +34,14 @@ function getCommandsModule({ servicesManager }: withAppTypes) {
         cineService.setIsCineEnabled(true);
       }
     },
+    pixosAddToReport: () => addViewportToReport(servicesManager),
   };
 
   return {
     actions,
     definitions: {
       toggleCinePlayback: { commandFn: actions.toggleCinePlayback },
+      pixosAddToReport: { commandFn: actions.pixosAddToReport },
     },
     defaultContext: 'DEFAULT',
   };
