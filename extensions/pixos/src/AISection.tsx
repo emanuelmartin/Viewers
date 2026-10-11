@@ -396,17 +396,17 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_tumor').map((q, i) => (
             <div key={`t${i}`} className="mt-3 text-[12px]">
-              <b>Tumor cerebral (BraTS, en validación):</b> {q.text}
+              <b>Lesión con realce (BraTS):</b> {q.text}
               {q.data?.tumor?.world_lps && (
                 <div className="mt-1">
                   <button className={btn} onClick={() => {
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(q.data.tumor.world_lps), 'tumor', null)
-                      .then(problem => { setMessage(problem ? '' : 'Tumor en la vista activa (T1 con contraste): anillo amarillo.'); setError(problem || ''); })
+                      .then(problem => { setMessage(problem ? '' : 'Lesión en la vista activa (T1 con contraste): anillo amarillo.'); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
                   }}>Ver en imagen</button>
                 </div>
               )}
-              <div className={muted}>Solo para validación: en HRSL marcó el cerebelo en cerebros normales. Verificar siempre.</div>
+              <div className={muted}>Señala componente con realce ≥ 8 ml (HRSL: 62% sensibilidad, 98% especificidad). No detecta lesiones pequeñas ni la mayoría de los meningiomas. Verificar siempre.</div>
             </div>
           ))}
 
