@@ -467,7 +467,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'ct_head_bleed' && q.data?.ich).map((q, i) => (
             <div key={`h${i}`} className="mt-3 text-[12px]">
-              <b>Hemorragia intracraneal (clasificador RSNA):</b> probabilidad {Math.round(q.data.ich.any * 100)}%
+              <b>Hemorragia intracraneal (clasificador RSNA):</b> probabilidad {Math.round(q.data.ich.any * 100)}%{rate(q.task)}
               <div className="mt-1 flex flex-wrap gap-x-3">
                 {Object.entries(q.data.ich.probs || {}).filter(([k]) => k !== 'cualquiera').map(([k, v]: [string, any]) => (
                   <span key={k} className={v >= 0.4 ? 'text-amber-300' : 'text-white/60'}>{k} {Math.round(v * 100)}%</span>
