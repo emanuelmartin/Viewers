@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAccess, subscribeAccess, callCloud, loadAccess, type ViewerAccess } from './ris';
 import AISection from './AISection';
+import AIReadyBadge from './AIReadyBadge';
 import WorkflowSection from './WorkflowSection';
 import {
   CALCULATORS,
@@ -99,6 +100,7 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
       <div className={`mb-3 ${muted}`}>
         {access.user?.fullName || 'Médico'} · {access.canSave ? 'puede enviar y guardar' : 'solo consulta'}
       </div>
+      {access.ai && <AIReadyBadge />}
       {notice && (
         <div className={`mb-3 rounded px-2 py-1 text-[12px] ${notice.type === 'ok' ? 'bg-green-800/60' : 'bg-red-800/60'}`}>{notice.text}</div>
       )}

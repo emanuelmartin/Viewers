@@ -160,6 +160,30 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  // The physician's verdict on each result («Correcto / Incorrecto»): feeds the validation. Kept with its study, so a
+  // study change shows none until its own arrive
+  const [feedback, setFeedback] = useState<{ uid: string; v: Record<string, string | null> }>({ uid: '', v: {} });
+  const verdicts = feedback.uid === studyUID ? feedback.v : {};
+  useEffect(() => {
+    callCloud<{ verdicts: Record<string, string> }>('aiFeedback:get', { studyInstanceUID: studyUID })
+      .then(r => setFeedback({ uid: studyUID, v: r.verdicts || {} })).catch(() => undefined);
+  }, [studyUID]);
+  const rate = (task: string) => {
+    const choose = (verdict: string) => {
+      const next = verdicts[task] === verdict ? null : verdict;
+      setFeedback({ uid: studyUID, v: { ...verdicts, [task]: next } });
+      callCloud('aiFeedback:set', { studyInstanceUID: studyUID, task, verdict: next, app: 'viewer' }).catch(() => undefined);
+    };
+    const on = 'rounded border px-1.5 py-0.5 text-[11px]';
+    return (
+      <span className="ml-1 inline-flex gap-1 align-middle">
+        <button className={`${on} ${verdicts[task] === 'correcto' ? 'border-green-400 bg-green-700/50' : 'border-white/20'}`} onClick={() => choose('correcto')}
+          title="El resultado es correcto en este estudio">Correcto</button>
+        <button className={`${on} ${verdicts[task] === 'incorrecto' ? 'border-red-400 bg-red-700/50' : 'border-white/20'}`} onClick={() => choose('incorrecto')}
+          title="El resultado no corresponde a lo que se ve">Incorrecto</button>
+      </span>
+    );
+  };
 
   const load = (request: boolean, redo = false) => {
     if (request) trackAI('viewer.ai.request', studyUID, { redo });
@@ -182,6 +206,10 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   // Usage record: the AI results this physician saw (once per study)
   useEffect(() => {
     if (state?.quant?.length) trackAIOnce(`${studyUID}|shown`, 'viewer.ai.shown', studyUID, { tasks: state.quant.map(q => q.task) });
+    // The top of the panel says «IA lista» (this section sits at the bottom)
+    window.dispatchEvent(new CustomEvent('pixos:viewer-ai', { detail: { studyUID, results: (state?.quant || []).map((q: any) => ({
+      task: q.task, label: q.label || q.task, flags: (q.flags || []).length })),
+      pending: !!state?.plan.some(p => p.job && ['queued', 'running'].includes(p.job.status)) } }));
   }, [state, studyUID]);
 
   // Results so far when the study opens
@@ -318,7 +346,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'ct_organs' || q.task === 'mr_prostate').map((q, i) => (
             <div key={`f${i}`} className="mt-2 text-[12px]">
-              {q.task === 'mr_prostate' && <div>{q.text}</div>}
+              {q.task === 'mr_prostate' && <div>{q.text}{rate(q.task)}</div>}
               {(q.flags || []).map((f: string, k: number) => <div key={k} className="text-amber-300">• {f}</div>)}
               {(q.data?.liver_lesions || []).length > 0 && (
                 <div className="mt-1">
@@ -343,7 +371,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_spine_levels').map((q, i) => (
             <div key={`s${i}`} className="mt-3 text-[12px]">
-              <b>Niveles (RM):</b> {q.text}
+              <b>Niveles (RM):</b> {q.text}{rate(q.task)}
               <div className="mt-1 flex flex-wrap gap-1">
                 {(q.data?.discs || []).map((d: any) => (
                   <button key={d.level} className={btn} onClick={() => {
@@ -360,7 +388,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_aneurysm').map((q, i) => (
             <div key={`a${i}`} className="mt-3 text-[12px]">
-              <b>Aneurismas (TOF, en validación):</b> {q.text}
+              <b>Aneurismas (TOF, en validación):</b> {q.text}{rate(q.task)}
               {(q.data?.aneurysms || []).map((a: any, k: number) => (
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{k + 1}. {a.diameter_mm} mm</span>
@@ -377,7 +405,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'ct_aorta').map((q, i) => (
             <div key={`ao${i}`} className="mt-3 text-[12px]">
-              <b>Diámetros aórticos (perpendiculares a la línea central):</b> {q.text}
+              <b>Diámetros aórticos (perpendiculares a la línea central):</b> {q.text}{rate(q.task)}
               {Object.entries(q.data?.segments || {}).map(([k, sg]: [string, any]) => (
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{AORTA_LABELS[k] || k}: {sg.max_eq_mm} mm</span>
@@ -394,7 +422,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_dwi' || q.task === 'mr_brain_stroke').map((q, i) => (
             <div key={`dw${i}`} className="mt-3 text-[12px]">
-              <b>{q.task === 'mr_brain_stroke' ? 'Restricción a la difusión (DeepISLES; verificar con ADC):' : 'Difusión restringida (en validación):'}</b> {q.text}
+              <b>{q.task === 'mr_brain_stroke' ? 'Restricción a la difusión (DeepISLES; verificar con ADC):' : 'Difusión restringida (en validación):'}</b> {q.text}{rate(q.task)}
               {(q.data?.lesions || []).filter((l: any) => l.volume_ml >= 0.3).map((l: any, k: number) => (
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{k + 1}. {l.side}, {l.volume_ml} ml, ADC {l.mean_adc}</span>
@@ -411,7 +439,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
 
           {(state.quant || []).filter(q => q.task === 'mr_brain_tumor').map((q, i) => (
             <div key={`t${i}`} className="mt-3 text-[12px]">
-              <b>Lesión con realce (BraTS):</b> {q.text}
+              <b>Lesión con realce (BraTS):</b> {q.text}{rate(q.task)}
               {q.data?.tumor?.world_lps && (
                 <div className="mt-1">
                   <button className={btn} onClick={() => {
@@ -464,7 +492,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
           {(state.quant || []).filter(q => q.task === 'ct_head_ventricles').map((q, i) => (
             <div key={`v${i}`} className="mt-3 text-[12px]">
               <b>Ventrículos:</b>
-              <div>{q.text}</div>
+              <div>{q.text}{rate(q.task)}</div>
               {(q.flags || []).map((f: string) => <div key={f} className="text-amber-300">• {f}</div>)}
               <div className={muted}>TotalSegmentator (ventricle_parts); índice de Evans en el corte axial de mayor anchura de astas frontales.</div>
             </div>
@@ -492,7 +520,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
           )}
 
           {(state.quant || []).filter(q => q.task === 'cxr').map((q, i) => (
-            <div key={i} className="mt-3 text-[12px]"><b>Clasificador de tórax (validación):</b> {q.text}</div>
+            <div key={i} className="mt-3 text-[12px]"><b>Clasificador de tórax (validación):</b> {q.text}{rate(q.task)}</div>
           ))}
         </>
       )}
