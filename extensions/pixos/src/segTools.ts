@@ -1,5 +1,6 @@
 import { cache, metaData, utilities as csCoreUtils } from '@cornerstonejs/core';
 import { segmentation as csSegmentation } from '@cornerstonejs/tools';
+import { trackAI } from './aiUsage';
 
 /**
  * Segmentation tools for the PixOS workflows. The HRSL mode (longitudinal)
@@ -333,6 +334,7 @@ export function armVista3d(servicesManager: any, studyUID: string, lesion: strin
     if (!seg || !seriesUID) return onMessage('No hay una segmentación activa en esta serie');
     const index = csSegmentation.segmentIndex.getActiveSegmentIndex(seg.segmentationId) || 1;
     onMessage('VISTA3D procesando en la GPU (≈30 s)…');
+    trackAI('viewer.vista3d', studyUID, { lesion });
     callCloud('viewerVista3d', { StudyInstanceUID: studyUID, SeriesInstanceUID: seriesUID, world: Array.from(world), lesion })
       .then((r: Vista3dResult) => {
         if (!r?.found) return onMessage('VISTA3D no segmentó una lesión en ese punto; intente más al centro o use «Volumen de lesión con un clic».');

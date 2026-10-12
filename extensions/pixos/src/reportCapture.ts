@@ -1,4 +1,5 @@
 import { callCloud, getAccess, subscribeAccess } from './ris';
+import { trackAI } from './aiUsage';
 
 /**
  * «Agregar al reporte»: the active viewport as the physician sees it (slice, window, zoom, annotations) goes to the
@@ -74,6 +75,7 @@ export async function addViewportToReport(servicesManager): Promise<void> {
       image,
       label,
     });
+    trackAI('viewer.report_capture', displaySet.StudyInstanceUID, { series: displaySet.SeriesDescription || displaySet.Modality || '', count: res.count });
     uiNotificationService.show({
       title: 'Imagen agregada al reporte',
       message: `${label || 'Vista actual'}. El reporte tiene ${res.count} ${res.count === 1 ? 'imagen' : 'imágenes'}.`,

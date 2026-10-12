@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { applyLook, download3D, getLook, Look, setStructureVisible, VolumeMode } from './aiSurfaces';
+import { trackAIOnce } from './aiUsage';
 
 export type AI3DView = { viewportId: string; segmentationId: string; seriesInstanceUID: string; title: string; modality: string };
 
@@ -20,6 +21,8 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
   const { colours, opacity, volume } = look;
 
   const change = (next: Partial<Look>) => {
+    // Usage record: once per kind of adjustment and view (the opacity slider fires on every step)
+    Object.keys(next).forEach(k => trackAIOnce(`${view.viewportId}|${view.title}|${k}`, 'viewer.ai3d.adjust', null, { what: k }));
     const merged = { ...look, ...next };
     setLook(merged);
     applyLook(servicesManager, view.viewportId, view.segmentationId, merged);
@@ -39,6 +42,7 @@ export default function AI3DControls({ servicesManager, view }: { servicesManage
   const indices = Object.keys(segments).map(Number).filter(i => segments[i]);
   // The segmentation's visibility updates asynchronously: the list shows the choice right away
   const toggle = (index: number, show: boolean) => {
+    trackAIOnce(`${view.viewportId}|${view.title}|structures`, 'viewer.ai3d.adjust', null, { what: 'estructuras' });
     setStructureVisible(servicesManager, view.viewportId, view.segmentationId, index, show);
     setShown(prev => ({ ...prev, [index]: show }));
   };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { callCloud } from './ris';
+import { trackAI } from './aiUsage';
 import { SLABS, applySlab, createSegmentation } from './tools';
 import { armClickSegment, armVista3d } from './segTools';
 import { FOLLOW_UP_MODULE, SCENARIO_MODULES, WORKFLOWS, type Step } from './workflows';
@@ -141,6 +142,7 @@ function WorkflowSection({ servicesManager, commandsManager, studyUID, ai, canSa
         break;
       }
       case 'ai':
+        trackAI('viewer.workflow.ai_step', studyUID, { step: step.label });
         callCloud('viewerRequestAIAnalysis', { StudyInstanceUID: studyUID }).catch(() => {});
         scrollTo('pixos-ai');
         text = `${step.label}: solicitado; el avance aparece en la sección IA`;

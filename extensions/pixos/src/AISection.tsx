@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { trackAI, trackAIOnce } from './aiUsage';
 import { callCloud } from './ris';
 import { showPoint, toWorld } from './navigate';
 import { applyLook, attachAISurfaces, getLook, registerAIMeshes } from './aiSurfaces';
@@ -161,6 +162,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   const [message, setMessage] = useState('');
 
   const load = (request: boolean, redo = false) => {
+    if (request) trackAI('viewer.ai.request', studyUID, { redo });
     setError('');
     setBusy(true);
     fetchState(studyUID, request, redo)
@@ -176,6 +178,11 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
   useEffect(() => {
     registerAIMeshes(state?.quant || []);
   }, [state]);
+
+  // Usage record: the AI results this physician saw (once per study)
+  useEffect(() => {
+    if (state?.quant?.length) trackAIOnce(`${studyUID}|shown`, 'viewer.ai.shown', studyUID, { tasks: state.quant.map(q => q.task) });
+  }, [state, studyUID]);
 
   // Results so far when the study opens
   useEffect(() => {
@@ -265,12 +272,14 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                   {q.aiSeg && (
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <button className={btn} onClick={() => {
+                        trackAI('viewer.ai.view_3d', studyUID, { task: q.task });
                         showAISeg3D(servicesManager, commandsManager, q.aiSeg)
                           .then(problem => { setMessage(problem ? '' : 'MPR + 3D con la segmentación de IA. En la esquina superior derecha del recuadro 3D, el botón «IA 3D» tiene color, opacidad, estructuras, volumen y PNG. Clic sobre una superficie lleva los planos MPR a ese punto para medir con Longitud, Ángulo, etc.'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar en 3D: ${e?.message || e}`); });
                       }}>Ver en 3D</button>
                       {q.aiSeg.renderSeriesInstanceUID && (
                         <button className={btn} onClick={() => {
+                          trackAI('viewer.ai.renders', studyUID, { task: q.task });
                           const problem = showAIRenders(servicesManager, q.aiSeg);
                           setMessage(problem ? '' : 'Vistas 3D isométricas de la segmentación (serie de IA en el PACS).');
                           setError(problem || '');
@@ -282,6 +291,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <span className="text-white/60">{q.aiSeg.title} · {q.aiSeg.segments} segmento(s)</span>
                       <button className={btn} onClick={() => {
+                        trackAI('viewer.ai.seg', studyUID, { task: q.task });
                         showAISeg(servicesManager, commandsManager, q.aiSeg)
                           .then(problem => { setMessage(problem ? '' : 'Segmentación de IA sobre la vista activa (panel Segmentación para colores y visibilidad; en 3D se ve como superficie).'); setError(problem || ''); })
                           .catch(e => { setMessage(''); setError(`No se pudo cargar: ${e?.message || e}`); });
@@ -318,6 +328,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                       <span>{k + 1}. {l.diameter_mm} mm · {l.mean_hu} UH{l.segment ? ` · segmento ${l.segment}` : ''}</span>
                       {l.world_lps && (
                         <button className={btn} onClick={() => {
+                          trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                           showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(l.world_lps), `${k + 1}: ${l.diameter_mm} mm`, LIVER)
                             .then(problem => { setMessage(problem ? '' : `Lesión ${k + 1} en la vista activa: anillo amarillo.`); setError(problem || ''); })
                             .catch(e => { setMessage(''); setError(`No se pudo ubicar la lesión: ${e?.message || e}`); });
@@ -336,6 +347,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
               <div className="mt-1 flex flex-wrap gap-1">
                 {(q.data?.discs || []).map((d: any) => (
                   <button key={d.level} className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(d.world_lps), d.level, null)
                       .then(problem => { setMessage(problem ? '' : `Disco ${d.level} en la vista activa.`); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -353,6 +365,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{k + 1}. {a.diameter_mm} mm</span>
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(a.world_lps), `${k + 1}: ${a.diameter_mm} mm`, null)
                       .then(problem => { setMessage(problem ? '' : `Candidato ${k + 1} en la vista activa (TOF): anillo amarillo.`); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -369,6 +382,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{AORTA_LABELS[k] || k}: {sg.max_eq_mm} mm</span>
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(sg.world_lps), `${AORTA_LABELS[k] || k}: ${sg.max_eq_mm} mm`, null)
                       .then(problem => { setMessage(problem ? '' : `${AORTA_LABELS[k] || k}: corte de mayor diámetro (anillo amarillo); verifique con MPR.`); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -385,6 +399,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                 <div key={k} className="mt-1 flex items-center justify-between gap-2">
                   <span>{k + 1}. {l.side}, {l.volume_ml} ml, ADC {l.mean_adc}</span>
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(l.world_lps), `${k + 1}: ${l.volume_ml} ml`, null)
                       .then(problem => { setMessage(problem ? '' : `Zona ${k + 1} en la difusión: anillo amarillo; compare con el mapa ADC.`); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -400,6 +415,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
               {q.data?.tumor?.world_lps && (
                 <div className="mt-1">
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(q.data.tumor.world_lps), 'tumor', null)
                       .then(problem => { setMessage(problem ? '' : 'Lesión en la vista activa (T1 con contraste): anillo amarillo.'); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -433,6 +449,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
               {q.data.ich.focus_lps && (
                 <div className="mt-1">
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: q.task });
                     showOnSeries(servicesManager, commandsManager, q.seriesInstanceUID || null, toWorld(q.data.ich.focus_lps), `hemorragia ${Math.round(q.data.ich.any * 100)}%`, [0, 80])
                       .then(problem => { setMessage(problem ? '' : 'Corte con mayor probabilidad de hemorragia (ventana cerebral): verifique en los cortes vecinos.'); setError(problem || ''); })
                       .catch(e => { setMessage(''); setError(`No se pudo ubicar: ${e?.message || e}`); });
@@ -461,6 +478,7 @@ function AISection({ servicesManager, commandsManager, studyUID }: { servicesMan
                 <div key={i} className="mt-1 flex items-center justify-between gap-2">
                   <span>{i + 1}. {n.diameter_mm} mm · confianza {Math.round(n.score * 100)}%</span>
                   <button className={btn} onClick={() => {
+                    trackAI('viewer.ai.view_in_image', studyUID, { task: 'ct_lung_nodules' });
                     showOnSeries(servicesManager, commandsManager, n.seriesUID, toWorld(n.center_mm), `${i + 1}: ${n.diameter_mm} mm`)
                       .then(problem => {
                         setMessage(problem ? '' : `Nódulo ${i + 1} en la vista activa${n.series ? ` (serie ${n.series})` : ''}: anillo amarillo.`);
