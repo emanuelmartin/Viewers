@@ -7,8 +7,19 @@ import { useSystem } from '@ohif/core';
 import { Toolbar } from '../Toolbar/Toolbar';
 import HeaderViewStudyButton from './HeaderViewStudyButton';
 import HeaderDownloadButton from './HeaderDownloadButton';
+import HeaderModeSwitch from './HeaderModeSwitch';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
+
+/** The header toolbar in labelled groups; anything not listed (pixOS AI, report capture…) goes to «Más». */
+const TOOL_GROUPS = [
+  { label: 'Navegar', ids: ['Zoom', 'Pan', 'TrackballRotate', 'Crosshairs', 'StackScroll'] },
+  { label: 'Imagen', ids: ['WindowLevel'] },
+  { label: 'Medir', ids: ['MeasurementTools'] },
+  { label: 'Vista', ids: ['Layout'] },
+  { label: 'Informe', ids: ['pixosAddToReport'] },
+  { label: 'Más', ids: ['Capture', 'MoreTools'] },
+];
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager } = useSystem();
@@ -54,8 +65,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
   // Whatever fills the right side of the menu bar, in order: undo/redo then
   // patient info by default. Each item is rendered as a component, so it can
   // bring its own hooks, and reordering the list reorders the header.
-  const rightSideItems =
-    customizationService.getCustomization('ohif.headerRightSide')?.items ?? [];
+  const rightSideItems = customizationService.getCustomization('ohif.headerRightSide')?.items ?? [];
 
   const menuOptions = [
     {
@@ -113,7 +123,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       Secondary={
         <div className="flex items-center gap-1">
           <Toolbar buttonSection="secondary" />
-          <div className="border-primary-dark mx-1 h-[25px] border-r" />
+          <HeaderModeSwitch />
           <HeaderViewStudyButton />
           <HeaderDownloadButton />
         </div>
@@ -123,8 +133,11 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
         <Item key={index} />
       ))}
     >
-      <div className="relative flex justify-center gap-[4px]">
-        <Toolbar buttonSection="primary" />
+      <div className="relative flex items-stretch justify-center">
+        <Toolbar
+          buttonSection="primary"
+          groups={TOOL_GROUPS}
+        />
       </div>
     </Header>
   );

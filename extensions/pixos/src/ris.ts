@@ -42,12 +42,20 @@ export function risSessionToken(): string | undefined {
 }
 
 /** Calls a Parse cloud function as the RIS user; throws with the server's message. */
-export async function callCloud<T = any>(name: string, params: Record<string, unknown> = {}): Promise<T> {
+export async function callCloud<T = any>(
+  name: string,
+  params: Record<string, unknown> = {},
+  extraHeaders: Record<string, string> = {}
+): Promise<T> {
   const { parseUrl, appId, jsKey } = config();
   if (!parseUrl || !appId) {
     throw new Error('El visor no tiene configurado el servidor del RIS');
   }
-  const headers: Record<string, string> = { 'X-Parse-Application-Id': appId, 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {
+    ...extraHeaders,
+    'X-Parse-Application-Id': appId,
+    'Content-Type': 'application/json',
+  };
   if (jsKey) {
     headers['X-Parse-Javascript-Key'] = jsKey;
   }
@@ -82,6 +90,14 @@ function publish(next: ViewerAccess) {
 export function loadAccess(): Promise<ViewerAccess> {
   if (inFlight) {
     return inFlight;
+  }
+  // Local development only (stripped from production builds): see the physician toolbar without a RIS session.
+  if (
+    process.env.NODE_ENV === 'development' &&
+    window.localStorage.getItem('px.devPhysician') === '1'
+  ) {
+    publish({ status: 'ready', physician: true, canSave: false, ai: true });
+    return Promise.resolve(access);
   }
   if (!risSessionToken()) {
     publish({ ...RESTRICTED, status: 'ready' });

@@ -66,7 +66,7 @@ function Header({
       <div
         key={index}
         className={classNames(
-          "after:border-primary-dark flex items-center empty:hidden after:mx-1.5 after:h-[25px] after:border-r after:content-['']",
+          "after:border-primary-dark flex items-center after:mx-1.5 after:h-[25px] after:border-r after:content-[''] empty:hidden",
           index === RightSide.length - 1 ? lastSlotClassName : slotClassName
         )}
       >
@@ -117,7 +117,7 @@ function Header({
         {...props}
       >
         {/* Desktop (>= 1024px): logo | toolbar | right-side slots + settings */}
-        <div className="hidden h-[48px] items-center justify-between gap-2 px-2 lg:flex">
+        <div className="px-header hidden h-[60px] items-center justify-between gap-3 px-3 lg:flex">
           <div className="flex flex-shrink-0 items-center">
             <div className={classNames('mr-3 inline-flex items-center', isSticky && 'py-6')}>
               {isSticky && <Button onClick={onClickReturn}>{<Icons.ArrowLeftBold />}</Button>}
@@ -126,7 +126,7 @@ function Header({
             {Secondary && <div className="ml-2">{Secondary}</div>}
           </div>
           <div className="flex min-w-0 flex-1 justify-center px-2">
-            <div className="ohif-scrollbar-toolbar flex w-full items-center justify-center space-x-2 overflow-x-auto overflow-y-hidden">
+            <div className="ohif-scrollbar-toolbar flex w-full items-center justify-center gap-1 overflow-x-auto overflow-y-hidden">
               {children}
             </div>
           </div>
@@ -153,7 +153,8 @@ function Header({
               <div className="hidden">{settingsMenu}</div>
             </div>
           </div>
-          <div className="border-border ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1">
+          {/* pixOS: on phones the tools live in a bottom bar (ViewerLayout); tablets keep this row */}
+          <div className="border-border ohif-scrollbar-toolbar flex h-[40px] items-center overflow-x-auto overflow-y-hidden border-t px-1 max-sm:hidden">
             <div className="mx-auto flex items-center gap-1">{children}</div>
           </div>
         </div>

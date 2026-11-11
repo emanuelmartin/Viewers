@@ -141,9 +141,7 @@ async function fetchStudiesByUIDs(
   if (!uids.length) {
     return [];
   }
-  const where = encodeURIComponent(
-    JSON.stringify({ [schema.studiesUidField]: { $in: uids } })
-  );
+  const where = encodeURIComponent(JSON.stringify({ [schema.studiesUidField]: { $in: uids } }));
   const res = await fetch(
     `${schema.parseUrl}/classes/${schema.studiesClass}?where=${where}&limit=20`,
     { headers: buildHeaders(schema) }
@@ -170,7 +168,9 @@ async function fetchInterpretationsByStudies(
   const where = encodeURIComponent(
     JSON.stringify({ [schema.interpretationsStudyField]: { $in: pointers } })
   );
-  const include = encodeURIComponent(`${schema.interpretationsUserField},${schema.interpretationsStudyField}`);
+  const include = encodeURIComponent(
+    `${schema.interpretationsUserField},${schema.interpretationsStudyField}`
+  );
   const res = await fetch(
     `${schema.parseUrl}/classes/${schema.interpretationsClass}?where=${where}&include=${include}&order=-createdAt&limit=20`,
     { headers: buildHeaders(schema) }
@@ -201,11 +201,18 @@ async function runCloudFunction(name: string, params: object, schema: Interpreta
  * function scoped to the StudyInstanceUIDs of the link. Shaped like the
  * Interpretations rows the panel renders.
  */
-async function fetchPublicInterpretations(uids: string[], schema: InterpretationsPanelSchema): Promise<any[]> {
+async function fetchPublicInterpretations(
+  uids: string[],
+  schema: InterpretationsPanelSchema
+): Promise<any[]> {
   if (!uids.length) {
     return [];
   }
-  const rows = await runCloudFunction('getPublicStudyInterpretations', { StudyInstanceUIDs: uids }, schema);
+  const rows = await runCloudFunction(
+    'getPublicStudyInterpretations',
+    { StudyInstanceUIDs: uids },
+    schema
+  );
   return (rows || []).map(r => ({
     objectId: r.interpretationId,
     createdAt: r.signedAt?.iso || r.signedAt,
@@ -226,9 +233,16 @@ async function downloadInterpretationPdf(
   try {
     // Shared link: the stored PDF of that study's signed report
     const result: any = interp.publicStudyUID
-      ? await runCloudFunction('getPublicInterpretationPdf',
-          { StudyInstanceUID: interp.publicStudyUID, interpretationId: interp.objectId }, schema)
-      : await runCloudFunction(schema.interpretationsPdfCloudFunction, { interpretationId: interp.objectId }, schema);
+      ? await runCloudFunction(
+          'getPublicInterpretationPdf',
+          { StudyInstanceUID: interp.publicStudyUID, interpretationId: interp.objectId },
+          schema
+        )
+      : await runCloudFunction(
+          schema.interpretationsPdfCloudFunction,
+          { interpretationId: interp.objectId },
+          schema
+        );
     const pdfBase64 = result?.pdf;
     const pdfUrl = result?.pdfUrl;
     const fileName = 'Interpretacion.pdf';
@@ -292,6 +306,34 @@ async function loadInterpretations(): Promise<{ interpretations: any[]; error: s
   }
 }
 
+function EmptyState({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="px-fade-in flex h-full flex-col items-center justify-start gap-3 px-6 pt-16 text-center">
+      <div
+        className="flex h-12 w-12 items-center justify-center rounded-2xl"
+        style={{ background: 'var(--px-accent-soft)', color: 'var(--px-accent)' }}
+        aria-hidden
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+          <path d="M14 3v5h5M9 13h6M9 17h4" />
+        </svg>
+      </div>
+      <div className="px-title text-foreground text-[14px]">{title}</div>
+      <p className="text-muted-foreground max-w-[220px] text-[12.5px] leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
 const PanelInterpretations: React.FC = () => {
   const [interpretations, setInterpretations] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -299,7 +341,11 @@ const PanelInterpretations: React.FC = () => {
   const [pdfBusy, setPdfBusy] = useState<Record<string, boolean>>({});
 
   const schema = getSchema();
-  const isConfigured = !!(schema.showInterpretationsPanel !== false && schema.parseUrl && schema.appId);
+  const isConfigured = !!(
+    schema.showInterpretationsPanel !== false &&
+    schema.parseUrl &&
+    schema.appId
+  );
   const [loading, setLoading] = useState(isConfigured);
 
   // Inject Quill output CSS once
@@ -331,9 +377,14 @@ const PanelInterpretations: React.FC = () => {
     };
   }, [isConfigured]);
 
-  // If interpretationsPanel is not configured, render nothing
+  // Not configured (no RIS connection): say what the panel is for instead of a blank tab
   if (!isConfigured) {
-    return null;
+    return (
+      <EmptyState
+        title="Informes del estudio"
+        body="Aquí aparecen los informes cuando el radiólogo los firma en pixOS."
+      />
+    );
   }
 
   if (loading) {
@@ -354,13 +405,10 @@ const PanelInterpretations: React.FC = () => {
 
   if (!interpretations.length) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
-        <div className="text-3xl opacity-50">📋</div>
-        <div className="text-foreground text-sm font-medium">Sin interpretaciones</div>
-        <div className="text-muted-foreground text-xs">
-          Este estudio aún no tiene interpretaciones registradas.
-        </div>
-      </div>
+      <EmptyState
+        title="Todavía sin informe"
+        body="Cuando el radiólogo firme el informe de este estudio aparecerá aquí, con su PDF."
+      />
     );
   }
 
@@ -379,13 +427,14 @@ const PanelInterpretations: React.FC = () => {
         const isOpen = expandedIndex === index;
         const signedAtRaw = interp[schema.interpretationsSignedAtField];
         const userObj: any = interp[schema.interpretationsUserField];
-        const userName: string = userObj?.[schema.userNameField] ?? userObj?.username ?? 'Sin identificar';
+        const userName: string =
+          userObj?.[schema.userNameField] ?? userObj?.username ?? 'Sin identificar';
         const dateStr = formatDateTime(
           typeof signedAtRaw === 'object' ? signedAtRaw?.iso : signedAtRaw || interp.createdAt
         );
         const isSigned: boolean = !!interp[schema.interpretationsSignedField];
         const content: string = interp[schema.interpretationsContentField] ?? '';
-        
+
         // Ensure PDF button condition is evaluated at render time
         const hasPdfCloudFunction = !!(schema.parseUrl && schema.interpretationsPdfCloudFunction);
 
@@ -411,9 +460,7 @@ const PanelInterpretations: React.FC = () => {
                     <span className="text-yellow-400">Borrador</span>
                   )}
                 </div>
-                <div className="text-muted-foreground mt-1 text-[10px]">
-                  {userName}
-                </div>
+                <div className="text-muted-foreground mt-1 text-[10px]">{userName}</div>
               </div>
               <div className="ml-2 flex flex-shrink-0 items-center gap-1">
                 {/* PDF download button if Cloud Function is configured */}
@@ -431,16 +478,46 @@ const PanelInterpretations: React.FC = () => {
                     }}
                     className="text-muted-foreground hover:text-foreground flex items-center rounded p-1 transition-colors disabled:opacity-40"
                   >
-                    {pdfBusy[interp.objectId] ? (  
-                      <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    {pdfBusy[interp.objectId] ? (
+                      <svg
+                        className="h-3.5 w-3.5 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8H4z"
+                        />
                       </svg>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
-                        <line x1="12" y1="18" x2="12" y2="12" />
+                        <line
+                          x1="12"
+                          y1="18"
+                          x2="12"
+                          y2="12"
+                        />
                         <polyline points="9 15 12 18 15 15" />
                       </svg>
                     )}

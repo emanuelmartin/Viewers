@@ -10,7 +10,8 @@ module.exports = {
   prefix: '',
   theme: {
     fontFamily: {
-      inter: ['Inter', 'sans-serif'],
+      inter: ['Figtree', 'Inter', 'sans-serif'],
+      title: ['Poppins', 'Figtree', 'sans-serif'],
     },
     fontSize: {
       xxs: '0.625rem', // 10px
@@ -105,18 +106,18 @@ module.exports = {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       bkg: {
-        low: '#071318',
-        med: '#0a1929',
-        full: '#0f2942',
+        low: '#061423',
+        med: '#0b1e31',
+        full: '#0f263c',
       },
       info: {
         primary: '#e3f2fd',
         secondary: '#7ba4d8',
       },
       actions: {
-        primary: '#1e4976',
+        primary: '#16324e',
         highlight: '#b3d4fc',
-        hover: 'rgba(30, 73, 118, 0.2)',
+        hover: 'rgba(132, 170, 203, 0.12)',
       },
     },
   },

@@ -21,6 +21,7 @@ module.exports = {
   theme: {
     fontFamily: {
       sans: [
+        'Figtree',
         'Inter',
         'system-ui',
         '-apple-system',

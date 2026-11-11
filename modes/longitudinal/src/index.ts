@@ -64,6 +64,9 @@ export const modeInstance = {
   displayName: i18n.t('Modes:Basic Viewer'),
   routes: [longitudinalRoute],
   extensions: extensionDependencies,
+  // pixOS: matched by the study (radiographs side by side, four-view
+  // mammography); everything else opens with the default protocol
+  hangingProtocol: ['@ohif/hpMammo', '@pixos/hpPairedViews', 'default'],
 };
 
 const mode = {

@@ -2,13 +2,13 @@ import React from 'react';
 import classNames from 'classnames';
 
 import ProgressLoadingBar from '../ProgressLoadingBar';
-import { Icons } from '../Icons';
+import { PixosLoaderMark } from '../PixosLoader/PixosLoaderMark';
 /**
  *  A React component that renders a loading indicator.
  * if progress is not provided, it will render an infinite loading indicator
  * if progress is provided, it will render a progress bar
  * Optionally a textBlock can be provided to display a message
- * Optionally a logo can be provided to display instead of the OHIF mark
+ * Optionally a logo can be provided to display instead of the pixOS mark
  */
 function LoadingIndicatorProgress({ className, textBlock, progress, logo }) {
   return (
@@ -26,11 +26,15 @@ function LoadingIndicatorProgress({ className, textBlock, progress, logo }) {
           className="h-16 w-auto max-w-xs object-contain"
         />
       ) : (
-        <Icons.LoadingOHIFMark className="text-foreground h-12 w-12" />
+        <PixosLoaderMark size={52} />
       )}
 
       {/* Progress bar */}
-      <div className="w-48">
+      <div
+        className="w-48"
+        role="status"
+        aria-label="Cargando imágenes"
+      >
         <ProgressLoadingBar progress={progress} />
       </div>
 

@@ -77,28 +77,28 @@ const getPanelModule = ({ commandsManager, servicesManager, extensionManager }: 
     {
       name: 'panelMeasurement',
       iconName: 'tab-linear',
-      iconLabel: 'Measure',
-      label: 'Measurement',
+      iconLabel: 'Medir',
+      label: 'Medidas',
       component: PanelMeasurement,
     },
     {
       name: 'panelSegmentation',
       iconName: 'tab-segmentation',
-      iconLabel: 'Segmentation',
-      label: 'Segmentation',
+      iconLabel: 'Segmentación',
+      label: 'Segmentación',
       component: wrappedPanelSegmentation,
     },
     {
       name: 'panelSegmentationNoHeader',
       iconName: 'tab-segmentation',
-      iconLabel: 'Segmentation',
-      label: 'Segmentation',
+      iconLabel: 'Segmentación',
+      label: 'Segmentación',
       component: wrappedPanelSegmentationNoHeader,
     },
     {
       name: 'panelSegmentationWithToolsLabelMap',
       iconName: 'tab-segmentation',
-      iconLabel: 'Segmentation',
+      iconLabel: 'Segmentación',
       label: i18n.t('SegmentationPanel:Labelmap'),
       component: props =>
         wrappedPanelSegmentationWithTools({
@@ -112,7 +112,7 @@ const getPanelModule = ({ commandsManager, servicesManager, extensionManager }: 
     {
       name: 'panelSegmentationWithToolsContour',
       iconName: 'tab-contours',
-      iconLabel: 'Segmentation',
+      iconLabel: 'Segmentación',
       label: i18n.t('SegmentationPanel:Contour'),
       component: props =>
         wrappedPanelSegmentationWithTools({

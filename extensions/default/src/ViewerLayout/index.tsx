@@ -8,6 +8,8 @@ import SidePanelWithServices from '../Components/SidePanelWithServices';
 import { Onboarding, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@ohif/ui-next';
 import useResizablePanels from './ResizablePanelsHook';
 import MobileBottomPanels from './MobileBottomPanels';
+import { IconPresentationProvider, ToolButton } from '@ohif/ui-next';
+import { Toolbar } from '../Toolbar/Toolbar';
 
 const resizableHandleClassName = 'mt-[1px] bg-background';
 
@@ -172,7 +174,6 @@ function ViewerLayout({
 
   const viewportComponents = viewports.map(getViewportComponentData);
 
-
   const loadingIndicator = showLoadingIndicator && (
     <LoadingIndicatorProgress
       className="bg-background h-full w-full"
@@ -195,7 +196,7 @@ function ViewerLayout({
         {/* Mobile layout: viewport + bottom panels (interpretations, segmentations, measurements) */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <div
-            className="relative flex flex-1 items-center justify-center overflow-hidden bg-background"
+            className="bg-background relative flex flex-1 items-center justify-center overflow-hidden"
             onMouseEnter={handleMouseEnter}
           >
             <ViewportGridComp
@@ -204,6 +205,18 @@ function ViewerLayout({
               commandsManager={commandsManager}
             />
           </div>
+          {/* Phones: the tools in a thumb-reach bar under the images */}
+          <IconPresentationProvider
+            size="large"
+            IconContainer={ToolButton}
+          >
+            <nav
+              className="px-mobile-tools sm:hidden"
+              aria-label="Herramientas"
+            >
+              <Toolbar buttonSection="primary" />
+            </nav>
+          </IconPresentationProvider>
           <MobileBottomPanels
             leftPanelTabs={leftPanelTabs}
             rightPanelTabs={rightPanelTabs}
@@ -227,8 +240,8 @@ function ViewerLayout({
         appConfig={appConfig}
       />
       <div
-        className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-background"
-        style={{ height: 'calc(100vh - 52px)' }}
+        className="bg-background relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden"
+        style={{ height: 'calc(100vh - 60px)' }}
       >
         <React.Fragment>
           {loadingIndicator}
@@ -255,7 +268,7 @@ function ViewerLayout({
             <ResizablePanel {...resizableViewportGridPanelProps}>
               <div className="flex h-full flex-1 flex-col">
                 <div
-                  className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-background"
+                  className="bg-background relative flex h-full flex-1 items-center justify-center overflow-hidden"
                   onMouseEnter={handleMouseEnter}
                 >
                   <ViewportGridComp
@@ -291,7 +304,5 @@ function ViewerLayout({
     </div>
   );
 }
-
-
 
 export default ViewerLayout;

@@ -7,39 +7,51 @@
 /* OHIF Theme */
 
 @layer base {
-  :root {
-    --highlight: 214 100% 68%;
-    --neutral: 211 24% 54%;
-    --neutral-light: 211 67% 83%;
-    --neutral-dark: 214 52% 25%;
-    --background: 198 55% 6%;
-    --foreground: 205 87% 94%;
-    --card: 209 63% 16%;
-    --card-foreground: 205 87% 94%;
-    --popover: 211 60% 19%;
-    --popover-foreground: 205 87% 94%;
-    --primary: 214 100% 68%;
-    --primary-foreground: 198 55% 6%;
-    --secondary: 214 52% 25%;
-    --secondary-foreground: 211 67% 83%;
-    --muted: 209 63% 16%;
-    --muted-foreground: 211 67% 83%;
-    --accent: 214 52% 25%;
-    --accent-foreground: 205 87% 94%;
-    --destructive: 0 62.8% 30.6%;
+  /*
+   * pixOS (tema oscuro de @pixos/kit): azul profundo, marca azul suave y naranja SOLO para lo activo (herramienta,
+   * serie, pestaña) y la acción principal. El lienzo de la imagen sigue negro (clinical.viewer.canvas).
+   */
+  :root,
+  .dark {
+    --highlight: 23 100% 64%;
+    --neutral: 211 24% 60%;
+    --neutral-light: 211 29% 74%;
+    --neutral-dark: 210 56% 20%;
+    --background: 211 71% 8%;
+    --foreground: 210 47% 93%;
+    --card: 210 63% 12%;
+    --card-foreground: 210 47% 93%;
+    --popover: 209 59% 17%;
+    --popover-foreground: 210 47% 93%;
+    --primary: 208 41% 66%;
+    --primary-foreground: 204 94% 6%;
+    --secondary: 210 56% 20%;
+    --secondary-foreground: 211 29% 74%;
+    --muted: 209 60% 15%;
+    --muted-foreground: 211 29% 74%;
+    --accent: 210 56% 20%;
+    --accent-foreground: 210 47% 93%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 61% 23%;
-    --input: 211 60% 19%;
-    --ring: 221 83% 53%;
-    --chart-1: 214 100% 68%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --radius: 0.5rem;
-    /* Pixos RIS shell: navy #0f2942, accent #5aa1ff */
-    --brand-navy: 209 63% 16%;
-    --brand-accent: 214 100% 68%;
+    --border: 209 51% 23%;
+    --input: 209 59% 17%;
+    --ring: 208 41% 66%;
+    --chart-1: 208 41% 66%;
+    --chart-2: 142 69% 58%;
+    --chart-3: 23 100% 64%;
+    --chart-4: 255 92% 76%;
+    --chart-5: 0 91% 71%;
+    --radius: 0.625rem;
+    /* pixOS: azul del isotipo y naranja */
+    --brand-navy: 209 51% 23%;
+    --brand-accent: 23 100% 64%;
+    --px-accent: #ff8d47;
+    --px-accent-soft: rgba(255, 141, 71, 0.14);
+    --px-brand: #84aacb;
+    --px-brand-soft: rgba(132, 170, 203, 0.12);
+    --px-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --px-font-ui: 'Figtree', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --px-font-title: 'Poppins', 'Figtree', system-ui, sans-serif;
     --success-bg: hsl(143, 85%, 96%);
     --success-border: hsl(145, 92%, 91%);
     --success-text: hsl(140, 100%, 27%);
@@ -55,33 +67,6 @@
     --error-bg: hsl(359, 100%, 97%);
     --error-border: hsl(359, 100%, 94%);
     --error-text: hsl(360, 100%, 45%);
-  }
-
-  .dark {
-    --background: 198 55% 6%;
-    --foreground: 205 87% 94%;
-    --card: 209 63% 16%;
-    --card-foreground: 205 87% 94%;
-    --popover: 211 60% 19%;
-    --popover-foreground: 205 87% 94%;
-    --primary: 214 100% 68%;
-    --primary-foreground: 198 55% 6%;
-    --secondary: 214 52% 25%;
-    --secondary-foreground: 211 67% 83%;
-    --muted: 209 63% 16%;
-    --muted-foreground: 211 67% 83%;
-    --accent: 214 52% 25%;
-    --accent-foreground: 205 87% 94%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 210 61% 23%;
-    --input: 211 60% 19%;
-    --ring: 221 83% 53%;
-    --chart-1: 214 100% 68%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -214,7 +199,7 @@
 
 @layer base {
   html {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Figtree', 'Inter', sans-serif;
   }
 
   body {

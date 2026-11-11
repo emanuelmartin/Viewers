@@ -62,5 +62,9 @@
   "New segment name": "Nombre del nuevo segmento",
   "No segmentations available": "Sin segmentaciones disponibles",
   "Not available on the current viewport": "No disponible en el visor actual",
-  "Add segment to enable this tool": "Añadir segmento para habilitar esta herramienta"
+  "Add segment to enable this tool": "Añadir segmento para habilitar esta herramienta",
+  "Save": "Guardar",
+  "Segment Bidirectional": "Bidireccional del segmento",
+  "Draw a segment before using bidirectional measurement": "Dibuje un segmento antes de usar la medida bidireccional",
+  "No description": "Sin descripción"
 }

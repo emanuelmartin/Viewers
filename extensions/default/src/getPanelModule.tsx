@@ -26,8 +26,8 @@ function getPanelModule({ commandsManager, extensionManager, servicesManager }) 
     {
       name: 'panelInterpretations',
       iconName: 'tab-patient-info',
-      iconLabel: 'Interpretaciones',
-      label: 'Interpretaciones',
+      iconLabel: 'Informes',
+      label: 'Informes',
       component: PanelInterpretations,
     },
   ];

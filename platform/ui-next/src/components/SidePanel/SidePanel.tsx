@@ -111,10 +111,10 @@ const getTabClassNames = (
   isActiveTab: boolean,
   isTabDisabled: boolean
 ) =>
-  classnames('h-[28px] mb-[2px] cursor-pointer text-foreground bg-brand/40 hover:bg-brand/70', {
-    'hover:text-brand-accent': !isActiveTab && !isTabDisabled,
-    'rounded-l': tabIndex % numColumns === 0,
-    'rounded-r': (tabIndex + 1) % numColumns === 0 || tabIndex === numTabs - 1,
+  // pixOS: segmented control; the active tab gets the soft orange pill (styles.css .px-tab)
+  classnames('px-tab h-[30px] cursor-pointer text-foreground', {
+    'is-active': isActiveTab,
+    'is-disabled': isTabDisabled,
   });
 
 const getTabStyle = (numTabs: number) => {
@@ -124,11 +124,7 @@ const getTabStyle = (numTabs: number) => {
 };
 
 const getTabIconClassNames = (numTabs: number, isActiveTab: boolean) => {
-  return classnames('h-full w-full flex items-center justify-center', {
-    // Pixos RIS: active tab raised (#1e3a5f) with a blue underline
-    'bg-secondary text-brand-accent shadow-[inset_0_-2px_0_hsl(var(--brand-accent))]': isActiveTab,
-    rounded: isActiveTab,
-  });
+  return 'h-full w-full flex items-center justify-center';
 };
 const createStyleMap = (
   expandedWidth: number,
@@ -321,7 +317,7 @@ const SidePanel = ({
             className={classnames('text-primary', side === 'left' && 'rotate-180 transform')}
           />
         </div>
-        <div className={classnames('hidden lg:flex mt-3 flex-col space-y-3')}>
+        <div className={classnames('mt-3 hidden flex-col space-y-3 lg:flex')}>
           {_childComponents.map((childComponent, index) => (
             <Tooltip key={index}>
               <TooltipTrigger>
@@ -389,7 +385,7 @@ const SidePanel = ({
       <>
         {getCloseIcon()}
         <div className={classnames('flex grow justify-center')}>
-          <div className={classnames('bg-muted text-primary flex flex-wrap')}>
+          <div className={classnames('px-tabs text-primary flex flex-wrap')}>
             {tabs.map((tab, tabIndex) => {
               const { disabled } = tab;
               return (
@@ -398,7 +394,7 @@ const SidePanel = ({
                     <div
                       className={classnames('flex h-[28px] w-[2px] items-center', tabSpacerWidth)}
                     >
-                      <div className="bg-muted h-[20px] w-full"></div>
+                      <div className="h-[20px] w-full"></div>
                     </div>
                   )}
                   <Tooltip key={tabIndex}>
@@ -456,7 +452,7 @@ const SidePanel = ({
         onClick={() => updatePanelOpen(!panelOpen)}
       >
         {getCloseIcon()}
-        <span>{tabs[0].label}</span>
+        <span className="px-panel-title">{tabs[0].label}</span>
       </div>
     );
   };
@@ -464,7 +460,7 @@ const SidePanel = ({
   const getOpenStateComponent = () => {
     return (
       <>
-        <div className="bg-muted flex h-[40px] flex-shrink-0 select-none rounded-t p-2">
+        <div className="px-panel-head flex h-[44px] flex-shrink-0 select-none items-center px-2">
           {tabs.length === 1 ? getOneTabComponent() : getTabGridComponent()}
         </div>
         <Separator

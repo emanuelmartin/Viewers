@@ -135,11 +135,19 @@ const createRoutes = ({
 
   const customRoutes = customizationService.getCustomization('routes.customRoutes');
 
+  // A deployment can replace the "study not available" pages (pixOS: Spanish, says why and what to do)
+  const StudyUnavailable = customizationService.getCustomization('ui.studyUnavailable');
+  const baked = StudyUnavailable
+    ? bakedInRoutes.map(r =>
+        r.path === '/notfoundstudy' || r.path === '/notfoundserver' ? { ...r, children: StudyUnavailable } : r
+      )
+    : bakedInRoutes;
+
   const allRoutes = [
     ...routes,
     ...(showStudyList ? [WorkListRoute] : []),
     ...(customRoutes?.routes || []),
-    ...bakedInRoutes,
+    ...baked,
     customRoutes?.notFoundRoute || notFoundRoute,
   ];
 

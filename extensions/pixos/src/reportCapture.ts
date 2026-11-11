@@ -91,7 +91,7 @@ export const REPORT_CAPTURE_BUTTON = {
   id: 'pixosAddToReport',
   uiType: 'ohif.toolButton',
   props: {
-    icon: 'clipboard',
+    icon: 'tool-annotate',
     label: 'Agregar al reporte',
     tooltip: 'Agregar la vista activa (corte, ventana, zoom y anotaciones) a las imágenes del reporte',
     commands: 'pixosAddToReport',

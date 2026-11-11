@@ -25,5 +25,7 @@
   "Do you want to open this Segmentation?": "¿Desea abrir esta segmentación?",
   "There are unsaved measurements. Do you want to save it?": "Hay medidas sin guardar. ¿Desea guardarlas?",
   "Export": "Exportar",
-  "Create Report": "Crear informe"
+  "Create Report": "Crear informe",
+  "Save": "Guardar",
+  "No tracked measurements": "Sin medidas todavía. Use «Medir» en la barra para agregar una."
 }

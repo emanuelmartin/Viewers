@@ -168,5 +168,8 @@
   "Less Tools": "Menos herramientas",
   "Measure": "Medir",
   "Report": "Informe",
-  "Close": "Cerrar"
+  "Close": "Cerrar",
+  "Click to Segment": "Segmentar con un clic",
+  "Click-to-segment lesions with no configuration. Hover for visual feedback—click when a plus sign appears to segment the lesion.": "Segmente lesiones con un clic, sin configurar nada. Pase el cursor y haga clic cuando aparezca el signo + para segmentar la lesión.",
+  "PET only. Click-to-segment lesions with no configuration. Hover for visual feedback—click when a plus sign appears to segment the lesion.": "Solo PET. Segmente lesiones con un clic, sin configurar nada. Pase el cursor y haga clic cuando aparezca el signo + para segmentar la lesión."
 }

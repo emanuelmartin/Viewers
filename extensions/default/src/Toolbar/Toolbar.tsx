@@ -26,9 +26,15 @@ interface ToolbarProps {
    * Used for ordering and layout purposes in the UI.
    */
   location?: number;
+
+  /**
+   * Optional labelled groups (button ids in order). Buttons not named in any group go to the last
+   * group. Without groups the buttons render flat, as before.
+   */
+  groups?: Array<{ label: string; ids: string[] }>;
 }
 
-export function Toolbar({ buttonSection = 'primary', viewportId, location }: ToolbarProps) {
+export function Toolbar({ buttonSection = 'primary', viewportId, location, groups }: ToolbarProps) {
   const {
     toolbarButtons,
     onInteraction,
@@ -45,54 +51,87 @@ export function Toolbar({ buttonSection = 'primary', viewportId, location }: Too
     return null;
   }
 
+  const renderTool = toolDef => {
+    if (!toolDef) {
+      return null;
+    }
+
+    const { id, Component, componentProps } = toolDef;
+
+    // Enhanced props with state and actions - respecting viewport specificity
+    const enhancedProps = {
+      ...componentProps,
+      isOpen: isItemOpen(id, viewportId),
+      isLocked: isItemLocked(id, viewportId),
+      onOpen: () => openItem(id, viewportId),
+      onClose: () => closeItem(id, viewportId),
+      onToggleLock: () => toggleLock(id, viewportId),
+      viewportId,
+    };
+
+    const tool = (
+      <Component
+        key={id}
+        id={id}
+        location={location}
+        onInteraction={args => {
+          onInteraction({
+            ...args,
+            itemId: id,
+            viewportId,
+          });
+        }}
+        {...enhancedProps}
+      />
+    );
+
+    return (
+      <div
+        key={id}
+        // This wrapper div exists solely for React's key prop requirement during reconciliation.
+        // We use display:contents to make it transparent to the layout engine (children appear
+        // as direct children of the parent) while keeping it in the DOM for React's virtual DOM.
+        className="contents"
+      >
+        {tool}
+      </div>
+    );
+  };
+
+  if (!groups?.length) {
+    return <>{toolbarButtons.map(renderTool)}</>;
+  }
+
+  const byId = new Map(toolbarButtons.filter(Boolean).map(def => [def.id, def]));
+  const placed = new Set<string>();
+  const filled = groups.map(group => {
+    const defs = group.ids.map(id => byId.get(id)).filter(Boolean);
+    defs.forEach(def => placed.add(def.id));
+    return { label: group.label, defs };
+  });
+  const rest = toolbarButtons.filter(def => def && !placed.has(def.id));
+  filled[filled.length - 1].defs.push(...rest);
+
   return (
     <>
-      {toolbarButtons?.map(toolDef => {
-        if (!toolDef) {
-          return null;
-        }
-
-        const { id, Component, componentProps } = toolDef;
-
-        // Enhanced props with state and actions - respecting viewport specificity
-        const enhancedProps = {
-          ...componentProps,
-          isOpen: isItemOpen(id, viewportId),
-          isLocked: isItemLocked(id, viewportId),
-          onOpen: () => openItem(id, viewportId),
-          onClose: () => closeItem(id, viewportId),
-          onToggleLock: () => toggleLock(id, viewportId),
-          viewportId,
-        };
-
-        const tool = (
-          <Component
-            key={id}
-            id={id}
-            location={location}
-            onInteraction={args => {
-              onInteraction({
-                ...args,
-                itemId: id,
-                viewportId,
-              });
-            }}
-            {...enhancedProps}
-          />
-        );
-
-        return (
+      {filled
+        .filter(group => group.defs.length)
+        .map(group => (
           <div
-            key={id}
-            // This wrapper div exists solely for React's key prop requirement during reconciliation.
-            // We use display:contents to make it transparent to the layout engine (children appear
-            // as direct children of the parent) while keeping it in the DOM for React's virtual DOM.
-            className="contents"
+            key={group.label}
+            role="group"
+            aria-label={group.label}
+            className="px-tool-group"
           >
-            {tool}
+            <div className="px-tool-group-buttons">{group.defs.map(renderTool)}</div>
+            <span
+              className="px-tool-group-label"
+              aria-hidden
+            >
+              {group.label}
+            </span>
           </div>
-        );
-      })}
+        ))}
     </>
   );
 }
