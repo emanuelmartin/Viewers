@@ -31,7 +31,8 @@ interface ToolbarProps {
    * Optional labelled groups (button ids in order). Buttons not named in any group go to the last
    * group. Without groups the buttons render flat, as before.
    */
-  groups?: Array<{ label: string; ids: string[] }>;
+  /** Labelled groups; `prefix` also takes every button whose id starts with it (buttons added at run time). */
+  groups?: Array<{ label: string; ids: string[]; prefix?: string }>;
 }
 
 export function Toolbar({ buttonSection = 'primary', viewportId, location, groups }: ToolbarProps) {
@@ -106,6 +107,9 @@ export function Toolbar({ buttonSection = 'primary', viewportId, location, group
   const placed = new Set<string>();
   const filled = groups.map(group => {
     const defs = group.ids.map(id => byId.get(id)).filter(Boolean);
+    if (group.prefix) {
+      defs.push(...toolbarButtons.filter(def => def?.id?.startsWith(group.prefix) && !group.ids.includes(def.id)));
+    }
     defs.forEach(def => placed.add(def.id));
     return { label: group.label, defs };
   });

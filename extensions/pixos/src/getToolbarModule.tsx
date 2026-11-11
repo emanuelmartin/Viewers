@@ -1,5 +1,6 @@
 import AI3DMenu from './AI3DMenu';
 import ProcessMenu from './ProcessMenu';
+import { Menu3D, WindowsMenu } from './HeaderMenus';
 import { getAccess, subscribeAccess } from './ris';
 import { aiSurfaceView } from './aiSurfaces';
 
@@ -8,6 +9,8 @@ export default function getToolbarModule({ servicesManager }: withAppTypes) {
   return [
     { name: 'pixos.ai3dMenu', defaultComponent: AI3DMenu },
     { name: 'pixos.processMenu', defaultComponent: ProcessMenu },
+    { name: 'pixos.windowsMenu', defaultComponent: WindowsMenu },
+    { name: 'pixos.menu3d', defaultComponent: Menu3D },
     {
       name: 'evaluate.pixos.ai3dMenu',
       evaluate: ({ viewportId }) => ({ disabled: !aiSurfaceView(servicesManager, viewportId) }),

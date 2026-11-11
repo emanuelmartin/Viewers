@@ -19,14 +19,60 @@ const TOOL_GROUPS = [
   },
   { label: 'Imagen', ids: ['WindowLevel', 'pixosProcess'] },
   { label: 'Medir', ids: ['MeasurementTools'] },
-  { label: 'Vista', ids: ['Layout'] },
+  // pixOS: the tools of the modality on screen (TC, RM, PET, US…); its name comes from the active view
+  { label: 'Modalidad', ids: [], prefix: 'px.mod.' },
+  { label: 'Vista', ids: ['Layout', 'px.3d'] },
   { label: 'Informe', ids: ['pixosAddToReport'] },
   { label: 'Más', ids: ['Capture', 'MoreTools'] },
 ];
 
+const MODALITY_NAME: Record<string, string> = {
+  CT: 'TC',
+  MR: 'RM',
+  PT: 'PET',
+  NM: 'Nuclear',
+  US: 'US',
+  MG: 'Mastografía',
+  CR: 'Rayos X',
+  DX: 'Rayos X',
+  XA: 'Angio',
+  RF: 'Fluoro',
+};
+
+/** Name of the modality in the active view, for the toolbar's modality group. */
+function useActiveModalityName(servicesManager): string {
+  const { viewportGridService, displaySetService } = servicesManager.services;
+  const read = () => {
+    const uids: string[] =
+      viewportGridService.getState().viewports.get(viewportGridService.getActiveViewportId())
+        ?.displaySetInstanceUIDs || [];
+    const ds: any = uids
+      .map(uid => displaySetService.getDisplaySetByUID(uid))
+      .find((d: any) => d && !['SEG', 'SR', 'RTSTRUCT'].includes(d.Modality));
+    return ds ? MODALITY_NAME[ds.Modality] || ds.Modality : '';
+  };
+  const [name, setName] = React.useState(read);
+  React.useEffect(() => {
+    const update = () => setName(prev => read() || prev);
+    const subs = [
+      viewportGridService.subscribe(viewportGridService.EVENTS.ACTIVE_VIEWPORT_ID_CHANGED, update),
+      viewportGridService.subscribe(viewportGridService.EVENTS.GRID_STATE_CHANGED, update),
+      displaySetService.subscribe(displaySetService.EVENTS.DISPLAY_SETS_ADDED, update),
+    ];
+    return () => subs.forEach(sub => sub.unsubscribe());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return name;
+}
+
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager } = useSystem();
   const { customizationService } = servicesManager.services;
+  const modalityName = useActiveModalityName(servicesManager);
+  const groups = React.useMemo(
+    () => TOOL_GROUPS.map(g => (g.prefix === 'px.mod.' ? { ...g, label: modalityName || 'Modalidad' } : g)),
+    [modalityName]
+  );
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -139,7 +185,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       <div className="relative flex items-stretch justify-center">
         <Toolbar
           buttonSection="primary"
-          groups={TOOL_GROUPS}
+          groups={groups}
         />
       </div>
     </Header>

@@ -18,6 +18,7 @@ import { installAutoVoi } from './autoVoi';
 import { installModalityLook } from './modalityLook';
 import getToolbarModule, { installAI3DButton, installProcessButton } from './getToolbarModule';
 import { installReportCaptureButton } from './reportCapture';
+import { installModalityBar } from './modalityBar';
 
 let cleanup: Array<() => void> = [];
 
@@ -42,6 +43,7 @@ function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
     installLooks(servicesManager),
     installReportCaptureButton(servicesManager),
     installProcessButton(servicesManager),
+    installModalityBar(servicesManager),
   ];
   loadAccess();
 }

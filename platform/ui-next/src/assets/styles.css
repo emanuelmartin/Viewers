@@ -394,7 +394,7 @@
 .px-proc-trigger-label {
   font: 600 12.5px/1 var(--px-font-ui), system-ui, sans-serif;
 }
-@media (max-width: 1279px) {
+@media (max-width: 1599px) {
   .px-proc-trigger-label {
     display: none;
   }
@@ -644,4 +644,16 @@
   border: 1px solid rgba(255, 141, 71, 0.4);
   font: 700 13.5px/1.3 var(--px-font-ui), system-ui, sans-serif;
   color: #ffe2cf;
+}
+.px-tile-2 {
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.px-tile-2 small {
+  font: 500 10px/1 var(--px-font-ui), system-ui, sans-serif;
+  color: rgba(185, 205, 225, 0.6);
 }

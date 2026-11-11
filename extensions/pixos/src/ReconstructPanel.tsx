@@ -22,7 +22,7 @@ import {
   view3D,
 } from './recon3d';
 import { getAccess, subscribeAccess } from './ris';
-import { MODALITY_LABEL, activateTool, activeModality, applyWindow, modalityTools } from './modalityTools';
+import { activeModality } from './modalityBar';
 
 function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
@@ -125,7 +125,6 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
   }
 
   const presets = PRESETS[modality] || PRESETS.CT;
-  const tools = modalityTools(modality);
   const has3D = !!vp;
   const isCT = modality === 'CT';
 
@@ -281,38 +280,6 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
         </>
       )}
 
-      <Section title={`Herramientas de ${MODALITY_LABEL[modality] || modality || 'la imagen'}`}>
-        {tools.windows.length > 0 && (
-          <>
-            <p className="px-proc-sub">Ventanas</p>
-            <div className="px-chips">
-              {tools.windows.map(w =>
-                w.kind === 'window' ? (
-                  <button key={w.label} type="button" className="px-seg-item" title={`A ${w.width} / N ${w.center}`} onClick={() => warn(applyWindow(servicesManager, w.width, w.center))}>
-                    {w.label}
-                  </button>
-                ) : null
-              )}
-            </div>
-          </>
-        )}
-        <div className="px-proc-grid3" style={{ gridTemplateColumns: 'repeat(2,1fr)', marginTop: 8 }}>
-          {tools.tools.map(t => (
-            <button
-              key={t.label}
-              type="button"
-              className="px-tile"
-              title={t.kind === 'window' ? '' : t.hint}
-              onClick={async () => {
-                if (t.kind === 'tool') activateTool(commandsManager, t.tool);
-                else if (t.kind === 'run') warn(await t.run(servicesManager, commandsManager));
-              }}
-            >
-              <strong>{t.label}</strong>
-            </button>
-          ))}
-        </div>
-      </Section>
     </div>
   );
 }
