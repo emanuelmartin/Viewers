@@ -56,7 +56,8 @@ function sliceText(viewport): string {
   return index != null && total > 1 ? `imagen ${index + 1}/${total}` : '';
 }
 
-export async function addViewportToReport(servicesManager): Promise<void> {
+/** `label` replaces the series/slice label (e.g. «L1 · Nódulo hepático»); `quiet` skips the toast (the caller shows its own). */
+export async function addViewportToReport(servicesManager, opts: { label?: string; quiet?: boolean } = {}): Promise<void> {
   const { viewportGridService, cornerstoneViewportService, displaySetService, uiNotificationService } = servicesManager.services;
   const { activeViewportId, viewports } = viewportGridService.getState();
   const viewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
@@ -69,13 +70,16 @@ export async function addViewportToReport(servicesManager): Promise<void> {
   }
   try {
     const image = await composeViewport(viewport);
-    const label = [displaySet.SeriesDescription || displaySet.Modality, sliceText(viewport)].filter(Boolean).join(' · ');
+    const label = [opts.label, displaySet.SeriesDescription || displaySet.Modality, sliceText(viewport)].filter(Boolean).join(' · ').slice(0, 160);
     const res = await callCloud<{ count: number; linked: boolean }>('addReportImageFromViewer', {
       studyInstanceUID: displaySet.StudyInstanceUID,
       image,
       label,
     });
     trackAI('viewer.report_capture', displaySet.StudyInstanceUID, { series: displaySet.SeriesDescription || displaySet.Modality || '', count: res.count });
+    if (opts.quiet) {
+      return;
+    }
     uiNotificationService.show({
       title: 'Imagen agregada al reporte',
       message: `${label || 'Vista actual'}. El reporte tiene ${res.count} ${res.count === 1 ? 'imagen' : 'imágenes'}.`,
@@ -83,6 +87,9 @@ export async function addViewportToReport(servicesManager): Promise<void> {
       duration: 3000,
     });
   } catch (e) {
+    if (opts.quiet) {
+      throw e;
+    }
     uiNotificationService.show({ title: 'No se pudo agregar al reporte', message: e?.message || String(e), type: 'error' });
   }
 }

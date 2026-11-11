@@ -20,6 +20,10 @@ import {
   spin,
   spinning,
   view3D,
+  seriesContrast,
+  presetBlocked,
+  NEEDS_CONTRAST,
+  CONTRAST_UNKNOWN_NOTE,
 } from './recon3d';
 import { getAccess, subscribeAccess } from './ris';
 import { activeModality } from './modalityBar';
@@ -136,6 +140,7 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
   }
 
   const presets = PRESETS[modality] || PRESETS.CT;
+  const contrast = modality === 'CT' ? seriesContrast(servicesManager) : 'desconocido';
   const has3D = !!vp;
   const isCT = modality === 'CT';
 
@@ -162,7 +167,8 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
                   key={p.id}
                   type="button"
                   className="px-preset"
-                  title={p.hint}
+                  title={presetBlocked(p.id, contrast) || p.hint}
+                  disabled={!!presetBlocked(p.id, contrast)}
                   data-active={preset === p.id || undefined}
                   onClick={() => {
                     setPreset(vp, p.id);
@@ -175,6 +181,10 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
                 </button>
               ))}
             </div>
+            {contrast === 'no' && presets.some(p => NEEDS_CONTRAST.has(p.id)) && (
+              <p className="px-proc-note">Serie sin contraste: los modos de vasos están apagados (necesitan angio-TC).</p>
+            )}
+            {contrast === 'desconocido' && preset && NEEDS_CONTRAST.has(preset) && <p className="px-proc-note">{CONTRAST_UNKNOWN_NOTE}</p>}
           </Section>
 
           <Section title="Ajustar" aside={<button type="button" className="px-link" onClick={() => { setThresholdState(0); setThreshold(vp, 0); }}>Umbral original</button>}>

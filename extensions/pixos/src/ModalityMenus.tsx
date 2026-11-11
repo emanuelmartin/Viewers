@@ -2,7 +2,8 @@
  * Menus of the modality group in the top bar:
  * - «Volumen de lesión» (CT, MR, PET): click a lesion, it grows in 3D and is measured (mL, axes, density / SUV).
  * - «Vértebras» (CT, MR, X-ray): each arrow placed gets the next vertebra's name (C1…S1, up or down).
- * - «Cálculos» (US): obstetric biometry with Hadlock gestational age and fetal weight, and Teichholz ejection fraction.
+ * - «Cálculos» (US): obstetric biometry with Hadlock gestational age and fetal weight, and ejection fraction by disks.
+ * Each one has «Al informe» (radiologists only): the numbers, method and reference go to the report (reportLink.ts).
  */
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { useSystem } from '@ohif/core';
@@ -11,6 +12,8 @@ import { activeModality } from './modalityBar';
 import { describe, ensureVolume, LesionResult, measureLesion, pickPoint } from './lesionVolume';
 import { readMeasurements } from './tools';
 import { compositeGA, diskVolume, efRange, gaVariability, hadlockEFW, hadlockGA, lvDisks, weeksText } from './clinicalCalc';
+import { getAccess } from './ris';
+import { ReportItem, ReportValue, sendToReport } from './reportLink';
 
 const TOOL_GROUPS = ['default', 'mpr', 'SRToolGroup', 'volume3d'];
 
@@ -21,6 +24,61 @@ const copy = (text: string) => {
     // no clipboard: the text is on screen
   }
 };
+
+/** «Al informe» with its status line; only for radiologists with a pixOS session (the server checks it again). */
+function SendButton({ label = 'Al informe', send }: { label?: string; send: () => Promise<string> }) {
+  const [state, setState] = useState<'idle' | 'busy'>('idle');
+  const [msg, setMsg] = useState('');
+  if (!getAccess().canSave) {
+    return null;
+  }
+  return (
+    <>
+      <button
+        type="button"
+        className="px-link"
+        disabled={state === 'busy'}
+        onClick={async () => {
+          setState('busy');
+          try {
+            setMsg(await send());
+          } catch (e) {
+            setMsg((e as Error)?.message || String(e));
+          }
+          setState('idle');
+        }}
+      >
+        {state === 'busy' ? 'Enviando…' : label}
+      </button>
+      {msg && <span className="px-proc-note px-send-msg" role="status">{msg}</span>}
+    </>
+  );
+}
+
+const v = (name: string, value: number | null | undefined, unit: string): ReportValue[] =>
+  typeof value === 'number' && Number.isFinite(value) ? [{ name, value: Math.round(value * 100) / 100, unit }] : [];
+
+/** A lesion result as a report item, with the method and reference that back it. */
+export function lesionItem(r: LesionResult, lesionKey: string): ReportItem {
+  const pet = r.unit === 'SUV';
+  const extent = r.axes.flatMap((a, i) => v(['extentA', 'extentB', 'extentC'][i], a, 'cm'));
+  const values: ReportValue[] = pet
+    ? [...v('suvMax', r.max, 'g/mL'), ...v('suvPeak', r.peak, 'g/mL'), ...v('mtv', r.ml, 'mL'), ...v('suvMean', r.mean, 'g/mL'), ...v('tlg', r.mean * r.ml, 'g'), ...extent]
+    : [...v('volume', r.ml, 'mL'), ...v('mean', r.mean, r.unit === 'UH' ? 'HU' : r.unit), ...extent];
+  return {
+    kind: 'Volumen de lesión',
+    label: r.label,
+    text: describe(r),
+    values,
+    tool: 'pixos.lesionVolume',
+    method: pet
+      ? `Isocontorno 3D al ${r.threshold} % del SUV máx (VOI${r.threshold}); SUVpeak en esfera de 1 mL`
+      : 'Crecimiento de región 3D desde un clic (apoyo; contorno revisado por el médico)',
+    reference: pet ? 'Boellaard R et al. EANM v2.0, EJNMMI 2015;42:328–54' : 'Adams R, Bischof L. IEEE TPAMI 1994;16:641–7 (método)',
+    field: 'lesion',
+    lesionKey,
+  };
+}
 
 // ── lesion volume ───────────────────────────────────────────────────────────
 
@@ -41,6 +99,7 @@ export function LesionMenu(): ReactNode {
   const [state, setState] = useState<'idle' | 'loading' | 'picking' | 'growing'>('idle');
   const [msg, setMsg] = useState('');
   const [list, setList] = useState<LesionResult[]>(() => [...lesionResults]);
+  const [keys, setKeys] = useState<Record<number, string>>({});
   const cancelRef = useRef<() => void>();
 
   useEffect(() => setTol(cfg.def), [key]);
@@ -145,7 +204,24 @@ export function LesionMenu(): ReactNode {
               </header>
               <ul className="px-result-list">
                 {list.map(r => (
-                  <li key={r.index}>{describe(r)}</li>
+                  <li key={r.index}>
+                    {describe(r)}
+                    {getAccess().canSave && (
+                      <span className="px-send-row">
+                        <label>
+                          Lesión
+                          <input
+                            className="px-key-input"
+                            aria-label="Identificador de la lesión para seguirla entre estudios"
+                            value={keys[r.index] ?? `L${r.index}`}
+                            maxLength={12}
+                            onChange={e => setKeys(k => ({ ...k, [r.index]: e.target.value.toUpperCase() }))}
+                          />
+                        </label>
+                        <SendButton send={() => sendToReport(servicesManager, [lesionItem(r, keys[r.index] ?? `L${r.index}`)], { keyImage: `${keys[r.index] ?? `L${r.index}`} · ${r.label}` })} />
+                      </span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -214,6 +290,15 @@ function stopSpine(servicesManager) {
   notifySpine();
 }
 
+/** Vertebra names placed so far (arrows labelled C1…S1), in anatomical order. */
+function vertebraLabels(servicesManager): string[] {
+  const { measurementService } = servicesManager.services;
+  const set = new Set<string>(
+    (measurementService.getMeasurements() || []).map((m: any) => String(m.label || m.text || '').trim()).filter((l: string) => VERTEBRAE.includes(l))
+  );
+  return VERTEBRAE.filter(x => set.has(x));
+}
+
 export function SpineMenu(): ReactNode {
   const { servicesManager, commandsManager } = useSystem();
   const [, force] = useState(0);
@@ -269,6 +354,22 @@ export function SpineMenu(): ReactNode {
               <button type="button" className="px-tile" disabled={!spine} onClick={() => stopSpine(servicesManager)}>
                 <strong>Terminar</strong>
               </button>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <SendButton
+                label="Niveles al informe (con imagen)"
+                send={() => {
+                  const levels = vertebraLabels(servicesManager);
+                  if (!levels.length) {
+                    return Promise.reject(new Error('Aún no hay vértebras marcadas.'));
+                  }
+                  return sendToReport(
+                    servicesManager,
+                    [{ kind: 'Vértebras', label: 'Niveles vertebrales', text: `Niveles marcados por el médico: ${levels.join(', ')}.`, values: [], tool: 'pixos.spineLabels', method: 'Numeración secuencial colocada por el médico (sin inferencia automática)', field: 'vertebras' }],
+                    { keyImage: `Vértebras ${levels[0]}–${levels[levels.length - 1]}` }
+                  );
+                }}
+              />
             </div>
           </div>
         </>
@@ -424,6 +525,32 @@ function patientSex(servicesManager): string {
   return ds?.instances?.[0]?.PatientSex || ds?.instance?.PatientSex || '';
 }
 
+function obstetricItem(f: Record<string, string>, lines: string[]): ReportItem {
+  const mm = { bpd: num(f.bpd), hc: num(f.hc), ac: num(f.ac), fl: num(f.fl) };
+  const cm = (x: number | null) => (x ? x / 10 : null);
+  const ga = mm.bpd && mm.hc && mm.ac && mm.fl ? compositeGA(cm(mm.bpd)!, cm(mm.hc)!, cm(mm.ac)!, cm(mm.fl)!) : null;
+  const efw = hadlockEFW({ bpd: cm(mm.bpd), hc: cm(mm.hc), ac: cm(mm.ac), fl: cm(mm.fl) });
+  return {
+    kind: 'Cálculo', label: 'Biometría fetal', text: lines.join('; '),
+    values: [...v('bpd', mm.bpd, 'mm'), ...v('hc', mm.hc, 'mm'), ...v('ac', mm.ac, 'mm'), ...v('fl', mm.fl, 'mm'), ...v('ga', ga, 'sem'), ...v('efw', efw?.grams, 'g')],
+    tool: 'pixos.obstetric', method: `Hadlock: edad gestacional compuesta (1984)${efw ? `; peso fetal ${efw.model}` : ''}`,
+    reference: 'Hadlock FP et al. Radiology 1984;152:497–501; Am J Obstet Gynecol 1985;151:333–7', field: 'obstetrico',
+  };
+}
+
+function echoItem(t: Record<string, Disks | null>, f: Record<string, string>, lines: string[]): ReportItem {
+  const biplane = !!(t.ed2 && t.es2);
+  const edv = t.ed4 ? diskVolume(t.ed4, biplane ? t.ed2 : null) : null;
+  const esv = t.es4 ? diskVolume(t.es4, biplane ? t.es2 : null) : null;
+  const ef = edv && esv ? ((edv - esv) / edv) * 100 : null;
+  return {
+    kind: 'Cálculo', label: 'Función del ventrículo izquierdo', text: lines.join('; '),
+    values: [...v('edv', edv, 'mL'), ...v('esv', esv, 'mL'), ...v('ef', ef, '%'), ...v('lvidd', num(f.lvidd), 'mm'), ...v('lvids', num(f.lvids), 'mm')],
+    tool: 'pixos.echoDisks', method: `Método de discos (Simpson modificado), ${biplane ? 'biplano' : 'monoplano 4 cámaras'}`,
+    reference: 'Lang RM et al. ASE/EACVI, J Am Soc Echocardiogr 2015;28:1–39', field: 'fevi',
+  };
+}
+
 export function CalcMenu(): ReactNode {
   const { servicesManager } = useSystem();
   const [tab, setTab] = useState<'ob' | 'echo'>(() => (isEcho(servicesManager) ? 'echo' : 'ob'));
@@ -496,9 +623,12 @@ export function CalcMenu(): ReactNode {
             <div className="px-proc-section">
               <header>
                 <h4>Resultado</h4>
-                <button type="button" className="px-link" onClick={() => copy(lines.join('\n'))}>
-                  Copiar
-                </button>
+                <span className="px-send-row">
+                  <button type="button" className="px-link" onClick={() => copy(lines.join('\n'))}>
+                    Copiar
+                  </button>
+                  <SendButton send={() => sendToReport(servicesManager, [tab === 'ob' ? obstetricItem(f, lines) : echoItem(traces, f, lines)], { keyImage: null })} />
+                </span>
               </header>
               <ul className="px-result-list">
                 {lines.map(l => (

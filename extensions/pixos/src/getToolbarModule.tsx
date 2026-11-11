@@ -2,6 +2,7 @@ import AI3DMenu from './AI3DMenu';
 import ProcessMenu from './ProcessMenu';
 import { Menu3D, WindowsMenu } from './HeaderMenus';
 import { CalcMenu, LesionMenu, SpineMenu } from './ModalityMenus';
+import { ReportMenu } from './ReportMenu';
 import { getAccess, subscribeAccess } from './ris';
 import { aiSurfaceView } from './aiSurfaces';
 
@@ -15,6 +16,7 @@ export default function getToolbarModule({ servicesManager }: withAppTypes) {
     { name: 'pixos.lesionMenu', defaultComponent: LesionMenu },
     { name: 'pixos.spineMenu', defaultComponent: SpineMenu },
     { name: 'pixos.calcMenu', defaultComponent: CalcMenu },
+    { name: 'pixos.reportMenu', defaultComponent: ReportMenu },
     {
       name: 'evaluate.pixos.ai3dMenu',
       evaluate: ({ viewportId }) => ({ disabled: !aiSurfaceView(servicesManager, viewportId) }),

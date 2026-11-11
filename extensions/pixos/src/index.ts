@@ -19,6 +19,7 @@ import { installModalityLook } from './modalityLook';
 import getToolbarModule, { installAI3DButton, installProcessButton } from './getToolbarModule';
 import { installReportCaptureButton } from './reportCapture';
 import { installModalityBar } from './modalityBar';
+import { installReportLink } from './reportLink';
 
 let cleanup: Array<() => void> = [];
 
@@ -27,7 +28,7 @@ let cleanup: Array<() => void> = [];
  * session) and checks the RIS session; physicians get the full toolbar and
  * the PixOS tools panel once the server confirms it.
  */
-function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
+function onModeEnter({ servicesManager, extensionManager, commandsManager }: withAppTypes) {
   cleanup.forEach(fn => fn());
   cleanup = [
     installToolbarGate(servicesManager),
@@ -44,6 +45,7 @@ function onModeEnter({ servicesManager, extensionManager }: withAppTypes) {
     installReportCaptureButton(servicesManager),
     installProcessButton(servicesManager),
     installModalityBar(servicesManager),
+    installReportLink(servicesManager, commandsManager),
   ];
   loadAccess();
 }

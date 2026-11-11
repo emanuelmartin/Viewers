@@ -741,3 +741,14 @@
   align-items: center;
   justify-content: space-between;
 }
+
+/* «Al informe» and the report menu */
+.px-send-row { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.px-send-row label { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.8; }
+.px-key-input { width: 52px; padding: 1px 4px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3); color: inherit; font: inherit; text-transform: uppercase; }
+.px-send-msg { display: block; margin: 2px 0 0; }
+.px-textarea { width: 100%; margin-top: 6px; padding: 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3); color: inherit; font: inherit; resize: vertical; }
+.px-radio-list { display: grid; gap: 4px; }
+.px-radio-list .px-seg-item { text-align: start; }
+.px-preset:disabled { opacity: 0.38; cursor: not-allowed; filter: grayscale(0.7); }
+.px-preset:disabled:hover { transform: none; }

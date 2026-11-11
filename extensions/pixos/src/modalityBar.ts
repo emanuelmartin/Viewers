@@ -9,6 +9,7 @@ import { getAccess, subscribeAccess } from './ris';
 const TOOL_GROUPS = ['default', 'mpr', 'SRToolGroup', 'volume3d'];
 export const MOD_PREFIX = 'px.mod.';
 export const BUTTON_3D = 'px.3d';
+export const BUTTON_REPORT = 'px.report';
 
 const toolButton = (toolName: string, label: string, tooltip: string, icon: string, key = toolName) => ({
   id: `${MOD_PREFIX}${key}`,
@@ -89,6 +90,8 @@ function buttonsFor(modality: string): any[] {
 }
 
 const BUTTON_3D_DEF = { id: BUTTON_3D, uiType: 'pixos.menu3d', props: {} };
+/** «Informe»: crítico, revisión por pares y PACS (radiólogos que pueden guardar). */
+const BUTTON_REPORT_DEF = { id: BUTTON_REPORT, uiType: 'pixos.reportMenu', props: {} };
 
 /** Modality of the active view (its first image series). */
 export function activeModality(servicesManager): string {
@@ -121,16 +124,19 @@ export function installModalityBar(servicesManager): () => void {
       const wanted = buttonsFor(m);
       // 3D only where there is a volume to reconstruct
       const volumetric = ['CT', 'MR', 'PT', 'NM'].includes(m);
-      const missing = [...wanted, BUTTON_3D_DEF].filter(b => !toolbarService.getButton(b.id));
+      const missing = [...wanted, BUTTON_3D_DEF, BUTTON_REPORT_DEF].filter(b => !toolbarService.getButton(b.id));
       if (missing.length) {
         toolbarService.addButtons(missing);
       }
-      const base = primary.filter(id => !id.startsWith(MOD_PREFIX) && id !== BUTTON_3D);
+      const base = primary.filter(id => !id.startsWith(MOD_PREFIX) && id !== BUTTON_3D && id !== BUTTON_REPORT);
       const atMeasure = base.indexOf('MeasurementTools');
       base.splice(atMeasure >= 0 ? atMeasure + 1 : base.length, 0, ...wanted.map(b => b.id));
       if (volumetric) {
         const atLayout = base.indexOf('Layout');
         base.splice(atLayout >= 0 ? atLayout + 1 : base.length, 0, BUTTON_3D);
+      }
+      if (getAccess().canSave) {
+        base.push(BUTTON_REPORT);
       }
       if (base.join('|') !== primary.join('|')) {
         toolbarService.clearButtonSection('primary');

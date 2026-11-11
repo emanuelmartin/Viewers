@@ -1,6 +1,7 @@
 import { utilities as csToolsUtilities } from '@cornerstonejs/tools';
 import { datasetToDicomBlob } from '@ohif/extension-default/src/utils/dicomWriter';
 import { callCloud } from './ris';
+import { ImageRef, refOfImageId } from './reportLink';
 import { stackSegmentStats } from './segTools';
 
 // ── measurements ────────────────────────────────────────────────────────────
@@ -12,6 +13,8 @@ export type ViewerItem = {
   text: string;
   series?: string;
   values: Record<string, number | string>;
+  /** Image where it was measured (to come back to it from the report). */
+  ref?: ImageRef | null;
 };
 
 const round = (x: number, d = 1) => Math.round(x * 10 ** d) / 10 ** d;
@@ -38,7 +41,9 @@ export function readMeasurements(servicesManager): ViewerItem[] {
     const series = displaySetService.getDisplaySetByUID(m.displaySetInstanceUID)?.SeriesDescription || '';
     const primary = (m.displayText?.primary || []).join(' · ');
     const kind = TOOL_LABELS[m.toolName] || m.toolName;
+    const imageId = m.referencedImageId || m.metadata?.referencedImageId;
     return {
+      ref: imageId ? refOfImageId(imageId) : null,
       key: m.uid,
       kind: m.toolName,
       label: m.label || kind,

@@ -1,7 +1,7 @@
 import React, { ReactNode, useState } from 'react';
 import { useSystem } from '@ohif/core';
 import { Icons, Popover, PopoverContent, PopoverTrigger, Tooltip, TooltipContent, TooltipTrigger } from '@ohif/ui-next';
-import { open3D, PRESETS, setPreset, view3D } from './recon3d';
+import { CONTRAST_UNKNOWN_NOTE, NEEDS_CONTRAST, open3D, presetBlocked, PRESETS, seriesContrast, setPreset, view3D } from './recon3d';
 import { activeModality } from './modalityBar';
 
 const RECONSTRUCT_PANEL = '@ohif/extension-pixos.panelModule.reconstruct';
@@ -134,6 +134,7 @@ export function Menu3D(): ReactNode {
   const [busy, setBusy] = useState(false);
   const modality = activeModality(servicesManager);
   const presets = (PRESETS[modality] || PRESETS.CT).slice(0, 6);
+  const contrast = modality === 'CT' ? seriesContrast(servicesManager) : 'desconocido';
 
   const go = async (only: boolean, preset?: string) => {
     setBusy(true);
@@ -170,12 +171,25 @@ export function Menu3D(): ReactNode {
             </header>
             <div className="px-preset-grid">
               {presets.map(p => (
-                <button key={p.id} type="button" className="px-preset" title={p.hint} onClick={() => { close(); go(false, p.id); }}>
+                <button
+                  key={p.id}
+                  type="button"
+                  className="px-preset"
+                  title={presetBlocked(p.id, contrast) || p.hint}
+                  disabled={!!presetBlocked(p.id, contrast)}
+                  onClick={() => { close(); go(false, p.id); }}
+                >
                   <i style={{ background: p.css }} />
                   <span>{p.label}</span>
                 </button>
               ))}
             </div>
+            {contrast === 'no' && presets.some(p => NEEDS_CONTRAST.has(p.id)) && (
+              <p className="px-proc-note" style={{ marginTop: 8 }}>Serie sin contraste: los modos de vasos necesitan angio-TC.</p>
+            )}
+            {contrast === 'desconocido' && presets.some(p => NEEDS_CONTRAST.has(p.id)) && (
+              <p className="px-proc-note" style={{ marginTop: 8 }}>{CONTRAST_UNKNOWN_NOTE}</p>
+            )}
             <button
               type="button"
               className="px-link"

@@ -1,3 +1,4 @@
+import { lesionKeyOfLabel, notifyReport } from './reportLink';
 import React, { useEffect, useState } from 'react';
 import { getAccess, subscribeAccess, callCloud, loadAccess, type ViewerAccess } from './ris';
 import AISection from './AISection';
@@ -205,8 +206,9 @@ function PixOSToolsPanel({ servicesManager, commandsManager }: withAppTypes) {
           <button className={primaryBtn} disabled={!toSend.length || !!busy} onClick={() => run('send', async () => {
             const res: any = await callCloud('saveViewerMeasurements', {
               StudyInstanceUID: activeStudyUID(),
-              items: toSend.map(({ kind, label, text, series, values }) => ({ kind, label, text, series, values })),
+              items: toSend.map(({ kind, label, text, series, values, ref }: any) => ({ kind, label, text, series, values, tool: kind, ref: ref ?? null, lesionKey: lesionKeyOfLabel(label) })),
             });
+            notifyReport(activeStudyUID());
             setResults([]);
             setSelected([]);
             return `${res.count} elemento(s) enviados: aparecen en «Medidas del visor» del editor de informes`;

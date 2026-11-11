@@ -35,6 +35,18 @@ estándar único · **Heurística** = decisión de ingeniería propia, sin valid
 | Mamas enfrentadas, ajuste al tejido | Colgado de lectura | — | Convención |
 | PET invertido al abrir | Presentación de lectura | — | Convención |
 | Etiquetado de vértebras | Numeración secuencial C1…S1 que pone el médico | — | Sin inferencia automática; el médico decide el nivel (atención a vértebras de transición) |
+| 3D de vasos (aorta, tórax, pulmonares, coronarias) | Curvas propias PX-CTA-*: transparente < 110–150 UH, luz con contraste roja (pulmonares azul), hueso > 500 UH marfil | — (umbrales propios; la sangre sin contraste mide ~40 UH, como el músculo) | Convención. Los ajustes de fábrica de VTK/3D Slicer se retiraron: «CT-Chest-Vessels» es opaco desde −1278 UH y «CT-Pulmonary-Arteries» desde −568 UH (todo sale rojo); «CT-Coronary-Arteries-2» pinta la luz con contraste de blanco como hueso |
+| Modos de vasos apagados en serie simple | Contraste por (0018,0010) o por la descripción de serie/protocolo («native», «simple», «sin contraste», «calcium score»…) | DICOM PS3.3 C.7.6.4 (Contrast/Bolus) | Heurística: si nada lo dice, se permite con un aviso |
+
+## Del visor al informe
+- Las medidas viajan con nombre, valor, unidad, método, referencia, imagen (UID y cuadro) e identificador de lesión
+  (L1, L2…). Seguimiento con RECIST 1.1 (Eisenhauer EA et al. *Eur J Cancer* 2009;45:228–47), PERCIST orientativo
+  (Wahl 2009) y tiempo de duplicación de volumen (Schwartz M. *Cancer* 1961;14:1272–94).
+- Al firmar se guardan en el PACS como DICOM SR (TID 1500, DICOM PS3.16) y la segmentación «Lesiones» como DICOM SEG.
+- Revisión por pares con la escala RADPEER 1–4 y significancia a/b (Goldberg-Stein S et al. *J Am Coll Radiol*
+  2017;14:1080–6).
+- Guardar (medidas, imágenes clave, SR/SEG, crítico, revisión) solo lo puede un radiólogo con sesión de pixOS y
+  membresía activa en la organización del estudio; el servidor lo vuelve a revisar.
 
 ## Pendiente de validar antes de uso clínico formal
 - Validación local de «Volumen de lesión» contra segmentación manual (TC, RM, PET) y en maniquí (perfil QIBA de

@@ -3,7 +3,34 @@
  * shift), quality, lighting, standard views, turntable rotation, a crop box, PNG export and volume by density range
  * inside that box. It all acts on the 3D view on screen; nothing is written to the study.
  */
-import { cache, utilities as csUtils } from '@cornerstonejs/core';
+import { cache, CONSTANTS, utilities as csUtils } from '@cornerstonejs/core';
+import { contrastStatus, ContrastStatus, NEEDS_CONTRAST, registerVesselPresets } from './vesselPresets';
+
+// pixOS angio-TC looks (vesselPresets.ts) next to the stock ones
+registerVesselPresets(CONSTANTS.VIEWPORT_PRESETS as any[]);
+export { NEEDS_CONTRAST };
+
+/** Contrast of the series in the active view (or the first CT on screen), from its DICOM header. */
+export function seriesContrast(servicesManager: Services): ContrastStatus {
+  const { viewportGridService, displaySetService } = servicesManager.services;
+  const state = viewportGridService.getState();
+  const ids: string[] = [
+    ...(state.viewports.get(viewportGridService.getActiveViewportId())?.displaySetInstanceUIDs || []),
+    ...[...state.viewports.values()].flatMap((v: any) => v.displaySetInstanceUIDs || []),
+  ];
+  const ds: any = ids.map(id => displaySetService.getDisplaySetByUID(id)).find((d: any) => d?.Modality === 'CT');
+  const inst: any = ds?.instances?.[0] || ds?.instance || {};
+  return contrastStatus({ ...inst, SeriesDescription: ds?.SeriesDescription ?? inst.SeriesDescription });
+}
+
+/** Why a look is off for this series, or null. */
+export function presetBlocked(id: string, contrast: ContrastStatus): string | null {
+  return NEEDS_CONTRAST.has(id) && contrast === 'no'
+    ? 'Requiere angio-TC con contraste. Esta serie es simple: sin contraste la sangre mide lo mismo que el músculo y los vasos no se pueden separar.'
+    : null;
+}
+export const CONTRAST_UNKNOWN_NOTE =
+  'No se sabe si esta serie tiene contraste. Los vasos solo se ven en fase con contraste; si sale hueso o nada, la serie es simple.';
 import vtkPlane from '@kitware/vtk.js/Common/DataModel/Plane';
 
 type Services = any;
@@ -15,10 +42,10 @@ export const PRESETS: Record<string, Preset[]> = {
   CT: [
     { id: 'CT-Bones', label: 'Hueso', hint: 'Solo hueso, limpio', css: 'linear-gradient(135deg,#f3e6c8,#b89a6a)' },
     { id: 'CT-Bone', label: 'Hueso y piel', hint: 'Hueso con piel translúcida', css: 'linear-gradient(135deg,#f4d9b0,#a5522e)' },
-    { id: 'CT-AAA', label: 'Aorta y vasos', hint: 'Angio-TC: aorta, ramas y hueso', css: 'linear-gradient(135deg,#ff9a8a,#b21a1a)' },
-    { id: 'CT-Chest-Vessels', label: 'Vasos del tórax', hint: 'Angio-TC de tórax', css: 'linear-gradient(135deg,#ffb2a0,#7a1414)' },
-    { id: 'CT-Pulmonary-Arteries', label: 'Arterias pulmonares', hint: 'TEP / angio pulmonar', css: 'linear-gradient(135deg,#9ad0ff,#b0202a)' },
-    { id: 'CT-Coronary-Arteries-2', label: 'Coronarias', hint: 'Angio-TC coronaria', css: 'linear-gradient(135deg,#ffcf9a,#c0392b)' },
+    { id: 'PX-CTA-Aorta', label: 'Aorta y vasos', hint: 'Angio-TC: luz con contraste en rojo, hueso marfil', css: 'linear-gradient(135deg,#ff9a8a,#b21a1a)' },
+    { id: 'PX-CTA-Chest', label: 'Vasos del tórax', hint: 'Angio-TC de tórax: vasos con contraste', css: 'linear-gradient(135deg,#ffb2a0,#7a1414)' },
+    { id: 'PX-CTA-Pulmonary', label: 'Arterias pulmonares', hint: 'Angio-TC pulmonar (TEP): arterias en azul', css: 'linear-gradient(135deg,#9ad0ff,#b0202a)' },
+    { id: 'PX-CTA-Coronary', label: 'Coronarias', hint: 'Angio-TC coronaria: cavidades y coronarias con contraste', css: 'linear-gradient(135deg,#ffcf9a,#c0392b)' },
     { id: 'CT-Cardiac3', label: 'Corazón', hint: 'Cavidades y grandes vasos', css: 'linear-gradient(135deg,#ff8f7a,#6d0f0f)' },
     { id: 'CT-Liver-Vasculature', label: 'Hígado y vasos', hint: 'Hígado con contraste', css: 'linear-gradient(135deg,#e9a46b,#7b2d12)' },
     { id: 'CT-Lung', label: 'Pulmón', hint: 'Parénquima y vía aérea', css: 'linear-gradient(135deg,#d6ecff,#4a7fb5)' },
