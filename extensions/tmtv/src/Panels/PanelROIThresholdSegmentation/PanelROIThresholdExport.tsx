@@ -73,7 +73,7 @@ export default function PanelRoiThresholdSegmentation() {
       <div className="invisible-scrollbar overflow-y-auto overflow-x-hidden">
         <div className="bg-popover flex items-baseline justify-between px-2 py-1">
           <div className="py-1">
-            <span className="text-muted-foreground text-base font-bold uppercase">{'TMTV: '}</span>
+            <span className="text-muted-foreground text-base font-bold uppercase">{'Volumen tumoral (TMTV): '}</span>
             <span className="text-foreground">{tmtvValue ? `${tmtvValue.toFixed(3)} mL` : ''}</span>
           </div>
           <div className="flex items-center">
@@ -83,7 +83,7 @@ export default function PanelRoiThresholdSegmentation() {
               variant="ghost"
               onClick={handleExportCSV}
             >
-              <span className="pl-1">CSV</span>
+              <span className="pl-1">Descargar CSV</span>
             </Button>
           </div>
         </div>

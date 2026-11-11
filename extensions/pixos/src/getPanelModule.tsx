@@ -7,7 +7,7 @@ function getPanelModule({ servicesManager, commandsManager, extensionManager }: 
       name: 'pixos',
       iconName: 'tab-linear',
       iconLabel: 'PixOS',
-      label: 'Herramientas PixOS',
+      label: 'Herramientas',
       component: props => (
         <PixOSToolsPanel
           {...props}

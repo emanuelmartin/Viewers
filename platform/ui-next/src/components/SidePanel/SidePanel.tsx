@@ -66,10 +66,13 @@ const openStateIconName = {
 };
 
 const getTabWidth = (numTabs: number) => {
+  // pixOS: icon and name on every tab
   if (numTabs < 3) {
-    return 68;
+    return 96;
+  } else if (numTabs < 5) {
+    return 62;
   } else {
-    return 40;
+    return 54;
   }
 };
 
@@ -112,7 +115,7 @@ const getTabClassNames = (
   isTabDisabled: boolean
 ) =>
   // pixOS: segmented control; the active tab gets the soft orange pill (styles.css .px-tab)
-  classnames('px-tab h-[30px] cursor-pointer text-foreground', {
+  classnames('px-tab h-[38px] cursor-pointer text-foreground', {
     'is-active': isActiveTab,
     'is-disabled': isTabDisabled,
   });
@@ -124,7 +127,7 @@ const getTabStyle = (numTabs: number) => {
 };
 
 const getTabIconClassNames = (numTabs: number, isActiveTab: boolean) => {
-  return 'h-full w-full flex items-center justify-center';
+  return 'h-full w-full flex flex-col items-center justify-center gap-[3px] px-1';
 };
 const createStyleMap = (
   expandedWidth: number,
@@ -392,7 +395,7 @@ const SidePanel = ({
                 <React.Fragment key={tabIndex}>
                   {tabIndex % numCols !== 0 && (
                     <div
-                      className={classnames('flex h-[28px] w-[2px] items-center', tabSpacerWidth)}
+                      className={classnames('flex h-[38px] w-[2px] items-center', tabSpacerWidth)}
                     >
                       <div className="h-[20px] w-full"></div>
                     </div>
@@ -422,10 +425,11 @@ const SidePanel = ({
                               'ohif-disabled': disabled,
                             }),
                             style: {
-                              width: '22px',
-                              height: '22px',
+                              width: '18px',
+                              height: '18px',
                             },
                           })}
+                          <span className="px-tab-label">{tab.label}</span>
                         </div>
                       </div>
                     </TooltipTrigger>
@@ -460,7 +464,7 @@ const SidePanel = ({
   const getOpenStateComponent = () => {
     return (
       <>
-        <div className="px-panel-head flex h-[44px] flex-shrink-0 select-none items-center px-2">
+        <div className="px-panel-head flex min-h-[50px] flex-shrink-0 select-none items-center px-2 py-1">
           {tabs.length === 1 ? getOneTabComponent() : getTabGridComponent()}
         </div>
         <Separator

@@ -53,15 +53,15 @@ function _askTrackMeasurements(
       'viewportNotification.trackNewStudyMessage'
     );
     const actions = [
-      { type: 'cancel', text: i18n.t('MeasurementTable:No'), value: RESPONSE.CANCEL },
+      { type: 'cancel', text: 'No', value: RESPONSE.CANCEL },
       {
         type: 'secondary',
-        text: i18n.t('MeasurementTable:No, do not ask again'),
+        text: 'No, y no volver a preguntar',
         value: RESPONSE.NO_NOT_FOR_SERIES,
       },
       {
         type: 'primary',
-        text: i18n.t('MeasurementTable:Yes'),
+        text: 'Sí, guardar',
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
     ];
@@ -100,15 +100,15 @@ function _askSaveDiscardOrCancel(
       'viewportNotification.discardStudyMessage'
     );
     const actions = [
-      { type: 'cancel', text: 'Cancel', value: RESPONSE.CANCEL },
+      { type: 'cancel', text: 'Cancelar', value: RESPONSE.CANCEL },
       {
         type: 'secondary',
-        text: 'No, discard previously tracked series & measurements',
+        text: 'No, borrar las anteriores',
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
       {
         type: 'primary',
-        text: 'Yes',
+        text: 'Sí, guardar',
         value: RESPONSE.CREATE_REPORT,
       },
     ];

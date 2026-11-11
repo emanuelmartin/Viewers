@@ -13,8 +13,11 @@ import { Types } from '@ohif/core';
 
 /** The header toolbar in labelled groups; anything not listed (pixOS AI, report capture…) goes to «Más». */
 const TOOL_GROUPS = [
-  { label: 'Navegar', ids: ['Zoom', 'Pan', 'TrackballRotate', 'Crosshairs', 'StackScroll'] },
-  { label: 'Imagen', ids: ['WindowLevel'] },
+  {
+    label: 'Navegar',
+    ids: ['Zoom', 'Pan', 'TrackballRotate', 'StackScroll', 'Crosshairs', 'ReferenceLines', 'ImageSliceSync'],
+  },
+  { label: 'Imagen', ids: ['WindowLevel', 'pixosProcess'] },
   { label: 'Medir', ids: ['MeasurementTools'] },
   { label: 'Vista', ids: ['Layout'] },
   { label: 'Informe', ids: ['pixosAddToReport'] },

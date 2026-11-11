@@ -50,19 +50,19 @@ function _askTrackMeasurements(uiViewportDialogService, customizationService, vi
       {
         id: 'prompt-begin-tracking-cancel',
         type: 'secondary',
-        text: i18n.t('Common:No'),
+        text: 'No',
         value: RESPONSE.CANCEL,
       },
       {
         id: 'prompt-begin-tracking-no-do-not-ask-again',
         type: 'secondary',
-        text: i18n.t('MeasurementTable:No, do not ask again'),
+        text: 'No, y no volver a preguntar',
         value: RESPONSE.NO_NEVER,
       },
       {
         id: 'prompt-begin-tracking-yes',
         type: 'primary',
-        text: i18n.t('Common:Yes'),
+        text: 'Sí, guardar',
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
     ];
