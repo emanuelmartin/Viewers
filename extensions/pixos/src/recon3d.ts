@@ -60,6 +60,8 @@ export const VIEWS = [
   { id: 'I', label: 'Inferior', normal: [0, 0, -1], up: [0, -1, 0] },
 ];
 
+// HU ranges. Sourced: calcium ≥130 (Agatston 1990), fat −190 to −30 (Yoshizumi 1999), emphysema < −950 (LAA-950,
+// Gevenois 1996). The rest (bone, contrast, soft tissue, lung, air) are practical display ranges. See REFERENCIAS.md.
 export const DENSITY_RANGES = [
   { id: 'bone', label: 'Hueso', lower: 300, upper: 3000 },
   { id: 'calc', label: 'Calcio', lower: 130, upper: 3000 },
@@ -101,10 +103,22 @@ export async function open3D(commandsManager: any, servicesManager: Services, on
     await wait(250);
     const vp = view3D(servicesManager);
     if (vp && volumeActor(vp)) {
+      fit(vp);
       return vp;
     }
   }
   return null;
+}
+
+/** Frames the whole volume in the pane, seen from the front. */
+export function fit(vp: any): void {
+  try {
+    const front = VIEWS[0];
+    setView(vp, front.normal, front.up);
+  } catch {
+    vp.resetCamera?.();
+    vp.render();
+  }
 }
 
 // The opacity curve of each preset, kept so the threshold slider is absolute (moving it back returns to the preset).
@@ -208,7 +222,23 @@ export function setView(vp: any, normal: number[], up: number[]): void {
     viewUp: up,
   });
   vp.resetCamera?.({ resetPan: true, resetZoom: true, resetToCenter: true });
-  vp.setCamera({ viewPlaneNormal: normal, viewUp: up, position: center.map((c, i) => c + normal[i] * dist), focalPoint: center });
+  // Frame the whole volume with a margin: half its extent along «up», or along «right» for the pane's aspect
+  const right = [
+    up[1] * normal[2] - up[2] * normal[1],
+    up[2] * normal[0] - up[0] * normal[2],
+    up[0] * normal[1] - up[1] * normal[0],
+  ];
+  const size = [bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4]];
+  const along = (v: number[]) => v.reduce((acc, x, i) => acc + Math.abs(x) * size[i], 0);
+  const aspect = (vp.canvas?.clientWidth || 1) / (vp.canvas?.clientHeight || 1);
+  const parallelScale = Math.max(along(up) / 2, along(right) / 2 / aspect) * 1.1;
+  vp.setCamera({
+    viewPlaneNormal: normal,
+    viewUp: up,
+    position: center.map((c, i) => c + normal[i] * dist),
+    focalPoint: center,
+    parallelScale,
+  });
   vp.render();
 }
 

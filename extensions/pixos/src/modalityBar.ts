@@ -30,6 +30,9 @@ const actionButton = (id: string, label: string, tooltip: string, icon: string, 
 
 const B = {
   windows: { id: `${MOD_PREFIX}windows`, uiType: 'pixos.windowsMenu', props: {} },
+  lesion: { id: `${MOD_PREFIX}lesion`, uiType: 'pixos.lesionMenu', props: {} },
+  spine: { id: `${MOD_PREFIX}spine`, uiType: 'pixos.spineMenu', props: {} },
+  calc: { id: `${MOD_PREFIX}calc`, uiType: 'pixos.calcMenu', props: {} },
   hu: toolButton('Probe', 'Densidad (UH)', 'Unidades Hounsfield en un punto', 'tool-probe'),
   roiHu: toolButton('EllipticalROI', 'Región (UH media)', 'Área y densidad media de una región', 'tool-ellipse'),
   roiSignal: toolButton('EllipticalROI', 'Señal en región', 'Área y señal media', 'tool-ellipse', 'roiSignal'),
@@ -65,21 +68,21 @@ export const MODALITY_NAME: Record<string, string> = {
 function buttonsFor(modality: string): any[] {
   switch (modality) {
     case 'CT':
-      return [B.windows, B.hu, B.roiHu];
+      return [B.windows, B.hu, B.roiHu, B.lesion, B.spine];
     case 'MR':
-      return [B.autoWindow, B.roiSignal, B.perfusion];
+      return [B.autoWindow, B.roiSignal, B.perfusion, B.lesion, B.spine];
     case 'PT':
     case 'NM':
-      return [B.roiSuv, B.invert];
+      return [B.windows, B.roiSuv, B.lesion, B.invert];
     case 'US':
-      return [B.doppler, B.twoAxes, B.ellipse];
+      return [B.calc, B.doppler, B.twoAxes, B.ellipse];
     case 'MG':
       return [B.magnify, B.magnifyFixed, B.invert];
     case 'CR':
     case 'DX':
     case 'XA':
     case 'RF':
-      return [B.cobb, B.calibrate, B.magnify];
+      return [B.cobb, B.spine, B.calibrate, B.magnify];
     default:
       return [];
   }
@@ -116,6 +119,8 @@ export function installModalityBar(servicesManager): () => void {
       const m = activeModality(servicesManager) || modality;
       modality = m;
       const wanted = buttonsFor(m);
+      // 3D only where there is a volume to reconstruct
+      const volumetric = ['CT', 'MR', 'PT', 'NM'].includes(m);
       const missing = [...wanted, BUTTON_3D_DEF].filter(b => !toolbarService.getButton(b.id));
       if (missing.length) {
         toolbarService.addButtons(missing);
@@ -123,8 +128,10 @@ export function installModalityBar(servicesManager): () => void {
       const base = primary.filter(id => !id.startsWith(MOD_PREFIX) && id !== BUTTON_3D);
       const atMeasure = base.indexOf('MeasurementTools');
       base.splice(atMeasure >= 0 ? atMeasure + 1 : base.length, 0, ...wanted.map(b => b.id));
-      const atLayout = base.indexOf('Layout');
-      base.splice(atLayout >= 0 ? atLayout + 1 : base.length, 0, BUTTON_3D);
+      if (volumetric) {
+        const atLayout = base.indexOf('Layout');
+        base.splice(atLayout >= 0 ? atLayout + 1 : base.length, 0, BUTTON_3D);
+      }
       if (base.join('|') !== primary.join('|')) {
         toolbarService.clearButtonSection('primary');
         toolbarService.updateSection('primary', base);

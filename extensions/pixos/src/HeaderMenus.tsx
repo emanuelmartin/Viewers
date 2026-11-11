@@ -7,7 +7,7 @@ import { activeModality } from './modalityBar';
 const RECONSTRUCT_PANEL = '@ohif/extension-pixos.panelModule.reconstruct';
 
 /** An icon in the header that opens a menu, styled like the toolbar's own buttons. */
-function HeaderPopover({
+export function HeaderPopover({
   id,
   icon,
   tooltip,
@@ -49,6 +49,8 @@ function HeaderPopover({
   );
 }
 
+// Usual CT presets (W/L in HU). These are reading conventions, not a standard: values differ between textbooks,
+// vendors and departments (see REFERENCIAS.md); the radiologist adjusts them by hand.
 const CT_WINDOWS = [
   { label: 'Cerebro', w: 80, c: 40 },
   { label: 'Subdural', w: 200, c: 75 },
@@ -62,11 +64,22 @@ const CT_WINDOWS = [
   { label: 'Oído / senos', w: 4000, c: 400 },
 ];
 
-/** CT windows, one click each; with the 3D view active they go on the 2D planes. */
+// Fixed SUV scales; EANM 2015 asks to read follow-ups on the same fixed scale (its example: SUV 0–10, inverse linear).
+const SUV_WINDOWS = [
+  { label: 'SUV 0–3', lo: 0, hi: 3 },
+  { label: 'SUV 0–5', lo: 0, hi: 5 },
+  { label: 'SUV 0–7', lo: 0, hi: 7 },
+  { label: 'SUV 0–10', lo: 0, hi: 10 },
+  { label: 'SUV 0–15', lo: 0, hi: 15 },
+  { label: 'SUV 0–20', lo: 0, hi: 20 },
+];
+
+/** Windows of the modality on screen (CT in HU, PET in SUV), one click each; with 3D active they go on the 2D planes. */
 export function WindowsMenu(): ReactNode {
   const { servicesManager } = useSystem();
   const { viewportGridService, cornerstoneViewportService } = servicesManager.services;
-  const apply = (w: number, c: number) => {
+  const pet = ['PT', 'NM'].includes(activeModality(servicesManager));
+  const apply = (lower: number, upper: number) => {
     const active: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
     const list: any[] =
       active && active.type !== 'volume3d'
@@ -75,36 +88,38 @@ export function WindowsMenu(): ReactNode {
             .map(id => cornerstoneViewportService.getCornerstoneViewport(id))
             .filter((vp: any) => vp && vp.type !== 'volume3d');
     for (const vp of list) {
-      vp.setProperties({ voiRange: { lower: c - w / 2, upper: c + w / 2 } });
+      vp.setProperties({ voiRange: { lower, upper } });
       vp.render();
     }
   };
+  const items = pet
+    ? SUV_WINDOWS.map(x => ({ label: x.label, sub: `${x.lo}–${x.hi} g/mL`, lo: x.lo, hi: x.hi }))
+    : CT_WINDOWS.map(x => ({ label: x.label, sub: `${x.w} / ${x.c}`, lo: x.c - x.w / 2, hi: x.c + x.w / 2 }));
   return (
-    <HeaderPopover id="pxWindows" icon="tool-window-level" tooltip="Ventanas de TC" width={250}>
+    <HeaderPopover id="pxWindows" icon="tool-window-level" tooltip={pet ? 'Ventanas en SUV' : 'Ventanas de TC'} width={250}>
       {close => (
         <>
           <div className="px-proc-head">
-            <span>Ventanas</span>
+            <span>{pet ? 'Ventanas en SUV' : 'Ventanas'}</span>
           </div>
           <div className="px-proc-section">
             <div className="px-proc-grid3" style={{ gridTemplateColumns: 'repeat(2,1fr)' }}>
-              {CT_WINDOWS.map(x => (
+              {items.map(x => (
                 <button
                   key={x.label}
                   type="button"
                   className="px-tile px-tile-2"
                   onClick={() => {
-                    apply(x.w, x.c);
+                    apply(x.lo, x.hi);
                     close();
                   }}
                 >
                   <strong>{x.label}</strong>
-                  <small>
-                    {x.w} / {x.c}
-                  </small>
+                  <small>{x.sub}</small>
                 </button>
               ))}
             </div>
+            {pet && <p className="px-proc-note" style={{ marginTop: 8 }}>SUV por peso corporal. Para comparar estudios usa siempre la misma escala (EANM 2015).</p>}
           </div>
         </>
       )}

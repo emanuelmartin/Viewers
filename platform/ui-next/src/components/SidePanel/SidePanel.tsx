@@ -69,8 +69,10 @@ const getTabWidth = (numTabs: number) => {
   // pixOS: icon and name on every tab
   if (numTabs < 3) {
     return 96;
-  } else if (numTabs < 5) {
+  } else if (numTabs < 4) {
     return 62;
+  } else if (numTabs < 5) {
+    return 56;
   } else {
     return 54;
   }

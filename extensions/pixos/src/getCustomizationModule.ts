@@ -134,6 +134,18 @@ const thumbnailDetails = [
 ];
 
 /** Units of SequenceOfUltrasoundRegions (PhysicalUnitsXDirection): 3 = cm. */
+/** «LCC», «RMLO»…: laterality and view, as mammography is labelled everywhere. */
+export function mammoView(instance: any): string {
+  const side = String(instance?.ImageLaterality || instance?.Laterality || '').toUpperCase();
+  const code =
+    instance?.ViewCodeSequence?.[0]?.CodeMeaning ||
+    instance?.ViewPosition ||
+    '';
+  const raw = String(instance?.ViewPosition || '').toUpperCase();
+  const view = raw || (/cranio/i.test(code) ? 'CC' : /medio-?lateral oblique/i.test(code) ? 'MLO' : /medio-?lateral/i.test(code) ? 'ML' : '');
+  return `${side}${view}`.trim();
+}
+
 export function usCalibration(instance: any): string {
   const regions: any[] = instance?.SequenceOfUltrasoundRegions || [];
   const region = regions.find(
@@ -159,6 +171,14 @@ function getCustomizationModule() {
         'ui.studyUnavailable': StudyUnavailable,
         // Ultrasound: say whether lengths and areas come out calibrated (mm) or only in pixels
         'viewportOverlay.topRight': [
+          {
+            id: 'MammoView',
+            inheritsFrom: 'ohif.overlayItem',
+            label: '',
+            title: 'Proyección de la mastografía',
+            condition: ({ referenceInstance }) => referenceInstance?.Modality === 'MG',
+            contentF: ({ referenceInstance }) => mammoView(referenceInstance),
+          },
           {
             id: 'UsCalibration',
             inheritsFrom: 'ohif.overlayItem',

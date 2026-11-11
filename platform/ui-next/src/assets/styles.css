@@ -657,3 +657,87 @@
   font: 500 10px/1 var(--px-font-ui), system-ui, sans-serif;
   color: rgba(185, 205, 225, 0.6);
 }
+
+/* ---- pixOS: corner text readable on any image (inverted PET, bright X-ray edges) ------------------- */
+.overlay-item,
+.orientation-marker-value,
+[data-cy='viewport-pane'] .text-primary-light {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 0 4px rgba(0, 0, 0, 0.8),
+    0 1px 1px rgba(0, 0, 0, 0.9);
+}
+/* Waiting for a click on the image (lesion volume) */
+.px-picking,
+.px-picking canvas {
+  cursor: crosshair !important;
+}
+
+/* modality menus: lesion volume, vertebrae, ultrasound calculations */
+.px-range {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  font: 500 12px/1 var(--px-font-ui), system-ui, sans-serif;
+  color: #c9d9e8;
+}
+.px-range b {
+  color: #ffd2b5;
+  font-weight: 700;
+}
+.px-tile-primary {
+  background: var(--px-accent, #ff8d47);
+  border-color: transparent;
+  color: #061423;
+}
+.px-tile-primary:hover {
+  background: #ffa36b;
+  border-color: transparent;
+}
+.px-tile:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.px-proc-warn {
+  margin-top: 8px;
+  font: 600 11.5px/1.35 var(--px-font-ui), system-ui, sans-serif;
+  color: #ffc58f;
+}
+.px-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  font: 500 12px/1.4 var(--px-font-ui), system-ui, sans-serif;
+  color: #dce8f3;
+  user-select: text;
+}
+.px-result-list li {
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: rgba(132, 170, 203, 0.07);
+}
+.px-calc-field {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font: 700 11.5px/1 var(--px-font-ui), system-ui, sans-serif;
+  color: #c9d9e8;
+}
+.px-calc-field input {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 7px;
+  border: 1px solid rgba(132, 170, 203, 0.25);
+  background: rgba(4, 15, 27, 0.7);
+  color: #fff;
+  font: 600 12.5px/1 var(--px-font-ui), system-ui, sans-serif;
+}
+.px-proc-section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

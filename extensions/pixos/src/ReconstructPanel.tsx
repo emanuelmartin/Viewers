@@ -124,6 +124,17 @@ export default function ReconstructPanel({ servicesManager, commandsManager }: a
     );
   }
 
+  if (modality && !['CT', 'MR', 'PT', 'NM'].includes(modality)) {
+    return (
+      <div className="px-recon">
+        <p className="px-proc-note" style={{ padding: 16 }}>
+          Esta imagen es plana ({modality}): no tiene un volumen que reconstruir. La reconstrucción 3D y la volumetría
+          aparecen al abrir una tomografía, resonancia o PET.
+        </p>
+      </div>
+    );
+  }
+
   const presets = PRESETS[modality] || PRESETS.CT;
   const has3D = !!vp;
   const isCT = modality === 'CT';
