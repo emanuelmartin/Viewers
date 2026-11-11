@@ -18,6 +18,7 @@ import { installAutoVoi } from './autoVoi';
 import { installModalityLook } from './modalityLook';
 import getToolbarModule, { installAI3DButton, installProcessButton } from './getToolbarModule';
 import { installReportCaptureButton } from './reportCapture';
+import { installVolumeWatchdog } from './volumeWatchdog';
 import { installModalityBar } from './modalityBar';
 import { installReportLink } from './reportLink';
 
@@ -46,6 +47,7 @@ function onModeEnter({ servicesManager, extensionManager, commandsManager }: wit
     installProcessButton(servicesManager),
     installModalityBar(servicesManager),
     installReportLink(servicesManager, commandsManager),
+    installVolumeWatchdog(),
   ];
   loadAccess();
 }

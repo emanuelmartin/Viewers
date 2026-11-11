@@ -6,11 +6,12 @@
  */
 import { cache, utilities as csUtils } from '@cornerstonejs/core';
 import { segmentation as csSeg } from '@cornerstonejs/tools';
-import { PEAK_RADIUS_MM } from './clinicalCalc';
+import { grow, growWithRetry, lungVolumeWarning, suvPeak, type GrowMode } from './lesionGrow';
+
+export { grow, suvPeak, type GrowMode };
 
 type Services = any;
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
-const MAX_ML = 1500;
 
 export type LesionResult = {
   index: number;
@@ -83,172 +84,6 @@ export function pickPoint(s: Services): { promise: Promise<{ vp: any; world: num
 }
 
 /** 3D region growing from a world point. Returns the voxel indices (k·nx·ny + j·nx + i) and the stats. */
-export type GrowMode = { kind: 'abs'; tol: number } | { kind: 'rel'; frac: number } | { kind: 'pet'; frac: number };
-
-export function grow(volume: any, world: number[], mode: GrowMode) {
-  const [nx, ny, nz] = volume.dimensions;
-  const data: ArrayLike<number> = volume.voxelManager.getCompleteScalarDataArray();
-  const ijk = csUtils.transformWorldToIndex(volume.imageData, world as any).map(Math.round);
-  const [si, sj, sk] = ijk;
-  if (si < 0 || sj < 0 || sk < 0 || si >= nx || sj >= ny || sk >= nz) return null;
-  const slice = nx * ny;
-  // Seed value: mean of the 3×3×3 around the click, so one noisy voxel does not decide the range
-  let sum = 0;
-  let n = 0;
-  for (let dk = -1; dk <= 1; dk++)
-    for (let dj = -1; dj <= 1; dj++)
-      for (let di = -1; di <= 1; di++) {
-        const i = si + di, j = sj + dj, k = sk + dk;
-        if (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz) continue;
-        sum += data[k * slice + j * nx + i];
-        n++;
-      }
-  const seed = sum / n;
-  let lo: number;
-  let hi: number;
-  let start = sk * slice + sj * nx + si;
-  if (mode.kind === 'pet') {
-    // PET: snap to the hottest voxel within 15 mm of the click (clicking a few mm off a small lesion is normal), then
-    // keep everything above a fraction (41 % by default) of it, as for metabolic tumour volume
-    const [px, py, pz] = volume.spacing;
-    const ri = Math.ceil(15 / px), rj = Math.ceil(15 / py), rk = Math.ceil(15 / pz);
-    let best = start;
-    for (let dk = -rk; dk <= rk; dk++)
-      for (let dj = -rj; dj <= rj; dj++)
-        for (let di = -ri; di <= ri; di++) {
-          if ((di * px) ** 2 + (dj * py) ** 2 + (dk * pz) ** 2 > 225) continue;
-          const i = si + di, j = sj + dj, k = sk + dk;
-          if (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz) continue;
-          const x = k * slice + j * nx + i;
-          if (data[x] > data[best]) best = x;
-        }
-    start = best;
-    lo = data[best] * mode.frac;
-    hi = Infinity;
-  } else {
-    const tol = mode.kind === 'abs' ? mode.tol : Math.abs(seed) * mode.frac;
-    lo = seed - tol;
-    hi = seed + tol;
-  }
-  const [sx, sy, sz] = volume.spacing;
-  const maxVoxels = Math.floor((MAX_ML * 1000) / (sx * sy * sz));
-  const seen = new Uint32Array(Math.ceil((nx * ny * nz) / 32));
-  const mark = (x: number) => (seen[x >>> 5] |= 1 << (x & 31));
-  const isSeen = (x: number) => (seen[x >>> 5] & (1 << (x & 31))) !== 0;
-  let out = new Int32Array(1 << 16);
-  let count = 0;
-  let total = 0;
-  let maxV = -Infinity;
-  const k0 = Math.floor(start / slice);
-  const j0 = Math.floor((start - k0 * slice) / nx);
-  const i0 = start - k0 * slice - j0 * nx;
-  const bounds = [i0, i0, j0, j0, k0, k0];
-  // Range tests use the mean of the voxel and its 6 neighbours (CT/MR noise would otherwise stop the growth);
-  // PET is already smooth and is compared voxel by voxel
-  const val =
-    mode.kind === 'pet'
-      ? (x: number) => data[x]
-      : (x: number) => {
-          const k = Math.floor(x / slice);
-          const r = x - k * slice;
-          const j = Math.floor(r / nx);
-          const i = r - j * nx;
-          let s = data[x];
-          let n = 1;
-          if (i > 0) { s += data[x - 1]; n++; }
-          if (i < nx - 1) { s += data[x + 1]; n++; }
-          if (j > 0) { s += data[x - nx]; n++; }
-          if (j < ny - 1) { s += data[x + nx]; n++; }
-          if (k > 0) { s += data[x - slice]; n++; }
-          if (k < nz - 1) { s += data[x + slice]; n++; }
-          return s / n;
-        };
-  if (val(start) < lo || val(start) > hi) return { indices: new Int32Array(0), count: 0, seed, mean: 0, max: 0, bounds, leaked: false };
-  mark(start);
-  out[count++] = start;
-  let head = 0;
-  let leaked = false;
-  while (head < count) {
-    const idx = out[head++];
-    total += data[idx];
-    if (data[idx] > maxV) maxV = data[idx];
-    const k = Math.floor(idx / slice);
-    const r = idx - k * slice;
-    const j = Math.floor(r / nx);
-    const i = r - j * nx;
-    if (i < bounds[0]) bounds[0] = i; if (i > bounds[1]) bounds[1] = i;
-    if (j < bounds[2]) bounds[2] = j; if (j > bounds[3]) bounds[3] = j;
-    if (k < bounds[4]) bounds[4] = k; if (k > bounds[5]) bounds[5] = k;
-    const neighbours = [
-      i > 0 ? idx - 1 : -1,
-      i < nx - 1 ? idx + 1 : -1,
-      j > 0 ? idx - nx : -1,
-      j < ny - 1 ? idx + nx : -1,
-      k > 0 ? idx - slice : -1,
-      k < nz - 1 ? idx + slice : -1,
-    ];
-    // Only spread from voxels inside solid tissue (5 of 6 neighbours in range): a lesion does not escape through a
-    // one-voxel bridge into the organ next to it
-    if (head > 1) {
-      let inside = 0;
-      for (const nb of neighbours) if (nb >= 0) { const v = val(nb); if (v >= lo && v <= hi) inside++; }
-      if (inside < 5) continue;
-    }
-    for (const nb of neighbours) {
-      if (nb < 0 || isSeen(nb)) continue;
-      mark(nb);
-      const v = val(nb);
-      if (v < lo || v > hi) continue;
-      if (count >= maxVoxels) {
-        leaked = true;
-        break;
-      }
-      if (count === out.length) {
-        const bigger = new Int32Array(out.length * 2);
-        bigger.set(out);
-        out = bigger;
-      }
-      out[count++] = nb;
-    }
-    if (leaked) break;
-  }
-  return { indices: out.subarray(0, count), count, seed, mean: count ? total / Math.max(head, 1) : 0, max: maxV, bounds, leaked };
-}
-
-/**
- * SUVpeak (EANM 2015 / PERCIST): highest mean in a 1.0 mL sphere (1.2 cm diameter) centred inside the lesion. Centres
- * are tried on the lesion's hottest voxels, which is where the peak almost always lies.
- */
-export function suvPeak(volume: any, indices: Int32Array): number | null {
-  if (!indices.length) return null;
-  const data: ArrayLike<number> = volume.voxelManager.getCompleteScalarDataArray();
-  const [nx, ny, nz] = volume.dimensions;
-  const [sx, sy, sz] = volume.spacing;
-  const slice = nx * ny;
-  const r = PEAK_RADIUS_MM;
-  const ri = Math.floor(r / sx), rj = Math.floor(r / sy), rk = Math.floor(r / sz);
-  const centres = Array.from(indices).sort((a, b) => data[b] - data[a]).slice(0, 200);
-  let best = -Infinity;
-  for (const c of centres) {
-    const k0 = Math.floor(c / slice);
-    const j0 = Math.floor((c - k0 * slice) / nx);
-    const i0 = c - k0 * slice - j0 * nx;
-    let sum = 0;
-    let n = 0;
-    for (let dk = -rk; dk <= rk; dk++)
-      for (let dj = -rj; dj <= rj; dj++)
-        for (let di = -ri; di <= ri; di++) {
-          if ((di * sx) ** 2 + (dj * sy) ** 2 + (dk * sz) ** 2 > r * r) continue;
-          const i = i0 + di, j = j0 + dj, k = k0 + dk;
-          if (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz) continue;
-          sum += data[k * slice + j * nx + i];
-          n++;
-        }
-    if (n && sum / n > best) best = sum / n;
-  }
-  return Number.isFinite(best) ? best : null;
-}
-
 let lesionSegId: string | null = null;
 let nextIndex = 1;
 
@@ -304,25 +139,20 @@ export async function measureLesion(
   if (volume.loadStatus && !volume.loadStatus.loaded) return 'El volumen aún no termina de cargar';
   // CT/MR: a fill that leaks is retried tighter before anything is painted (engineering heuristic, see REFERENCIAS.md).
   // PET follows EANM 2015: VOI41, and if it is not usable VOI50; never an arbitrary threshold.
-  let used = mode;
-  let g = grow(volume, pick.world, mode);
-  const steps = mode.kind === 'pet' ? (mode.frac < 0.5 ? [0.5] : []) : [0.7, 0.5, 0.35];
-  for (const f of steps) {
-    if (!g || !g.leaked) break;
-    used =
-      mode.kind === 'abs'
-        ? { kind: 'abs', tol: Math.max(5, Math.round(mode.tol * f)) }
-        : mode.kind === 'rel'
-          ? { kind: 'rel', frac: mode.frac * f }
-          : { kind: 'pet', frac: f };
-    g = grow(volume, pick.world, used);
-  }
+  const { g, used } = growWithRetry(volume, pick.world, mode);
   if (!g) return 'El punto quedó fuera de la imagen';
-  if (g.leaked) {
+  if (g.leaked || (mode.kind === 'pet' && g.lowContrast)) {
     if (mode.kind === 'pet') {
+      if (!g.leaked && g.lowContrast) {
+        const peak = suvPeak(volume, g.indices);
+        return `Contraste bajo contra el tejido vecino (fondo ${g.background?.toFixed(1)}): el volumen por umbral no es confiable (EANM 2015). Reporta SUV máx ${g.max.toFixed(1)}${peak ? ` y SUVpeak ${peak.toFixed(1)}` : ''}.`;
+      }
       const peak = suvPeak(volume, g.indices.subarray(0, 1));
       const hottest = volume.voxelManager.getCompleteScalarDataArray()[g.indices[0]];
       return `VOI no confiable (se une a captación vecina). Según EANM 2015 reporta solo SUV máx ${hottest.toFixed(1)}${peak ? ` y SUVpeak ${peak.toFixed(1)}` : ''}.`;
+    }
+    if (used.kind === 'lung') {
+      return 'La lesión se une al mediastino, la pared o un vaso grueso y el umbral no la separa: mídela con el pincel de segmentación o con diámetros.';
     }
     return 'Se desborda hacia el tejido vecino aun con tolerancia baja: elige un punto más central o usa el pincel de segmentación.';
   }
@@ -342,11 +172,16 @@ export async function measureLesion(
     mean: g.mean,
     max: g.max,
     peak,
-    threshold: used.kind === 'pet' ? Math.round(used.frac * 100) : null,
+    threshold: used.kind === 'pet' ? Math.round(used.frac * 100) : used.kind === 'lung' ? Math.round(g.threshold) : null,
     axes,
     leaked: g.leaked,
     note:
-      used === mode
+      used.kind === 'lung'
+        ? `nódulo en pulmón: umbral ${Math.round(g.threshold)} UH, a la mitad entre su centro y el pulmón (${Math.round(g.background ?? 0)} UH)` +
+          (g.opening ? `; se separaron vasos o puentes de hasta ${g.opening * 2} mm` : '') +
+          (g.lowContrast ? '; borde poco definido (vidrio deslustrado): el volumen es aproximado' : '') +
+          (lungVolumeWarning(ml, sz) ? `; ${lungVolumeWarning(ml, sz)}` : '')
+        : used === mode
         ? ''
         : used.kind === 'abs'
           ? `tolerancia ajustada a ± ${used.tol} UH`

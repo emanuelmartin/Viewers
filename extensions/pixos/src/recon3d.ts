@@ -5,9 +5,11 @@
  */
 import { cache, CONSTANTS, utilities as csUtils } from '@cornerstonejs/core';
 import { contrastStatus, ContrastStatus, NEEDS_CONTRAST, registerVesselPresets } from './vesselPresets';
+import { registerTissuePresets } from './tissuePresets';
 
 // pixOS angio-TC looks (vesselPresets.ts) next to the stock ones
 registerVesselPresets(CONSTANTS.VIEWPORT_PRESETS as any[]);
+registerTissuePresets(CONSTANTS.VIEWPORT_PRESETS as any[]);
 export { NEEDS_CONTRAST };
 
 /** Contrast of the series in the active view (or the first CT on screen), from its DICOM header. */
@@ -40,19 +42,18 @@ export type Preset = { id: string; label: string; hint: string; css: string };
 
 export const PRESETS: Record<string, Preset[]> = {
   CT: [
-    { id: 'CT-Bones', label: 'Hueso', hint: 'Solo hueso, limpio', css: 'linear-gradient(135deg,#f3e6c8,#b89a6a)' },
-    { id: 'CT-Bone', label: 'Hueso y piel', hint: 'Hueso con piel translúcida', css: 'linear-gradient(135deg,#f4d9b0,#a5522e)' },
+    { id: 'PX-CT-Bone', label: 'Hueso', hint: 'Solo hueso, limpio', css: 'linear-gradient(135deg,#f3e6c8,#b89a6a)' },
+    { id: 'PX-CT-BoneSkin', label: 'Hueso y piel', hint: 'Hueso con piel translúcida', css: 'linear-gradient(135deg,#f4d9b0,#a5522e)' },
     { id: 'PX-CTA-Aorta', label: 'Aorta y vasos', hint: 'Angio-TC: luz con contraste en rojo, hueso marfil', css: 'linear-gradient(135deg,#ff9a8a,#b21a1a)' },
     { id: 'PX-CTA-Chest', label: 'Vasos del tórax', hint: 'Angio-TC de tórax: vasos con contraste', css: 'linear-gradient(135deg,#ffb2a0,#7a1414)' },
     { id: 'PX-CTA-Pulmonary', label: 'Arterias pulmonares', hint: 'Angio-TC pulmonar (TEP): arterias en azul', css: 'linear-gradient(135deg,#9ad0ff,#b0202a)' },
     { id: 'PX-CTA-Coronary', label: 'Coronarias', hint: 'Angio-TC coronaria: cavidades y coronarias con contraste', css: 'linear-gradient(135deg,#ffcf9a,#c0392b)' },
     { id: 'CT-Cardiac3', label: 'Corazón', hint: 'Cavidades y grandes vasos', css: 'linear-gradient(135deg,#ff8f7a,#6d0f0f)' },
     { id: 'CT-Liver-Vasculature', label: 'Hígado y vasos', hint: 'Hígado con contraste', css: 'linear-gradient(135deg,#e9a46b,#7b2d12)' },
-    { id: 'CT-Lung', label: 'Pulmón', hint: 'Parénquima y vía aérea', css: 'linear-gradient(135deg,#d6ecff,#4a7fb5)' },
-    { id: 'CT-Air', label: 'Vía aérea', hint: 'Tráquea, bronquios, colon', css: 'linear-gradient(135deg,#e8f6ff,#6aa6d8)' },
-    { id: 'CT-Soft-Tissue', label: 'Tejidos blandos', hint: 'Piel y músculo', css: 'linear-gradient(135deg,#f6c6a8,#9b4f32)' },
-    { id: 'CT-Muscle', label: 'Músculo', hint: 'Músculo y hueso', css: 'linear-gradient(135deg,#e28a7a,#6a1c1c)' },
-    { id: 'CT-Fat', label: 'Grasa', hint: 'Tejido adiposo', css: 'linear-gradient(135deg,#fff1b8,#c9a227)' },
+    { id: 'PX-CT-Lung', label: 'Pulmón', hint: 'Superficie del parénquima pulmonar, costillas tenues', css: 'linear-gradient(135deg,#d6ecff,#4a7fb5)' },
+    { id: 'PX-CT-Soft', label: 'Tejidos blandos', hint: 'Piel translúcida, órganos y hueso', css: 'linear-gradient(135deg,#f6c6a8,#9b4f32)' },
+    { id: 'PX-CT-Muscle', label: 'Músculo', hint: 'Músculo y órganos, hueso tenue', css: 'linear-gradient(135deg,#e28a7a,#6a1c1c)' },
+    { id: 'PX-CT-Fat', label: 'Grasa', hint: 'Tejido adiposo (−190 a −30 UH)', css: 'linear-gradient(135deg,#fff1b8,#c9a227)' },
     { id: 'CT-MIP', label: 'MIP 3D', hint: 'Máxima intensidad en volumen', css: 'linear-gradient(135deg,#ffffff,#3a3a3a)' },
   ],
   MR: [

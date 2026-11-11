@@ -56,6 +56,32 @@ function sliceText(viewport): string {
   return index != null && total > 1 ? `imagen ${index + 1}/${total}` : '';
 }
 
+type ReportImageResult = {
+  count: number;
+  linked: boolean;
+  itemId?: string;
+  report?: string;
+  status?: string;
+  redirected?: boolean;
+  url?: string;
+};
+
+/**
+ * Opens the report in the RIS. Inside the interpretation screen (the viewer is its iframe, same origin) the RIS page
+ * moves to that report; opened alone, it goes to a new tab.
+ */
+function openReport(url: string): void {
+  try {
+    if (window.top && window.top !== window && window.top.location.origin === window.location.origin) {
+      window.top.location.assign(url);
+      return;
+    }
+  } catch {
+    // cross-origin parent: fall through
+  }
+  window.open(url, '_blank', 'noopener');
+}
+
 /** `label` replaces the series/slice label (e.g. «L1 · Nódulo hepático»); `quiet` skips the toast (the caller shows its own). */
 export async function addViewportToReport(servicesManager, opts: { label?: string; quiet?: boolean } = {}): Promise<void> {
   const { viewportGridService, cornerstoneViewportService, displaySetService, uiNotificationService } = servicesManager.services;
@@ -71,7 +97,7 @@ export async function addViewportToReport(servicesManager, opts: { label?: strin
   try {
     const image = await composeViewport(viewport);
     const label = [opts.label, displaySet.SeriesDescription || displaySet.Modality, sliceText(viewport)].filter(Boolean).join(' · ').slice(0, 160);
-    const res = await callCloud<{ count: number; linked: boolean }>('addReportImageFromViewer', {
+    const res = await callCloud<ReportImageResult>('addReportImageFromViewer', {
       studyInstanceUID: displaySet.StudyInstanceUID,
       image,
       label,
@@ -80,11 +106,16 @@ export async function addViewportToReport(servicesManager, opts: { label?: strin
     if (opts.quiet) {
       return;
     }
+    const n = `${res.count} ${res.count === 1 ? 'imagen' : 'imágenes'}`;
     uiNotificationService.show({
       title: 'Imagen agregada al reporte',
-      message: `${label || 'Vista actual'}. El reporte tiene ${res.count} ${res.count === 1 ? 'imagen' : 'imágenes'}.`,
-      type: 'success',
-      duration: 3000,
+      message: res.linked
+        ? `${label || 'Vista actual'} → ${res.report} (${res.status}). Ese reporte tiene ${n}.` +
+          (res.redirected ? ' El reporte abierto en interpretación ya estaba firmado; se agregó a este, que sigue sin firmar.' : '')
+        : `${label || 'Vista actual'}. El estudio aún no tiene orden en el RIS: queda con el estudio (${n}).`,
+      type: res.redirected ? 'warning' : 'success',
+      duration: res.redirected ? 9000 : 6000,
+      ...(res.url ? { action: { label: 'Abrir reporte', onClick: () => openReport(res.url!) } } : {}),
     });
   } catch (e) {
     if (opts.quiet) {

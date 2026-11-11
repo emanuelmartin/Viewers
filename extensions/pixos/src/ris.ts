@@ -70,7 +70,19 @@ export async function callCloud<T = any>(
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.error) {
-    throw new Error(json.error || `Error ${res.status}`);
+    // The RIS sends its errors as JSON ({ px, code, message }): show the message, keep the code
+    let message = json.error || `Error ${res.status}`;
+    let code: string | undefined;
+    try {
+      const wire = typeof json.error === 'string' && json.error.startsWith('{') ? JSON.parse(json.error) : null;
+      if (wire?.px) {
+        message = wire.message || message;
+        code = wire.code;
+      }
+    } catch {
+      // plain text error
+    }
+    throw Object.assign(new Error(message), { code });
   }
   return json.result as T;
 }
