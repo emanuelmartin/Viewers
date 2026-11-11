@@ -34,7 +34,12 @@ export const longitudinalInstance = {
     // `leftPanels` / `rightPanels` customizations so `mode` phase
     // blocks and global customizations can modify them.
     leftPanels: [tracked.thumbnailList],
-    rightPanels: [ohif.interpretations, cornerstone.segmentation, tracked.measurements],
+    rightPanels: [
+      ohif.interpretations,
+      '@ohif/extension-pixos.panelModule.reconstruct',
+      cornerstone.segmentation,
+      tracked.measurements,
+    ],
     viewports: [
       {
         namespace: tracked.viewport,

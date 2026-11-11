@@ -32,6 +32,7 @@ export const ohif = {
 
 export const pixos = {
   pixos: "@ohif/extension-pixos.panelModule.pixos",
+  reconstruct: "@ohif/extension-pixos.panelModule.reconstruct",
 };
 
 export const cornerstone = {
@@ -270,6 +271,7 @@ export const basicLayout = {
     leftPanelResizable: true,
     rightPanels: [
       ohif.interpretations,
+      pixos.reconstruct,
       pixos.pixos,
       cornerstone.segmentation,
       cornerstone.measurements,

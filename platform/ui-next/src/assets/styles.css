@@ -544,3 +544,104 @@
   background: rgba(255, 141, 71, 0.12);
   color: #ffd2b5;
 }
+
+/* ---- pixOS: «Reconstruir» panel ------------------------------------------------------------------ */
+.px-recon {
+  color: #dce8f3;
+  padding-bottom: 16px;
+}
+.px-recon .px-proc-section {
+  padding: 12px 12px 14px;
+}
+.px-proc-sub {
+  font: 600 11px/1 var(--px-font-ui), system-ui, sans-serif;
+  color: rgba(185, 205, 225, 0.7);
+  margin: 2px 0 6px;
+}
+.px-tile-wide {
+  width: 100%;
+  margin-top: 8px;
+}
+.px-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.px-preset {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid rgba(132, 170, 203, 0.16);
+  background: rgba(132, 170, 203, 0.05);
+  font: 600 11px/1.15 var(--px-font-ui), system-ui, sans-serif;
+  color: #c9d9e8;
+  text-align: center;
+  transition: all 150ms var(--px-ease, ease);
+}
+.px-preset i {
+  display: block;
+  height: 30px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 -10px 18px rgba(0, 0, 0, 0.35);
+}
+.px-preset:hover {
+  border-color: rgba(132, 170, 203, 0.4);
+  background: rgba(132, 170, 203, 0.12);
+}
+.px-preset[data-active] {
+  border-color: rgba(255, 141, 71, 0.75);
+  background: rgba(255, 141, 71, 0.12);
+  color: #ffd2b5;
+}
+.px-slider {
+  flex: 1;
+  accent-color: var(--px-accent, #ff8d47);
+}
+.px-crop-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 1fr;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font: 500 11.5px/1 var(--px-font-ui), system-ui, sans-serif;
+  color: #c9d9e8;
+}
+.px-crop-row input {
+  width: 100%;
+  accent-color: var(--px-accent, #ff8d47);
+}
+.px-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.px-chips .px-seg-item {
+  border: 1px solid rgba(132, 170, 203, 0.2);
+}
+.px-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px/1 var(--px-font-ui), system-ui, sans-serif;
+}
+.px-range-inputs input {
+  width: 74px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 7px;
+  background: rgba(4, 15, 27, 0.7);
+  border: 1px solid rgba(132, 170, 203, 0.25);
+  color: #fff;
+}
+.px-volume {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 141, 71, 0.1);
+  border: 1px solid rgba(255, 141, 71, 0.4);
+  font: 700 13.5px/1.3 var(--px-font-ui), system-ui, sans-serif;
+  color: #ffe2cf;
+}
