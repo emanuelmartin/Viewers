@@ -168,7 +168,7 @@ export function ReportMenu(): ReactNode {
     return null;
   }
   return (
-    <HeaderPopover id="pxReport" icon="tool-annotate" tooltip="Informe: crítico, revisión por pares, PACS" width={330}>
+    <HeaderPopover id="pxReport" icon="icon-list-view" tooltip="Informe: crítico, revisión por pares, PACS" width={330}>
       {() => {
         const uid = activeStudyUID(servicesManager);
         return (

@@ -313,7 +313,7 @@ export function SpineMenu(): ReactNode {
   }, []);
   const starts = ['C1', 'C2', 'C7', 'T1', 'T12', 'L1', 'L5', 'S1'];
   return (
-    <HeaderPopover id="pxSpine" icon="tool-annotate" tooltip="Etiquetar vértebras" width={280} active={!!spine}>
+    <HeaderPopover id="pxSpine" icon="tool-segment-label" tooltip="Etiquetar vértebras" width={280} active={!!spine}>
       {close => (
         <>
           <div className="px-proc-head">

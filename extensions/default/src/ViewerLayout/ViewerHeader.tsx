@@ -182,7 +182,8 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
         <Item key={index} />
       ))}
     >
-      <div className="relative flex items-stretch justify-center">
+      {/* En pantallas angostas (o el visor embebido en «Informar») la barra va abajo: aquí no se repite */}
+      <div className="relative flex items-stretch justify-center max-sm:hidden">
         <Toolbar
           buttonSection="primary"
           groups={groups}
