@@ -1,0 +1,12 @@
+{
+  "Appearance": "Apariencia",
+  "Theme": "Tema",
+  "Default Theme": "pixOS (oscuro)",
+  "Custom": "Personalizado",
+  "Custom Theme": "Tema personalizado",
+  "Hide": "Ocultar",
+  "Apply": "Aplicar",
+  "Clear": "Limpiar",
+  "No valid theme tokens found": "No se encontraron colores válidos. Se esperan líneas como --primary: 220 90% 60%",
+  "Paste your custom theme color tokens here": "Pegue aquí los colores de su tema"
+}

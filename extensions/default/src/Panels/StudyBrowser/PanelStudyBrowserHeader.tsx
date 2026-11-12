@@ -43,7 +43,7 @@ function PanelStudyBrowserHeader({
                 {viewPresets.map((viewPreset: viewPreset, index) => (
                   <ToggleGroupItem
                     key={index}
-                    aria-label={viewPreset.id}
+                    aria-label={viewPreset.id === 'list' ? 'Ver como lista' : 'Ver miniaturas'}
                     value={viewPreset.id}
                     className="text-primary"
                   >

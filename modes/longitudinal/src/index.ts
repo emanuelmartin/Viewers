@@ -34,7 +34,12 @@ export const longitudinalInstance = {
     // `leftPanels` / `rightPanels` customizations so `mode` phase
     // blocks and global customizations can modify them.
     leftPanels: [tracked.thumbnailList],
-    rightPanels: [ohif.interpretations, cornerstone.segmentation, tracked.measurements],
+    rightPanels: [
+      ohif.interpretations,
+      '@ohif/extension-pixos.panelModule.reconstruct',
+      cornerstone.segmentation,
+      tracked.measurements,
+    ],
     viewports: [
       {
         namespace: tracked.viewport,
@@ -64,6 +69,9 @@ export const modeInstance = {
   displayName: i18n.t('Modes:Basic Viewer'),
   routes: [longitudinalRoute],
   extensions: extensionDependencies,
+  // pixOS: matched by the study (radiographs side by side, four-view
+  // mammography); everything else opens with the default protocol
+  hangingProtocol: ['@ohif/hpMammo', '@pixos/hpPairedViews', 'default'],
 };
 
 const mode = {

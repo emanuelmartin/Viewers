@@ -61,10 +61,14 @@ const Thumbnail = ({
   onImageLoadError = () => {},
 }: withAppTypes): React.ReactNode => {
   const [imageLoadFailed, setImageLoadFailed] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     setImageLoadFailed(false);
+    setImageLoaded(false);
   }, [imageSrc]);
+
+  const isLoading = typeof loadingProgress === 'number' && loadingProgress > 0 && loadingProgress < 1;
 
   const shouldRenderThumbnailImage = Boolean(imageSrc && !imageLoadFailed);
 
@@ -120,32 +124,65 @@ const Thumbnail = ({
     return (
       <div
         className={classnames(
-          'flex h-full w-full flex-col items-center justify-center gap-[2px] p-[4px]',
-          isActive && 'bg-popover rounded'
+          'flex h-full w-full flex-col items-center justify-center gap-[2px] p-[4px]'
         )}
       >
         <div className="h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px]">
-          <div className="relative bg-background">
+          <div className="relative overflow-hidden rounded-md bg-black">
             {shouldRenderThumbnailImage ? (
-              <img
-                src={imageSrc}
-                alt={imageAltText}
-                className="h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px] rounded object-contain"
-                crossOrigin="anonymous"
-                onError={() => {
-                  setImageLoadFailed(true);
-                  onImageLoadError();
-                }}
-              />
+              <>
+                {!imageLoaded && (
+                  <div className="px-skeleton absolute inset-0 rounded-md" aria-hidden />
+                )}
+                <img
+                  src={imageSrc}
+                  alt={imageAltText}
+                  className={classnames(
+                    'h-[80px] w-[98px] rounded-md object-contain transition-[opacity,transform] duration-300 ease-out md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px]',
+                    imageLoaded ? 'opacity-100' : 'opacity-0',
+                    isDraggable && 'motion-safe:group-hover:scale-[1.03]'
+                  )}
+                  crossOrigin="anonymous"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    setImageLoadFailed(true);
+                    onImageLoadError();
+                  }}
+                />
+              </>
             ) : (
-              <div className="bg-background h-[80px] w-[98px] md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px] rounded">{children}</div>
+              <div
+                className={classnames(
+                  'h-[80px] w-[98px] rounded-md md:h-[96px] md:w-[112px] lg:h-[114px] lg:w-[128px]',
+                  children ? 'bg-background' : 'px-skeleton'
+                )}
+              >
+                {children}
+              </div>
+            )}
+
+            {/* download progress of the series */}
+            {isLoading && (
+              <div
+                className="absolute inset-x-0 bottom-0 h-[3px] bg-black/50"
+                role="progressbar"
+                aria-label="Descargando la serie"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(loadingProgress * 100)}
+              >
+                <div
+                  className="bg-highlight h-full transition-[width] duration-300 ease-out"
+                  style={{ width: `${Math.round(loadingProgress * 100)}%` }}
+                />
+              </div>
             )}
 
             {/* bottom left */}
-            <div className="absolute bottom-0 left-0 flex h-[14px] items-center gap-[4px] rounded-tr pt-[10px] pb-[10px] pr-[6px] pl-[5px]">
+            <div className="absolute bottom-[4px] left-[4px] flex h-[18px] items-center gap-[4px] rounded-md bg-black/60 px-[6px] backdrop-blur-sm">
               <div
                 className={classnames(
-                  'h-[10px] w-[10px] rounded-[2px]',
+                  'h-[8px] w-[8px] rounded-full',
                   isActive || isHydratedForDerivedDisplaySet ? 'bg-highlight' : 'bg-primary/65',
                   loadingProgress && loadingProgress < 1 && 'bg-primary/25'
                 )}
@@ -183,7 +220,7 @@ const Thumbnail = ({
                       <div className="flex flex-1 flex-col">
                         <span>
                           <span className="text-foreground">
-                            {isTracked ? 'Series is tracked' : 'Series is untracked'}
+                            {isTracked ? 'Serie con seguimiento' : 'Serie sin seguimiento'}
                           </span>
                         </span>
                       </div>
@@ -205,12 +242,13 @@ const Thumbnail = ({
             </div>
           </div>
         </div>
-        <div className="flex h-[46px] w-[98px] flex-col justify-start pt-px md:h-[50px] md:w-[112px] lg:h-[52px] lg:w-[128px]">
+        <div className="flex h-[46px] w-[98px] flex-col justify-start gap-[2px] pt-[3px] md:h-[50px] md:w-[112px] lg:h-[52px] lg:w-[128px]">
           <Tooltip>
             <TooltipContent>{description}</TooltipContent>
             <TooltipTrigger>
               <div
-                className="text-foreground min-h-[18px] w-[98px] overflow-hidden text-ellipsis whitespace-nowrap pb-0.5 pl-1 text-left text-[11px] font-normal leading-4 md:w-[112px] lg:w-[128px] lg:text-[12px]"
+                style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                className="text-foreground min-h-[18px] w-[98px] overflow-hidden break-words pb-0.5 pl-1 text-left text-[11px] font-medium leading-[14px] md:w-[112px] lg:w-[128px] lg:text-[12px] lg:leading-4"
                 data-cy="series-description-label"
               >
                 {description}
@@ -227,8 +265,7 @@ const Thumbnail = ({
     return (
       <div
         className={classnames(
-          'flex h-full w-full items-center justify-between pr-[8px] pl-[8px] pt-[4px] pb-[4px]',
-          isActive && 'bg-popover rounded'
+          'flex h-full w-full items-center justify-between pr-[8px] pl-[8px] pt-[4px] pb-[4px]'
         )}
       >
         <div className="relative flex h-[32px] w-full items-center gap-[8px] overflow-hidden">
@@ -287,7 +324,7 @@ const Thumbnail = ({
                   <div className="flex flex-1 flex-col">
                     <span>
                       <span className="text-foreground">
-                        {isTracked ? 'Series is tracked' : 'Series is untracked'}
+                        {isTracked ? 'Serie con seguimiento' : 'Serie sin seguimiento'}
                       </span>
                     </span>
                   </div>
@@ -311,8 +348,11 @@ const Thumbnail = ({
     <div
       className={classnames(
         className,
-        'bg-muted group flex select-none flex-col rounded outline-none flex-shrink-0',
-        isDraggable && 'hover:bg-primary/30 cursor-pointer',
+        'bg-muted/70 group flex flex-shrink-0 select-none flex-col rounded-lg outline-none ring-offset-0 transition-[background-color,box-shadow,transform] duration-150 ease-out',
+        'focus-visible:ring-primary focus-visible:ring-2',
+        isActive ? 'bg-popover ring-highlight shadow-lg shadow-black/40 ring-2' : 'ring-1 ring-transparent',
+        isDraggable && !isActive && 'hover:bg-accent/80 hover:ring-primary/40 cursor-pointer motion-safe:hover:-translate-y-px',
+        isDraggable && isActive && 'cursor-pointer',
         !isDraggable && 'cursor-default',
         viewPreset === 'thumbnails' &&
           'h-[130px] w-[105px] md:h-[150px] md:w-[120px] lg:h-[170px] lg:w-[135px]',
@@ -329,6 +369,20 @@ const Thumbnail = ({
       onDoubleClick={onDoubleClick}
       onTouchEnd={handleTouchEnd}
       role={isDraggable ? 'button' : undefined}
+      tabIndex={isDraggable ? 0 : undefined}
+      aria-pressed={isDraggable ? !!isActive : undefined}
+      aria-label={[modality, description].filter(Boolean).join(' · ') || undefined}
+      onKeyDown={
+        isDraggable
+          ? e => {
+              // Enter or space loads the series in the active viewport, like a double click
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onDoubleClick(e);
+              }
+            }
+          : undefined
+      }
     >
       {isDraggable ? (
         <DraggableThumbnailContent dragData={dragData}>

@@ -1,0 +1,8 @@
+{
+  "Loading document...": "Cargando documento…",
+  "This document type cannot be displayed": "Este tipo de documento no se puede mostrar",
+  "Document content does not match its declared type": "El contenido del documento no coincide con su tipo",
+  "Unable to retrieve this document": "No se pudo obtener este documento",
+  "No viewer installed for {{mimeType}}": "No hay visor para {{mimeType}}",
+  "Encapsulated document": "Documento adjunto"
+}

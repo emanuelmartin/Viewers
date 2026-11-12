@@ -2,5 +2,12 @@
   "Primary": "Primario",
   "Recent": "Reciente",
   "All": "Todos",
-  "Studies": "Estudios"
+  "Studies": "Estudios",
+  "Tracked Series": "Series con medidas",
+  "Tag Browser": "Etiquetas DICOM",
+  "Add as Layer": "Agregar como capa",
+  "Series Number": "Número de serie",
+  "Series Date": "Fecha de la serie",
+  "Thumbnail Double Click": "Doble clic en la miniatura",
+  "The selected display sets could not be added to the viewport.": "Las series elegidas no se pudieron agregar al visor."
 }

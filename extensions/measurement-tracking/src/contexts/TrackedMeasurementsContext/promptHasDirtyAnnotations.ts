@@ -38,17 +38,17 @@ function _askSaveDiscardOrCancel(
       'viewportNotification.discardDirtyMessage'
     );
     const actions = [
-      { id: 'cancel', type: 'cancel', text: 'Cancel', value: RESPONSE.CANCEL },
+      { id: 'cancel', type: 'cancel', text: 'Cancelar', value: RESPONSE.CANCEL },
       {
         id: 'discard-existing',
         type: 'secondary',
-        text: 'No, discard existing',
+        text: 'No, borrarlas',
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
       {
         id: 'save-existing',
         type: 'primary',
-        text: 'Yes',
+        text: 'Sí, guardar',
         value: RESPONSE.CREATE_REPORT,
       },
     ];

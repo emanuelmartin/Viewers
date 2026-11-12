@@ -4,7 +4,7 @@ export default {
       id: 'StudyDate',
       inheritsFrom: 'ohif.overlayItem',
       label: '',
-      title: 'Study date',
+      title: 'Fecha del estudio',
       condition: ({ referenceInstance }) => referenceInstance?.StudyDate,
       contentF: ({ referenceInstance, formatters: { formatDate } }) =>
         formatDate(referenceInstance.StudyDate),
@@ -13,7 +13,7 @@ export default {
       id: 'SeriesDescription',
       inheritsFrom: 'ohif.overlayItem',
       label: '',
-      title: 'Series description',
+      title: 'Descripción de la serie',
       condition: ({ referenceInstance }) => {
         return referenceInstance && referenceInstance.SeriesDescription;
       },
@@ -25,7 +25,7 @@ export default {
     {
       id: 'WindowLevel',
       inheritsFrom: 'ohif.overlayItem.windowLevel',
-      title: 'Window Level',
+      title: 'Ventana y nivel',
     },
     {
       id: 'ZoomLevel',
@@ -40,7 +40,7 @@ export default {
     {
       id: 'InstanceNumber',
       inheritsFrom: 'ohif.overlayItem.instanceNumber',
-      title: 'Instance Number',
+      title: 'Número de imagen',
     },
   ],
 };

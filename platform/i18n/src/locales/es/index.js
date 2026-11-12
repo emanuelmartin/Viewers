@@ -1,4 +1,7 @@
 import AboutModal from './AboutModal.json';
+import AppearanceModal from './AppearanceModal.json';
+import DataTable from './DataTable.json';
+import EncapsulatedDocument from './EncapsulatedDocument.json';
 import Buttons from './Buttons.json';
 import CaptureViewportModal from './CaptureViewportModal.json';
 import CineDialog from './CineDialog.json';
@@ -35,6 +38,9 @@ import USAnnotationPanel from './USAnnotationPanel.json';
 export default {
   es: {
     AboutModal,
+    AppearanceModal,
+    DataTable,
+    EncapsulatedDocument,
     Buttons,
     CaptureViewportModal,
     CineDialog,

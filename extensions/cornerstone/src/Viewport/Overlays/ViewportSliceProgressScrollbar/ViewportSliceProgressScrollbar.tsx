@@ -157,7 +157,7 @@ function ViewportSliceProgressScrollbar({
           onValueChange={onScrollbarValueChange}
           isLoading={isLoading}
           enableKeyboardNavigation={false}
-          aria-label="Image navigation scrollbar"
+          aria-label="Barra para recorrer las imágenes"
           indicator={
             customizationService.getCustomization('viewportScrollbar.indicator') as
               | Record<string, unknown>

@@ -5,5 +5,9 @@
   "Include annotations": "Incluir anotaciones",
   "Include warning message": "Incluir mensaje de advertencia",
   "Width": "Ancho",
-  "Height": "Altura"
+  "Height": "Altura",
+  "Copy to Clipboard": "Copiar imagen",
+  "Save Image": "Guardar imagen",
+  "Image copied to clipboard": "Imagen copiada",
+  "Failed to copy image to clipboard": "No se pudo copiar la imagen"
 }

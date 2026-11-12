@@ -47,17 +47,17 @@ function _askShouldAddMeasurements(uiViewportDialogService, customizationService
     const actions = [
       {
         type: 'secondary',
-        text: 'Cancel',
+        text: 'Cancelar',
         value: RESPONSE.CANCEL,
       },
       {
         type: 'primary',
-        text: 'Create new report',
+        text: 'Empezar de nuevo',
         value: RESPONSE.CREATE_REPORT,
       },
       {
         type: 'primary',
-        text: 'Add to existing report',
+        text: 'Agregar a las guardadas',
         value: RESPONSE.ADD_SERIES,
       },
     ];
@@ -87,15 +87,15 @@ function _askSaveDiscardOrCancel(UIViewportDialogService, customizationService, 
     );
 
     const actions = [
-      { type: 'secondary', text: 'Cancel', value: RESPONSE.CANCEL },
+      { type: 'secondary', text: 'Cancelar', value: RESPONSE.CANCEL },
       {
         type: 'secondary',
-        text: 'Save',
+        text: 'Guardar',
         value: RESPONSE.CREATE_REPORT,
       },
       {
         type: 'primary',
-        text: 'Discard',
+        text: 'Borrar',
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
     ];

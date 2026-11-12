@@ -39,7 +39,12 @@ const ActiveViewportBehavior = ({
 
     const sourceModalities = customizationService.getCustomization('autoCineModalities');
 
-    const requiresCine = modalities.some(modality => sourceModalities.includes(modality));
+    // pixOS: a single still (one frame) has nothing to play: no cine bar
+    const hasFrames = displaySets.some(
+      displaySet => (displaySet?.numImageFrames ?? displaySet?.instances?.length ?? 0) > 1
+    );
+    const requiresCine =
+      hasFrames && modalities.some(modality => sourceModalities.includes(modality));
 
     if ((requiresCine || isDynamicVolume) && !cineService.getState().isCineEnabled) {
       cineService.setIsCineEnabled(true);

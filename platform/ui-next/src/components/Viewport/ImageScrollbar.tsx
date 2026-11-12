@@ -62,7 +62,7 @@ export const ImageScrollbar: React.FC<ImageScrollbarProps> = ({
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          aria-label="Image navigation scrollbar"
+          aria-label="Barra para recorrer las imágenes"
           data-testid="image-scrollbar-input"
         />
       </div>

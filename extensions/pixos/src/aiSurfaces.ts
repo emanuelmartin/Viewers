@@ -318,7 +318,15 @@ export function styleSurfaces(servicesManager, viewportId: string, segmentationI
   return actors.size;
 }
 
-/** The CT/MR volume rendering behind the surfaces: hidden, or one of Cornerstone's presets. */
+// The stock looks behind these modes fog or break on everyday CT: use the pixOS ones (tissuePresets.ts)
+const PIXOS_LOOK: Partial<Record<VolumeMode, string>> = {
+  'CT-Bones': 'PX-CT-Bone',
+  'CT-Soft-Tissue': 'PX-CT-Soft',
+  'CT-Lung': 'PX-CT-Lung',
+  'CT-AAA': 'PX-CTA-Aorta',
+};
+
+/** The CT/MR volume rendering behind the surfaces: hidden, or one of the 3D looks. */
 export function setVolumeMode(servicesManager, viewportId: string, mode: VolumeMode) {
   const viewport: any = servicesManager.services.cornerstoneViewportService.getCornerstoneViewport(viewportId);
   if (!viewport) {
@@ -330,7 +338,7 @@ export function setVolumeMode(servicesManager, viewportId: string, mode: VolumeM
     }
   });
   if (mode !== 'oculto') {
-    viewport.setProperties({ preset: mode });
+    viewport.setProperties({ preset: PIXOS_LOOK[mode] ?? mode });
   }
   viewport.render();
 }

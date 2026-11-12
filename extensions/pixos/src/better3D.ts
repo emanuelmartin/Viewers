@@ -1,18 +1,26 @@
 /**
  * Better defaults for OHIF's 3D viewport. The MPR + 3D layout opens every CT with the «CT-Bone» preset, which in HRSL
  * studies renders the skin and muscle as an opaque red fog over everything. The first time a series is shown in a 3D
- * viewport it gets a preset by what the study is: vessels for angiography, coronary arteries for coronary CT, bones
- * only for the rest of CT, MR angiography for TOF/angio MR. Anything the radiologist chooses afterwards (viewport
+ * viewport it gets a pixOS look by what the study is: vessels for angiography (pulmonary arteries for PE studies),
+ * coronary arteries for coronary CT, bones only for the rest of CT (vesselPresets.ts, tissuePresets.ts), MR angiography for TOF/angio MR. Anything the radiologist chooses afterwards (viewport
  * menu presets, quality, lighting) is left alone.
  */
+import { CONSTANTS } from '@cornerstonejs/core';
+import { registerTissuePresets } from './tissuePresets';
+import { registerVesselPresets } from './vesselPresets';
+
+registerVesselPresets(CONSTANTS.VIEWPORT_PRESETS as any[]);
+registerTissuePresets(CONSTANTS.VIEWPORT_PRESETS as any[]);
+
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 function presetFor(ds: any): string | null {
   const text = `${ds?.StudyDescription || ''} ${ds?.SeriesDescription || ''} ${ds?.instances?.[0]?.StudyDescription || ''}`.toLowerCase();
   if (ds?.Modality === 'CT') {
-    if (/coronari|calcio|cardi/.test(text)) return 'CT-Coronary-Arteries-2';
-    if (/angio|aort|arteri|vascular|tep|pulmonar|cta/.test(text)) return 'CT-AAA';
-    return 'CT-Bones';
+    if (/coronari|cardi/.test(text) && !/calcio|calcium|score/.test(text)) return 'PX-CTA-Coronary';
+    if (/tep|embol|arteria(s)? pulmonar/.test(text)) return 'PX-CTA-Pulmonary';
+    if (/angio|aort|arteri|vascular|cta/.test(text)) return 'PX-CTA-Aorta';
+    return 'PX-CT-Bone';
   }
   if (ds?.Modality === 'MR') {
     return /tof|angio|arm|mra/.test(text) ? 'MR-Angio' : null;

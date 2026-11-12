@@ -14,5 +14,6 @@
   "12": "El conjunto de visualización tiene información de posición inconsistente.",
   "13": "Conjunto de visualización no compatible.",
   "14": "El UID de clase SOP {{ sopClassUid }} no es compatible.",
-  "15": "El conjunto de visualización no tiene un UID de clase SOP. Por favor verifique el archivo."
+  "15": "El conjunto de visualización no tiene un UID de clase SOP. Por favor verifique el archivo.",
+  "16": "El reporte no tiene contenido para mostrar."
 }

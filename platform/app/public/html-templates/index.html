@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <!--
       Content-Security-Policy is delivered via hosting headers (netlify.toml
@@ -16,7 +16,7 @@
     />
     <meta
       name="theme-color"
-      content="#1a4d7f"
+      content="#061423"
     />
     <meta
       name="mobile-web-app-capable"
@@ -153,7 +153,7 @@
       src="<%= PUBLIC_URL %>init-service-worker.js"
     ></script>
 
-    <title>Pixos® Viewer</title>
+    <title>pixOS Imagen · Visor</title>
 
     <script>
       function browserImportFunction(moduleId) {
@@ -180,8 +180,31 @@
   </head>
 
   <body>
-    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <noscript>Para ver las imágenes active JavaScript en su navegador.</noscript>
     <div id="react-portal"></div>
-    <div id="root"></div>
+    <div id="root">
+      <!-- pixOS: visible until React renders (replaced on mount) -->
+      <style>
+        html,body{margin:0;background:#061423}
+        .px-boot{position:fixed;inset:0;display:grid;place-items:center;align-content:center;gap:14px;background:radial-gradient(110% 80% at 80% 0%,#0b2a45 0%,#061423 60%);color:#8199b2;font:500 13px/1.4 Figtree,Inter,system-ui,sans-serif}
+        .px-boot svg{width:66px;height:61px}
+        .px-boot .r{stroke:#ff8d47;opacity:.6;stroke-dasharray:130 486;transform-origin:92.4px 81.5px;animation:pxo 2.4s cubic-bezier(.45,.05,.25,1) infinite}
+        .px-boot .b{fill:#84aacb}
+        .px-boot .f{fill:#ff7a2f;transform-box:fill-box;transform-origin:0 0;animation:pxh 2.4s cubic-bezier(.2,.8,.2,1) infinite}
+        @keyframes pxo{to{transform:rotate(360deg)}}
+        @keyframes pxh{50%{transform:translate(4px,4px)}}
+        @media (prefers-reduced-motion:reduce){.px-boot .r,.px-boot .f{animation:none}}
+      </style>
+      <div class="px-boot" role="status" aria-live="polite">
+        <svg viewBox="-20 -20 225 203" aria-hidden="true">
+          <circle class="r" cx="92.4" cy="81.5" r="98" fill="none" stroke-width="3" stroke-linecap="round" />
+          <g transform="matrix(0.707107 -0.707107 -0.707107 -0.707107 92.426 163.137)">
+            <path class="b" d="M7,0 L110,0 A50,50 0 0 1 110,100 L100,100 L100,110 A50,50 0 0 1 0,110 L0,7 Q0,0 7,0 Z" />
+            <path class="f" d="M30,0 L110,0 A50,50 0 0 1 110,100 L58,100 Q30,100 30,72 Z" />
+          </g>
+        </svg>
+        <span>Abriendo el visor…</span>
+      </div>
+    </div>
   </body>
 </html>

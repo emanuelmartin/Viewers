@@ -43,28 +43,29 @@ function getPanelModule({ commandsManager, extensionManager, servicesManager }) 
     {
       name: 'petSUV',
       iconName: 'tab-patient-info',
-      iconLabel: 'Patient Info',
-      label: 'Patient Info',
+      iconLabel: 'SUV',
+      label: 'Datos SUV',
       component: wrappedPanelPetSuv,
     },
     {
       name: 'tmtv',
       iconName: 'tab-segmentation',
       iconLabel: 'Segmentation',
+      label: 'Segmentación',
       component: wrappedPanelTMTV,
     },
     {
       name: 'tmtvBox',
       iconName: 'tab-segmentation',
       iconLabel: 'Segmentation',
-      label: 'Segmentation Toolbox',
+      label: 'Herramientas de segmentación',
       component: wrappedROIThresholdToolbox,
     },
     {
       name: 'tmtvExport',
       iconName: 'tab-segmentation',
       iconLabel: 'Segmentation',
-      label: 'Segmentation Export',
+      label: 'Exportar segmentación',
       component: wrappedROIThresholdExport,
     },
   ];

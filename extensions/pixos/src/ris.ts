@@ -42,12 +42,20 @@ export function risSessionToken(): string | undefined {
 }
 
 /** Calls a Parse cloud function as the RIS user; throws with the server's message. */
-export async function callCloud<T = any>(name: string, params: Record<string, unknown> = {}): Promise<T> {
+export async function callCloud<T = any>(
+  name: string,
+  params: Record<string, unknown> = {},
+  extraHeaders: Record<string, string> = {}
+): Promise<T> {
   const { parseUrl, appId, jsKey } = config();
   if (!parseUrl || !appId) {
     throw new Error('El visor no tiene configurado el servidor del RIS');
   }
-  const headers: Record<string, string> = { 'X-Parse-Application-Id': appId, 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {
+    ...extraHeaders,
+    'X-Parse-Application-Id': appId,
+    'Content-Type': 'application/json',
+  };
   if (jsKey) {
     headers['X-Parse-Javascript-Key'] = jsKey;
   }
@@ -62,7 +70,19 @@ export async function callCloud<T = any>(name: string, params: Record<string, un
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.error) {
-    throw new Error(json.error || `Error ${res.status}`);
+    // The RIS sends its errors as JSON ({ px, code, message }): show the message, keep the code
+    let message = json.error || `Error ${res.status}`;
+    let code: string | undefined;
+    try {
+      const wire = typeof json.error === 'string' && json.error.startsWith('{') ? JSON.parse(json.error) : null;
+      if (wire?.px) {
+        message = wire.message || message;
+        code = wire.code;
+      }
+    } catch {
+      // plain text error
+    }
+    throw Object.assign(new Error(message), { code });
   }
   return json.result as T;
 }
@@ -82,6 +102,14 @@ function publish(next: ViewerAccess) {
 export function loadAccess(): Promise<ViewerAccess> {
   if (inFlight) {
     return inFlight;
+  }
+  // Local development only (stripped from production builds): see the physician toolbar without a RIS session.
+  if (
+    process.env.NODE_ENV === 'development' &&
+    window.localStorage.getItem('px.devPhysician') === '1'
+  ) {
+    publish({ status: 'ready', physician: true, canSave: false, ai: true });
+    return Promise.resolve(access);
   }
   if (!risSessionToken()) {
     publish({ ...RESTRICTED, status: 'ready' });

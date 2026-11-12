@@ -1,4 +1,5 @@
 import { addViewportToReport } from './reportCapture';
+import { setColormap, currentColormap } from './processing';
 
 /**
  * PixOS commands.
@@ -35,6 +36,17 @@ function getCommandsModule({ servicesManager }: withAppTypes) {
       }
     },
     pixosAddToReport: () => addViewportToReport(servicesManager),
+    /** Back to the window the equipment sent, on the active view. */
+    pixosAutoWindow: () => {
+      const { cornerstoneViewportService } = servicesManager.services;
+      const vp: any = cornerstoneViewportService.getCornerstoneViewport(viewportGridService.getActiveViewportId());
+      vp?.resetProperties?.();
+      vp?.render?.();
+    },
+    /** Perfusion colour map on the active view; pressed again, back to grey. */
+    pixosToggleColor: ({ name = 'perfusion' } = {}) => {
+      setColormap(servicesManager, currentColormap(servicesManager) === name ? 'Grayscale' : name);
+    },
   };
 
   return {
@@ -42,6 +54,8 @@ function getCommandsModule({ servicesManager }: withAppTypes) {
     definitions: {
       toggleCinePlayback: { commandFn: actions.toggleCinePlayback },
       pixosAddToReport: { commandFn: actions.pixosAddToReport },
+      pixosAutoWindow: { commandFn: actions.pixosAutoWindow },
+      pixosToggleColor: { commandFn: actions.pixosToggleColor },
     },
     defaultContext: 'DEFAULT',
   };
